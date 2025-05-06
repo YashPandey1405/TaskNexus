@@ -2,6 +2,7 @@ import { asyncHandler } from "../utils/async-handler.js";
 import { ApiError } from "../utils/api-error.js";
 import { ApiResponse } from "../utils/api-response.js";
 import { User } from "../models/user.models.js";
+import crypto from "crypto";
 
 // Importing the mailgen content and sendEmail function from utils/mail.js.....
 import {
@@ -278,8 +279,77 @@ const logoutUser = asyncHandler(async (req, res) => {
 });
 
 const verifyEmail = asyncHandler(async (req, res) => {
-  const { email, username, password, role } = req.body;
+  const token = req.params.token;
+  console.log("Token: ", token);
 
+  try {
+    // Hash The Token received To Make The DB-Comparisn....
+    const hashedToken = crypto
+      .createHash("sha256") // 1️⃣ Create a SHA-256 hash function
+      .update(token) // 2️⃣ Pass the unhashed token to be hashed
+      .digest("hex"); // 3️⃣ Convert the hash output to a hexadecimal string
+
+    console.log("hashedToken: ", hashedToken);
+
+    // Find The User Based On The Hashed Verification Token.....
+    const existingUser = await User.findOne({
+      emailVerificationToken: hashedToken,
+    });
+    console.log("existingUser:", existingUser);
+
+    // Special case >>> When The User Is Been Already Verified & After This , If It requests That
+    // Verify-email , Then , The emailVerificationToken=null and emailVerificationExpiry=""......
+    if (!existingUser) {
+      // Optionally, try to find by email if you want to differentiate
+      const userMaybeVerified = await User.findOne({
+        isEmailVerified: true,
+        emailVerificationToken: { $in: [null, "", undefined] },
+      });
+
+      if (userMaybeVerified) {
+        throw new ApiError(400, "User Already Verified", [
+          { field: "email", message: "User email has already been verified" },
+        ]);
+      }
+
+      // If user doesn't exist, throw an error.....
+      throw new ApiError(400, "Invalid token", [
+        { field: "token", message: "Invalid or expired token" },
+      ]);
+    }
+
+    // Check if the token has expired Or Not.....
+    if (existingUser.emailVerificationExpiry.getTime() < Date.now()) {
+      throw new ApiError(400, "Token expired", [
+        { field: "token", message: "Email Verification Token Expired" },
+      ]);
+    }
+
+    // User is Been Verified , So We Have To Update The User's isEmailVerified Field To True.....
+    // Also , Clear The Email Verification Token & Expiry.....
+    existingUser.isEmailVerified = true;
+    existingUser.emailVerificationToken = "";
+    existingUser.emailVerificationExpiry = null;
+
+    await existingUser.save();
+
+    // Set API Response On Sucsessful Email Verification.....
+    const response = new ApiResponse(
+      200,
+      "Email verification Is successful On TaskNexus Platform",
+    );
+
+    // Send The Successful Response.....
+    return res.status(response.statusCode).json(response);
+  } catch (error) {
+    // Handle any errors that occur during user creation
+    throw new ApiError(500, "Internal server error", [
+      {
+        field: "server",
+        message: "Internal server error In The verifyEmail Controller",
+      },
+    ]);
+  }
   //validation
 });
 

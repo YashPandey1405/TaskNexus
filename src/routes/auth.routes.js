@@ -1,4 +1,8 @@
-import { registerUser, loginUser } from "../controllers/auth.controllers.js";
+import {
+  registerUser,
+  loginUser,
+  verifyEmail,
+} from "../controllers/auth.controllers.js";
 import { validate } from "../middlewares/validator.middlewares.js";
 import {
   userRegistrationValidator,
@@ -15,8 +19,6 @@ router
 
 router.route("/login").post(userLoginValidator(), validate, loginUser);
 
-router.get("/verify-email/:token", (req, res) => {
-  res.status(200).send("Hello World , Your email is verified");
-});
+router.route("/verify-email/:token").get(verifyEmail);
 
 export default router;
