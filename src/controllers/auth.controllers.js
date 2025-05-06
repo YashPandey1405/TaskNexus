@@ -232,11 +232,11 @@ const loginUser = asyncHandler(async (req, res) => {
       );
 
       // Send the email To The User.....
-      // await sendEmail({
-      //   email: loggedInUser.email, // receiver's email
-      //   subject: "Please Verify your email address", // subject line
-      //   mailgenContent: EmailVerification_MailgenContent, // Mailgen formatted content
-      // });
+      await sendEmail({
+        email: loggedInUser.email, // receiver's email
+        subject: "Please Verify your email address", // subject line
+        mailgenContent: EmailVerification_MailgenContent, // Mailgen formatted content
+      });
       console.log("Email sent successfully");
     }
 
@@ -386,10 +386,63 @@ const verifyEmail = asyncHandler(async (req, res) => {
 });
 
 const resendEmailVerification = asyncHandler(async (req, res) => {
-  const { email, username, password, role } = req.body;
+  try {
+    // req.user is Available Due To The VerifyJWT Middleware Used before this Controller...
+    const currentUser = await User.findById(req.user._id).select(
+      "-password -refreshToken",
+    );
+
+    // If The User Is Not Found In Database......
+    if (!currentUser) {
+      throw new ApiError(400, "Invalid User", [
+        { field: "User", message: "User Not Found" },
+      ]);
+    }
+
+    // If The User Is been Already Verified....
+    if (currentUser.isEmailVerified) {
+      throw new ApiError(400, "User Is Been Already verified");
+    }
+
+    // Send verification email to the user.....
+    const { hashedToken, unHashedToken, tokenExpiry } =
+      currentUser.generateTemporaryToken();
+
+    currentUser.emailVerificationToken = hashedToken; // Save the hashed token to the user document
+    currentUser.emailVerificationExpiry = tokenExpiry; // Save the token expiry to the user document
+    await currentUser.save({ validateBeforeSave: false }); // Save the user document without validation
+
+    // Create a verification URL with the Email-Verification token...
+    const verificationUrl = `${process.env.BASE_URL}/api/v1/auth/verify-email/${unHashedToken}`;
+    console.log("Verification URL: ", verificationUrl);
+
+    const EmailVerification_MailgenContent = emailVerificationMailgenContent(
+      currentUser.username,
+      verificationUrl,
+    );
+    console.log("Mailgen Content Created : ", EmailVerification_MailgenContent);
+
+    // Send the email To The User.....
+    await sendEmail({
+      email: currentUser.email, // receiver's email
+      subject: "Please Verify your email address", // subject line
+      mailgenContent: EmailVerification_MailgenContent, // Mailgen formatted content
+    });
+    console.log("Email sent successfully");
+  } catch (error) {
+    // Handle any errors that occur during user creation
+    throw new ApiError(500, "Internal server error", [
+      {
+        field: "server",
+        message:
+          "Internal server error In The resendEmailVerification Controller",
+      },
+    ]);
+  }
 
   //validation
 });
+
 const resetForgottenPassword = asyncHandler(async (req, res) => {
   const { email, username, password, role } = req.body;
 
