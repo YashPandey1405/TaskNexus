@@ -146,7 +146,7 @@ const registerUser = asyncHandler(async (req, res) => {
       .json(response);
   } catch (error) {
     // Handle any errors that occur during user creation
-    return new ApiError(500, "Internal server error", [
+    throw new ApiError(500, "Internal server error", [
       {
         field: "server",
         message: "Internal server error In The registerUser Controller",
@@ -156,7 +156,117 @@ const registerUser = asyncHandler(async (req, res) => {
 });
 
 const loginUser = asyncHandler(async (req, res) => {
-  const { email, username, password, role } = req.body;
+  // get data from request body
+  const { email, username, password } = req.body;
+  console.log(req.body);
+
+  //validation
+  const errors = [];
+  if (!email) errors.push({ field: "email", message: "Email is required" });
+  if (!username)
+    errors.push({ field: "username", message: "Username is required" });
+  if (!password)
+    errors.push({ field: "password", message: "Password is required" });
+  // if (!role) errors.push({ field: "role", message: "Role is required" });
+
+  if (errors.length > 0) {
+    throw new ApiError(400, "All fields are required", errors);
+  }
+
+  try {
+    // Check For The User Existence.....
+    const existingUser = await User.findOne({
+      $or: [{ email }, { username }],
+    });
+
+    // If user doesn't exist, throw an error.....
+    if (!existingUser) {
+      throw new ApiError(400, "Invalid credential", [
+        { field: "credentials", message: "User Does Not Exist" },
+      ]);
+    }
+
+    // We Have To Use The Object Instance Of The User Model.....
+    // 'isPasswordCorrect' is a method defined in the User model that checks
+    // if the provided password matches the hashed password stored in the database.
+    const isPasswordCorrect = await existingUser.isPasswordCorrect(password);
+
+    // When the password is incorrect....
+    if (!isPasswordCorrect) {
+      throw new ApiError(400, "Invalid credential", [
+        { field: "credentials", message: "Invalid password Entered" },
+      ]);
+    }
+
+    // Generate tokens
+    const { accessToken, refreshToken } = await generateAccessAndRefereshTokens(
+      existingUser._id,
+    );
+
+    const loggedInUser = await User.findById(existingUser._id).select(
+      "-password -refreshToken ",
+    );
+
+    // Only send the verification email if the user is not verified.....
+    if (!loggedInUser.isEmailVerified) {
+      // Send verification email to the user.....
+      const { hashedToken, unHashedToken, tokenExpiry } =
+        loggedInUser.generateTemporaryToken();
+
+      loggedInUser.emailVerificationToken = hashedToken; // Save the hashed token to the user document
+      loggedInUser.emailVerificationExpiry = tokenExpiry; // Save the token expiry to the user document
+      await loggedInUser.save({ validateBeforeSave: false }); // Save the user document without validation
+
+      // Create a verification URL with the Email-Verification token...
+      const verificationUrl = `${process.env.BASE_URL}/api/v1/auth/verify-email/${unHashedToken}`;
+      console.log("Verification URL: ", verificationUrl);
+
+      const EmailVerification_MailgenContent = emailVerificationMailgenContent(
+        loggedInUser.username,
+        verificationUrl,
+      );
+      console.log(
+        "Mailgen Content Created : ",
+        EmailVerification_MailgenContent,
+      );
+
+      // Send the email To The User.....
+      await sendEmail({
+        email: loggedInUser.email, // receiver's email
+        subject: "Please Verify your email address", // subject line
+        mailgenContent: EmailVerification_MailgenContent, // Mailgen formatted content
+      });
+      console.log("Email sent successfully");
+    }
+
+    // Cookie options
+    const options = {
+      httpOnly: true,
+      secure: true,
+    };
+
+    // Set cookies and redirect
+    const response = new ApiResponse(
+      200,
+      loggedInUser,
+      "Login successful On TaskNexus Platform",
+    );
+
+    // Set cookies for access and refresh tokens & send response.....
+    return res
+      .status(response.statusCode)
+      .cookie("accessToken", accessToken, options)
+      .cookie("refreshToken", refreshToken, options)
+      .json(response);
+  } catch (error) {
+    // Handle any errors that occur during user creation
+    throw new ApiError(500, "Internal server error", [
+      {
+        field: "server",
+        message: "Internal server error In The loginUser Controller",
+      },
+    ]);
+  }
 
   //validation
 });
