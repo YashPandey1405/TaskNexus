@@ -232,11 +232,11 @@ const loginUser = asyncHandler(async (req, res) => {
       );
 
       // Send the email To The User.....
-      await sendEmail({
-        email: loggedInUser.email, // receiver's email
-        subject: "Please Verify your email address", // subject line
-        mailgenContent: EmailVerification_MailgenContent, // Mailgen formatted content
-      });
+      // await sendEmail({
+      //   email: loggedInUser.email, // receiver's email
+      //   subject: "Please Verify your email address", // subject line
+      //   mailgenContent: EmailVerification_MailgenContent, // Mailgen formatted content
+      // });
       console.log("Email sent successfully");
     }
 
@@ -273,9 +273,41 @@ const loginUser = asyncHandler(async (req, res) => {
 });
 
 const logoutUser = asyncHandler(async (req, res) => {
-  const { email, username, password, role } = req.body;
+  // req.user is Available Due To The VerifyJWT Middleware Used before this Controller...
 
-  //validation
+  // Await the update operation on the User model, finding the user by their ID
+  await User.findByIdAndUpdate(
+    req.user._id, // The ID of the currently authenticated user (from the request object)
+
+    {
+      // Update operation: using $unset to remove the 'refreshToken' field from the document
+      $unset: {
+        refreshToken: 1, // '1' indicates the field should be removed (MongoDB syntax)
+      },
+    },
+
+    {
+      new: true, // Option to return the updated document (though it's not stored here)
+    },
+  );
+
+  const options = {
+    httpOnly: true,
+    secure: true,
+  };
+
+  // Set cookies and redirect
+  const response = new ApiResponse(
+    200,
+    "Logout successful On TaskNexus Platform",
+  );
+
+  // Set cookies for access and refresh tokens & send response.....
+  return res
+    .status(response.statusCode)
+    .clearCookie("accessToken", options)
+    .clearCookie("refreshToken", options)
+    .json(response);
 });
 
 const verifyEmail = asyncHandler(async (req, res) => {

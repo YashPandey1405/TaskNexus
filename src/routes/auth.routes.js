@@ -2,8 +2,11 @@ import {
   registerUser,
   loginUser,
   verifyEmail,
+  logoutUser,
 } from "../controllers/auth.controllers.js";
+
 import { validate } from "../middlewares/validator.middlewares.js";
+import { verifyJWT } from "../middlewares/auth.middleware.js";
 import {
   userRegistrationValidator,
   userLoginValidator,
@@ -18,6 +21,7 @@ router
   .post(userRegistrationValidator(), validate, registerUser);
 
 router.route("/login").post(userLoginValidator(), validate, loginUser);
+router.route("/logout").post(verifyJWT, logoutUser);
 
 router.route("/verify-email/:token").get(verifyEmail);
 
