@@ -10,4 +10,8 @@ router
   .route("/register")
   .post(userRegistrationValidator(), validate, registerUser);
 
+router.get("/verify-email/:token", (req, res) => {
+  res.status(200).send("Hello World , Your email is verified");
+});
+
 export default router;

@@ -3,6 +3,13 @@ import { ApiError } from "../utils/api-error.js";
 import { ApiResponse } from "../utils/api-response.js";
 import { User } from "../models/user.models.js";
 
+// Importing the mailgen content and sendEmail function from utils/mail.js.....
+import {
+  emailVerificationMailgenContent,
+  forgotPasswordMailgenContent,
+  sendEmail,
+} from "../utils/mail.js";
+
 // Common Method To Generate Access And Refresh Tokens....
 const generateAccessAndRefereshTokens = async (userId) => {
   try {
@@ -92,6 +99,32 @@ const registerUser = asyncHandler(async (req, res) => {
       "-password -refreshToken",
     );
 
+    // Send verification email to the user.....
+    const { hashedToken, unHashedToken, tokenExpiry } =
+      loggedInUser.generateTemporaryToken();
+
+    loggedInUser.emailVerificationToken = hashedToken; // Save the hashed token to the user document
+    loggedInUser.emailVerificationExpiry = tokenExpiry; // Save the token expiry to the user document
+    await loggedInUser.save({ validateBeforeSave: false }); // Save the user document without validation
+
+    // Create a verification URL with the Email-Verification token...
+    const verificationUrl = `${process.env.BASE_URL}/api/v1/auth/verify-email/${unHashedToken}`;
+    console.log("Verification URL: ", verificationUrl);
+
+    const EmailVerification_MailgenContent = emailVerificationMailgenContent(
+      loggedInUser.username,
+      verificationUrl,
+    );
+    console.log("Mailgen Content Created : ", EmailVerification_MailgenContent);
+
+    // Send the email To The User.....
+    await sendEmail({
+      email: loggedInUser.email, // receiver's email
+      subject: "Please Verify your email address", // subject line
+      mailgenContent: EmailVerification_MailgenContent, // Mailgen formatted content
+    });
+    console.log("Email sent successfully");
+
     // Cookie options
     const options = {
       httpOnly: true,
@@ -113,7 +146,7 @@ const registerUser = asyncHandler(async (req, res) => {
       .json(response);
   } catch (error) {
     // Handle any errors that occur during user creation
-    throw new ApiError(500, "Internal server error", [
+    return new ApiError(500, "Internal server error", [
       {
         field: "server",
         message: "Internal server error In The registerUser Controller",
