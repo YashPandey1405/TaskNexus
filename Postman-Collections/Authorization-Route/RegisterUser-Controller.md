@@ -78,6 +78,10 @@ This route initializes **JWT-based authentication** by setting:
 
 ![Cookies Screenshot](./asserts/RegisterUser-Response-Cookies.png)
 
+#### 🍪 verification Mail Via Nodemailer + mailTrap
+
+![Cookies Screenshot](./asserts/Verification-Email.png)
+
 ---
 
 ### 📌 Purpose
