@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser";
 //router imports
 import healthCheckRouter from "./routes/healthcheck.routes.js";
 import authorizationRoute from "./routes/auth.routes.js";
+import projectRoutes from "./routes/project.routes.js";
 
 const app = express();
 
@@ -27,6 +28,7 @@ const errorMiddleware = (err, req, res, next) => {
 
 app.use("/api/v1/healthcheck", healthCheckRouter);
 app.use("/api/v1/auth", authorizationRoute);
+app.use("/api/v1/project", projectRoutes);
 
 // Finally adding the error handler at the very bottom
 // This Will Improve The Readability Of The Api-Errors.....
