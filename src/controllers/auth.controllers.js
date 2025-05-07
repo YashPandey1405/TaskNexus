@@ -450,7 +450,70 @@ const resetForgottenPassword = asyncHandler(async (req, res) => {
 });
 
 const refreshAccessToken = asyncHandler(async (req, res) => {
-  const { email, username, password, role } = req.body;
+  const accessTokenFromCookie = req.cookies?.accessToken || null;
+
+  if (accessTokenFromCookie) {
+    // When accessToken already exists, Then No Need To Re-Generate Them....
+    throw new ApiError(401, "User Already Logged In To TaskNexux Platform");
+  }
+
+  const refreshTokenFromCookie = req.cookies?.refreshToken || null;
+
+  // When refreshToken expired, Then , User Have To Re-Login On TaskNexus....
+  if (!refreshTokenFromCookie) {
+    throw new ApiError(401, "User Has To Login To TaskNexux Platform");
+  }
+
+  try {
+    // Find The User Based On The refreshTokenFromCookie Token.....
+    const existingUser = await User.findOne({
+      refreshToken: refreshTokenFromCookie,
+    });
+
+    // When user Is Not Found In The database....
+    if (!existingUser) {
+      throw new ApiError(401, "User Not Found");
+    }
+
+    // existingUser.refreshToken = null;  >> No Need of This Extra Step...
+
+    // Generate tokens
+    const { accessToken, refreshToken } = await generateAccessAndRefereshTokens(
+      existingUser._id,
+    );
+
+    const loggedInUser = await User.findById(existingUser._id).select(
+      "-password -refreshToken ",
+    );
+
+    // Cookie options
+    const options = {
+      httpOnly: true,
+      secure: true,
+    };
+
+    // Set cookies and redirect
+    const response = new ApiResponse(
+      200,
+      loggedInUser,
+      "Access & Refresh Token Regenerated On TaskNexus Platform",
+    );
+
+    // Set cookies for access and refresh tokens & send response.....
+    return res
+      .status(response.statusCode)
+      .cookie("accessToken", accessToken, options)
+      .cookie("refreshToken", refreshToken, options)
+      .json(response);
+  } catch (error) {
+    // Handle any errors that occur during user creation
+    throw new ApiError(500, "Internal server error", [
+      {
+        field: "server",
+        message: "Internal server error In The refreshAccessToken Controller",
+      },
+    ]);
+  }
 
   //validation
 });
