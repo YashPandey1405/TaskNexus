@@ -453,9 +453,72 @@ const resendEmailVerification = asyncHandler(async (req, res) => {
 });
 
 const resetForgottenPassword = asyncHandler(async (req, res) => {
-  const { email, username, password, role } = req.body;
+  const { password, confirmPassword } = req.body;
 
-  //validation
+  if (password != confirmPassword) {
+    throw new ApiError(400, "Passwords do not match.");
+  }
+
+  // Get Token From The URL....
+  const token = req.params.token;
+  console.log("Token: ", token);
+
+  try {
+    // Hash The Token received To Make The DB-Comparisn....
+    const hashedToken = crypto
+      .createHash("sha256") // 1️⃣ Create a SHA-256 hash function
+      .update(token) // 2️⃣ Pass the unhashed token to be hashed
+      .digest("hex"); // 3️⃣ Convert the hash output to a hexadecimal string
+
+    console.log("hashedToken: ", hashedToken);
+
+    // Find The User Based On The Hashed Verification Token.....
+    const existingUser = await User.findOne({
+      forgotPasswordToken: hashedToken,
+    }).select("-password -refreshToken");
+    console.log("existingUser:", existingUser);
+
+    // If The User is Not Found In The Database....
+    if (!existingUser) {
+      throw new ApiError(404, "User Not Found");
+    }
+
+    // Check if the token has expired Or Not.....
+    if (existingUser.forgotPasswordExpiry.getTime() < Date.now()) {
+      throw new ApiError(400, "Token expired", [
+        { field: "token", message: "Forgot Password Token Expired" },
+      ]);
+    }
+
+    // User is Been Verified , So We Have To Update The User's Password Field To New Password.....
+    existingUser.password = password;
+    existingUser.forgotPasswordToken = "";
+    existingUser.forgotPasswordExpiry = null;
+
+    await existingUser.save();
+
+    const loggedInUser = await User.findById(existingUser._id).select(
+      "-password -refreshToken ",
+    );
+
+    // Set the requested user API response.....
+    const response = new ApiResponse(
+      200,
+      loggedInUser,
+      "Successfully Changes user's Password on TaskNexus.",
+    );
+
+    // Set cookies for access and refresh tokens & send response.....
+    return res.status(response.statusCode).json(response);
+  } catch (error) {
+    // Handle any errors that occur during user creation
+    throw new ApiError(500, "Internal server error", [
+      {
+        field: "server",
+        message: "Internal server error In The refreshAccessToken Controller",
+      },
+    ]);
+  }
 });
 
 const refreshAccessToken = asyncHandler(async (req, res) => {
