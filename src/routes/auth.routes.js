@@ -13,8 +13,10 @@ import {
 
 // Express-Validator Import.....
 import {
-  userRegistrationValidator,
+  userForgotPasswordValidator,
   userLoginValidator,
+  userRegistrationValidator,
+  userResetForgottenPasswordValidator,
 } from "../validatores/index.js";
 
 // Middlewares Import.....
@@ -36,8 +38,16 @@ router.route("/verify-email/:token").get(verifyEmail);
 router.route("/get-user/:userID").get(getCurrentUser);
 
 // Forgot Password Request & Change Routes.....
-router.route("/forgot-password-request").post(forgotPasswordRequest);
-router.route("/forgot-password-change/:token").post(resetForgottenPassword);
+router
+  .route("/forgot-password-request")
+  .post(userForgotPasswordValidator(), validate, forgotPasswordRequest);
+router
+  .route("/forgot-password-change/:token")
+  .post(
+    userResetForgottenPasswordValidator(),
+    validate,
+    resetForgottenPassword,
+  );
 
 // Routes & Controllers Which Need User Authorization & '_id'....
 router.route("/logout").post(verifyJWT, logoutUser);
