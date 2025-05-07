@@ -17,10 +17,23 @@ Ensure the user is **logged in** before attempting to create a project.
 
 After successful login, send a POST request to the following endpoint with the required JSON body.
 
-**Endpoint:**
-`POST http://localhost:8080/api/v1/project/create`
+1. **Endpoint For Create Project :**
 
-**Request Body (raw JSON):**
+- `POST http://localhost:8080/api/v1/project`
+
+2. **Endpoint For Update Project :**
+
+- `PUT http://localhost:8080/api/v1/project/:projectID`
+
+3. **Endpoint For Delete Project :**
+
+- `DELETE http://localhost:8080/api/v1/project/:projectID`
+
+**Sample Request Body (raw JSON) For Create Project:**
+
+---
+
+### 📥 Sample Request Body (raw JSON) For Create Project
 
 ```json
 {
@@ -31,20 +44,7 @@ After successful login, send a POST request to the following endpoint with the r
 
 ---
 
-### 📥 Request Body (JSON)
-
-The following fields are required:
-
-```json
-{
-  "name": "Test Project",
-  "description": "Sample project for testing purposes"
-}
-```
-
----
-
-### ✅ Successful Response
+### ✅ Successful Response For Create (Similar For Update & Delete)
 
 On successful login, the server responds with a JSON object and sets **two HTTP-only cookies**:
 
@@ -77,7 +77,7 @@ On successful login, the server responds with a JSON object and sets **two HTTP-
 
 ---
 
-### 📸 Screenshot of Response on Postman
+### 📸 Screenshot of Response on Postman (Eg:- Create Project)
 
 ---
 
@@ -89,7 +89,7 @@ On successful login, the server responds with a JSON object and sets **two HTTP-
 
 ![Cookies Screenshot](../Authorization-Route/asserts/RegisterUser-Response-Cookies.png)
 
-#### ✅ Sucsessful Project Creation
+#### ✅ Sucsessful Project Creation (Similar For Update & Delete)
 
 ![Cookies Screenshot](./asserts/Create-Project.png)
 
@@ -97,4 +97,4 @@ On successful login, the server responds with a JSON object and sets **two HTTP-
 
 ### 📌 Purpose
 
-The `create` route handles Project Creation setup on the TaskNexus platform.
+The `/` route handles Project Creation , Updation & Deletion setup on the TaskNexus platform.
