@@ -514,8 +514,6 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
       },
     ]);
   }
-
-  //validation
 });
 
 const forgotPasswordRequest = asyncHandler(async (req, res) => {
@@ -525,9 +523,47 @@ const forgotPasswordRequest = asyncHandler(async (req, res) => {
 });
 
 const changeCurrentPassword = asyncHandler(async (req, res) => {
-  const { email, username, password, role } = req.body;
+  const { password, confirmPassword } = req.body;
+  console.log(password, confirmPassword);
 
-  //validation
+  if (password != confirmPassword) {
+    throw new ApiError(400, "Passwords do not match.");
+  }
+
+  try {
+    // req.user is Available Due To The VerifyJWT Middleware Used before this Controller...
+    const existingUser = await User.findById(req.user._id).select(
+      "-password -refreshToken",
+    );
+
+    // When user Is Not Found In The database....
+    if (!existingUser) {
+      throw new ApiError(404, "User Not Found");
+    }
+
+    // User is Been Verified , So We Have To Update The User's Password Field To New Password.....
+    existingUser.password = password;
+
+    await existingUser.save();
+
+    // Set the requested user API response.....
+    const response = new ApiResponse(
+      200,
+      existingUser,
+      "Successfully Changes user's Password on TaskNexus.",
+    );
+
+    // Set cookies for access and refresh tokens & send response.....
+    return res.status(response.statusCode).json(response);
+  } catch (error) {
+    // Handle any errors that occur during user creation
+    throw new ApiError(500, "Internal server error", [
+      {
+        field: "server",
+        message: "Internal server error In The getCurrentUser Controller",
+      },
+    ]);
+  }
 });
 
 const getCurrentUser = asyncHandler(async (req, res) => {
@@ -563,7 +599,6 @@ const getCurrentUser = asyncHandler(async (req, res) => {
       },
     ]);
   }
-  //validation
 });
 
 export {
