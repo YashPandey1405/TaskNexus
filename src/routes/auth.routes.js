@@ -5,6 +5,8 @@ import {
   logoutUser,
   resendEmailVerification,
   refreshAccessToken,
+  getCurrentUser,
+  changeCurrentPassword,
 } from "../controllers/auth.controllers.js";
 
 // Express-Validator Import.....
@@ -29,9 +31,11 @@ router
 
 router.route("/resend-token").get(refreshAccessToken);
 router.route("/verify-email/:token").get(verifyEmail);
+router.route("/get-user/:userID").get(getCurrentUser);
 
 // Routes & Controllers Which Need User Authorization & '_id'....
 router.route("/logout").post(verifyJWT, logoutUser);
 router.route("/resend-email").get(verifyJWT, resendEmailVerification);
+router.route("/change-password").post(verifyJWT, changeCurrentPassword);
 
 export default router;

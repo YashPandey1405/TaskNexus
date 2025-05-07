@@ -531,8 +531,38 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
 });
 
 const getCurrentUser = asyncHandler(async (req, res) => {
-  const { email, username, password, role } = req.body;
+  const userID = req.params.userID;
+  console.log("userID: ", userID);
 
+  try {
+    // Find The User Based On The userID Of User.....
+    const existingUser = await User.findById(userID).select(
+      "-password -refreshToken ",
+    );
+
+    // When user Is Not Found In The database....
+    if (!existingUser) {
+      throw new ApiError(401, "User Not Found");
+    }
+
+    // Set the requested user API response.....
+    const response = new ApiResponse(
+      200,
+      existingUser,
+      "Successfully fetched user details on TaskNexus.",
+    );
+
+    // Set cookies for access and refresh tokens & send response.....
+    return res.status(response.statusCode).json(response);
+  } catch (error) {
+    // Handle any errors that occur during user creation
+    throw new ApiError(500, "Internal server error", [
+      {
+        field: "server",
+        message: "Internal server error In The getCurrentUser Controller",
+      },
+    ]);
+  }
   //validation
 });
 
