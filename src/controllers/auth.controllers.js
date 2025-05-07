@@ -429,6 +429,15 @@ const resendEmailVerification = asyncHandler(async (req, res) => {
       mailgenContent: EmailVerification_MailgenContent, // Mailgen formatted content
     });
     console.log("Email sent successfully");
+
+    // Set the success mail message to frontend.....
+    const response = new ApiResponse(
+      200,
+      "Mail Send successful To user's Email",
+    );
+
+    // send response.....
+    return res.status(response.statusCode).json(response);
   } catch (error) {
     // Handle any errors that occur during user creation
     throw new ApiError(500, "Internal server error", [
@@ -517,7 +526,71 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 });
 
 const forgotPasswordRequest = asyncHandler(async (req, res) => {
-  const { email, username, password, role } = req.body;
+  const { email } = req.body;
+  console.log("Email: ", email);
+
+  // When the email is not provided or not in valid format
+  if (!email || !email.includes("@")) {
+    throw new ApiError(400, "Please provide an email address.");
+  }
+
+  try {
+    // Find The User Based On The Hashed Verification Token.....
+    const existingUser = await User.findOne({
+      email: email,
+    }).select("-password -refreshToken");
+    console.log("existingUser:", existingUser);
+
+    // When The User Is Not Found In The Database.....
+    if (!existingUser) {
+      throw new ApiError(404, "User Not Found");
+    }
+
+    // Send forgot-password Email to the user.....
+    const { hashedToken, unHashedToken, tokenExpiry } =
+      existingUser.generateTemporaryToken();
+
+    existingUser.forgotPasswordToken = hashedToken; // Save the hashed token to the user document
+    existingUser.forgotPasswordExpiry = tokenExpiry; // Save the token expiry to the user document
+    await existingUser.save({ validateBeforeSave: false }); // Save the user document without validation
+
+    // Create a verification URL with the Forgot-Password token...
+    const verificationUrl = `${process.env.BASE_URL}/api/v1/auth/forgot-password-change/${unHashedToken}`;
+    console.log("Verification URL: ", verificationUrl);
+
+    // Mail Template Creation Through Mailgen npm.....
+    const ForgotPassword_MailgenContent = forgotPasswordMailgenContent(
+      existingUser.username,
+      verificationUrl,
+    );
+    console.log("Mailgen Content Created : ", ForgotPassword_MailgenContent);
+
+    // Send the email To The User.....
+    await sendEmail({
+      email: existingUser.email, // receiver's email
+      subject: "Reset Your Password", // subject line
+      mailgenContent: ForgotPassword_MailgenContent, // Mailgen formatted content
+    });
+    console.log("Email sent successfully");
+
+    // Set the success mail message to frontend.....
+    const response = new ApiResponse(
+      200,
+      "Mail Send successful To user's Email",
+    );
+
+    // send response.....
+    return res.status(response.statusCode).json(response);
+  } catch (error) {
+    // Handle any errors that occur during user creation
+    throw new ApiError(500, "Internal server error", [
+      {
+        field: "server",
+        message:
+          "Internal server error In The forgotPasswordRequest Controller",
+      },
+    ]);
+  }
 
   //validation
 });
@@ -546,10 +619,14 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
 
     await existingUser.save();
 
+    const loggedInUser = await User.findById(existingUser._id).select(
+      "-password -refreshToken ",
+    );
+
     // Set the requested user API response.....
     const response = new ApiResponse(
       200,
-      existingUser,
+      loggedInUser,
       "Successfully Changes user's Password on TaskNexus.",
     );
 
