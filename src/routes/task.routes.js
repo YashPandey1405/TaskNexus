@@ -25,6 +25,14 @@ router.route("/get-tasks/:taskID").get(verifyJWT, getTaskById);
 
 router.route("/create-task/:projectID").post(verifyJWT, createTask);
 
+// Routes For Sub-Task Controllers
+router
+  .route("/subtask/:subtaskID")
+  .put(verifyJWT, updateSubTask)
+  .delete(verifyJWT, deleteSubTask);
+
+router.route("/subtask/create/:taskID").post(verifyJWT, createSubTask);
+
 // Update & Delete Route To Task.....
 router
   .route("/:taskID")

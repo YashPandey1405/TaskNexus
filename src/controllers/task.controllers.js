@@ -5,6 +5,7 @@ import { ApiResponse } from "../utils/api-response.js";
 import { User } from "../models/user.models.js";
 import { Project } from "../models/project.models.js";
 import { Task } from "../models/task.models.js";
+import { SubTask } from "../models/subtask.models.js";
 
 const getTasks = asyncHandler(async (req, res) => {
   // req.user is Available Due To The VerifyJWT Middleware Used before this Controller...
@@ -221,6 +222,11 @@ const deleteTask = asyncHandler(async (req, res) => {
       throw new ApiError(404, "Task Not Found");
     }
 
+    // Major Step To Perform Cascade Delete In MongoDB Schema....
+    // Manually delete all subtasks linked to this task....
+    await SubTask.deleteMany({ task: taskID });
+    console.log(`Deleted all subtasks linked to taskID: ${taskID}`);
+
     // Set cookies and redirect
     const response = new ApiResponse(
       200,
@@ -242,39 +248,157 @@ const deleteTask = asyncHandler(async (req, res) => {
 });
 
 const createSubTask = asyncHandler(async (req, res) => {
+  const { title, isCompleted } = req.body;
+  console.log(req.body);
+
+  // Extra validation when required fields are missing
+  if (!title) {
+    throw new ApiError(400, "Task title is required", [
+      {
+        field: "title",
+        message: "This field is required",
+      },
+    ]);
+  }
+
+  const taskID = req.params.taskID;
+  console.log("taskID: ", taskID);
+
+  // req.user is Available Due To The VerifyJWT Middleware Used before this Controller...
+  const userID = req.user._id;
+  console.log("userID: ", userID);
   try {
+    // Search For The Task In The Database....
+    const requestedTask = await Task.findById(taskID);
+
+    // If No Task Found From The Database.....
+    if (!requestedTask) {
+      throw new ApiError(404, "Task Not Found");
+    }
+
+    // Create An SubTask In The Database......
+    const newSubTask = await SubTask.create({
+      title: title,
+      task: new mongoose.Types.ObjectId(requestedTask._id),
+      isCompleted: isCompleted || false,
+      createdBy: new mongoose.Types.ObjectId(userID),
+    });
+
+    if (!newSubTask) {
+      throw new ApiError(500, "Sub-Task Not Created");
+    }
+
+    // Set cookies and redirect
+    const response = new ApiResponse(
+      200,
+      newSubTask,
+      "Requested Sub-Task Created Sucsessfully On TaskNexus platform",
+    );
+
+    // Send All Projects To The Frontend....
+    return res.status(response.statusCode).json(response);
   } catch (error) {
     // Handle any errors that occur during user creation
     throw new ApiError(500, "Internal server error", [
       {
         field: "server",
-        message: "Internal server error In The getProjects Controller",
+        message: "Internal server error In The createSubTask Controller",
       },
     ]);
   }
 });
 
 const updateSubTask = asyncHandler(async (req, res) => {
+  const { title, isCompleted } = req.body;
+  console.log(req.body);
+
+  // Extra validation when required fields are missing
+  if (!title) {
+    throw new ApiError(400, "Task title is required", [
+      {
+        field: "title",
+        message: "This field is required",
+      },
+    ]);
+  }
+
+  const subtaskID = req.params.subtaskID;
+  console.log("subtaskID: ", subtaskID);
+
+  // req.user is Available Due To The VerifyJWT Middleware Used before this Controller...
+  const userID = req.user._id;
+  console.log("userID: ", userID);
   try {
+    const updatedSubTask = await SubTask.findByIdAndUpdate(
+      subtaskID,
+      { title, isCompleted: isCompleted || false },
+      { new: true }, // To return the updated document
+    );
+
+    if (!updatedSubTask) {
+      throw new ApiError(404, "Sub-Task Not Found");
+    }
+
+    // Set cookies and redirect
+    const response = new ApiResponse(
+      200,
+      updatedSubTask,
+      "Requested Sub-Task Updated Sucsessfully On TaskNexus platform",
+    );
+
+    // Send All Projects To The Frontend....
+    return res.status(response.statusCode).json(response);
   } catch (error) {
     // Handle any errors that occur during user creation
     throw new ApiError(500, "Internal server error", [
       {
         field: "server",
-        message: "Internal server error In The getProjects Controller",
+        message: "Internal server error In The updateSubTask Controller",
       },
     ]);
   }
 });
 
 const deleteSubTask = asyncHandler(async (req, res) => {
+  const subtaskID = req.params.subtaskID;
+  console.log("subtaskID: ", subtaskID);
+
+  // req.user is Available Due To The VerifyJWT Middleware Used before this Controller...
+  const userID = req.user._id;
+  console.log("userID: ", userID);
   try {
+    // Find the task and ensure it belongs to the user
+    const subtaskToDelete = await SubTask.findOne({
+      _id: subtaskID,
+      createdBy: userID,
+    });
+
+    if (!subtaskToDelete) {
+      throw new ApiError(404, "SubTask not found or unauthorized access");
+    }
+
+    // Now delete the task itself
+    const deletedSubTask = await SubTask.findByIdAndDelete(subtaskID);
+
+    if (!deletedSubTask) {
+      throw new ApiError(500, "Sub-Task Not Deleted");
+    }
+
+    // Set cookies and redirect
+    const response = new ApiResponse(
+      200,
+      deletedSubTask,
+      "Requested Sub-Task Deleted Sucsessfully On TaskNexus platform",
+    );
+
+    // Send All Projects To The Frontend....
+    return res.status(response.statusCode).json(response);
   } catch (error) {
     // Handle any errors that occur during user creation
     throw new ApiError(500, "Internal server error", [
       {
         field: "server",
-        message: "Internal server error In The getProjects Controller",
+        message: "Internal server error In The deleteSubTask Controller",
       },
     ]);
   }
