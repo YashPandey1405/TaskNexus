@@ -17,17 +17,42 @@ Ensure the user is **logged in** before attempting to create a project.
 
 After successful login, send a POST request to the following endpoint with the required JSON body.
 
-1. **Endpoint For Create Project :**
+#### 1. **Create Project**
 
-- `POST http://localhost:8080/api/v1/project`
+- **Method:** `POST`
+- **Endpoint:** `http://localhost:8080/api/v1/project`
+- **Description:** Creates a new project and saves it to the database.
 
-2. **Endpoint For Update Project :**
+---
 
-- `PUT http://localhost:8080/api/v1/project/:projectID`
+#### 2. **Update Project**
 
-3. **Endpoint For Delete Project :**
+- **Method:** `PUT`
+- **Endpoint:** `http://localhost:8080/api/v1/project/:projectID`
+- **Description:** Updates the project details by `projectID`.
 
-- `DELETE http://localhost:8080/api/v1/project/:projectID`
+---
+
+#### 3. **Delete Project**
+
+- **Method:** `DELETE`
+- **Endpoint:** `http://localhost:8080/api/v1/project/:projectID`
+- **Description:** Deletes the project by `projectID` along with all its associated tasks, subtasks, and members (cascade delete).
+
+---
+
+#### 4. **Get All Projects**
+
+- **Method:** `GET`
+- **Endpoint:** `http://localhost:8080/api/v1/project/getproject`
+- **Description:** Returns all project objects created by the authenticated user.
+
+---
+
+#### 5. **Get Project by ID**
+
+- **Method:** `GET`
+- **Endpoint:** `http://localhost:8080/api/v1/project/getproject/:projectID`
 
 **Sample Request Body (raw JSON) For Create Project:**
 
@@ -44,7 +69,7 @@ After successful login, send a POST request to the following endpoint with the r
 
 ---
 
-### ✅ Successful Response For Create (Similar For Update & Delete)
+### ✅ Successful Response For Create (Similar For Read ,Update & Delete)
 
 On successful login, the server responds with a JSON object and sets **two HTTP-only cookies**:
 
@@ -89,7 +114,7 @@ On successful login, the server responds with a JSON object and sets **two HTTP-
 
 ![Cookies Screenshot](../Authorization-Route/asserts/RegisterUser-Response-Cookies.png)
 
-#### ✅ Sucsessful Project Creation (Similar For Update & Delete)
+#### ✅ Sucsessful Project Creation (Similar For Read , Update & Delete)
 
 ![Cookies Screenshot](./asserts/Create-Project.png)
 
@@ -97,4 +122,4 @@ On successful login, the server responds with a JSON object and sets **two HTTP-
 
 ### 📌 Purpose
 
-The `/` route handles Project Creation , Updation & Deletion setup on the TaskNexus platform.
+The `/` route handles Project CRUD setup on the TaskNexus platform.
