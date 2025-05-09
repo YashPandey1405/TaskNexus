@@ -5,6 +5,8 @@ import { ApiResponse } from "../utils/api-response.js";
 import { User } from "../models/user.models.js";
 import { Project } from "../models/project.models.js";
 import { ProjectMember } from "../models/projectmember.models.js";
+import { Task } from "../models/task.models.js";
+import { SubTask } from "../models/subtask.models.js";
 
 const getProjects = asyncHandler(async (req, res) => {
   try {
@@ -189,8 +191,33 @@ const deleteProject = asyncHandler(async (req, res) => {
 
     // When No Project With Provided projectID Exists....
     if (!currentProject) {
-      throw new ApiError(404, "User Not Found");
+      throw new ApiError(404, "Project Not Found");
     }
+
+    // Major Step To Perform Cascade Delete In MongoDB Schema....
+    // Manually delete all Tasks & SubTasks linked to this Project....
+
+    // Step 1: Find all tasks linked to the current project
+    const tasksToDelete = await Task.find({ project: currentProject._id });
+
+    // Step 2: Delete the tasks
+    await Task.deleteMany({ project: currentProject._id });
+
+    // Step 3: Use the IDs of the deleted tasks to delete corresponding subtasks
+    if (tasksToDelete.length > 0) {
+      const taskIds = tasksToDelete.map((task) => task._id); // Extract task IDs
+
+      // Cascade delete subtasks linked to these tasks
+      await SubTask.deleteMany({
+        task: { $in: taskIds }, // Delete all subtasks linked to the tasks
+      });
+
+      // Log the deletion of subtasks for debugging purposes
+      console.log(`Deleted all subtasks linked to tasks: ${taskIds}`);
+    }
+
+    // Similar Work With ProjectMember Model As Well.....
+    await ProjectMember.deleteMany({ project: currentProject._id });
 
     // Set cookies and redirect
     const response = new ApiResponse(
