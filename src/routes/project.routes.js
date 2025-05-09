@@ -31,8 +31,8 @@ router
 
 router
   .route("/project-member/:projectID")
-  .get(getProjectMembers)
-  .post(addMemberToProject);
+  .get(verifyJWT, getProjectMembers)
+  .post(verifyJWT, addMemberToProject);
 
 // Routes & Controllers Which Need User Authorization & '_id'....
 router

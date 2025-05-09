@@ -26,6 +26,9 @@ router.route("/get-tasks/:taskID").get(verifyJWT, getTaskById);
 router.route("/create-task/:projectID").post(verifyJWT, createTask);
 
 // Update & Delete Route To Task.....
-router.route("/:taskID").put(updateTask).delete(deleteTask);
+router
+  .route("/:taskID")
+  .put(verifyJWT, updateTask)
+  .delete(verifyJWT, deleteTask);
 
 export default router;
