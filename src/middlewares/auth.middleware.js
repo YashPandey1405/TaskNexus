@@ -5,7 +5,10 @@ import jwt from "jsonwebtoken";
 // Jane Se Pehle Mil Ke Jana.....
 export const verifyJWT = async (req, res, next) => {
   try {
-    const token = req.cookies?.accessToken || null;
+    const authHeader = req.header("Authorization");
+    const bearerToken = authHeader && authHeader.startsWith("Bearer ") ? authHeader.slice(7) : null;
+    const token = req.cookies?.accessToken || bearerToken;
+
 
     // console.log(token);
     if (!token) {
