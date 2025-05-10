@@ -10,7 +10,7 @@ import {
 import {
   verifyJWT,
   validateProjectPermission,
-} from "../middlewares/auth.middleware";
+} from "../middlewares/auth.middleware.js";
 
 import { UserRolesEnum } from "../utils/constants.js";
 import { Router } from "express";
