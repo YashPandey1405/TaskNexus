@@ -4,6 +4,7 @@ import { ApiError } from "../utils/api-error.js";
 import { ApiResponse } from "../utils/api-response.js";
 import { User } from "../models/user.models.js";
 import { Project } from "../models/project.models.js";
+import { ProjectMember } from "../models/projectmember.models.js";
 import { Task } from "../models/task.models.js";
 import { SubTask } from "../models/subtask.models.js";
 
@@ -13,19 +14,27 @@ const getTasks = asyncHandler(async (req, res) => {
   console.log("userID: ", userID);
   try {
     // Search Tasks Assgined To The Current Logged In user...
-    const currentUserTasks = await Task.find({
+    const currentUser_TasksAssignedToUser = await Task.find({
       assignedTo: userID,
     }).populate("project", "name description");
 
+    // Search Tasks Assgined By The Current Logged In user...
+    const currentUser_TasksAssignedByUser = await Task.find({
+      assignedBy: userID,
+    }).populate("project", "name description");
+
     // When No Task Are Found From The Database....
-    if (!currentUserTasks) {
+    if (!currentUser_TasksAssignedToUser || !currentUser_TasksAssignedByUser) {
       throw new ApiError(404, "Tasks Not Found");
     }
 
     // Set cookies and redirect
     const response = new ApiResponse(
       200,
-      currentUserTasks,
+      {
+        AssignedToUser: currentUser_TasksAssignedToUser,
+        AssignedByUser: currentUser_TasksAssignedByUser,
+      },
       "All Assigned Tasks To currectUser Returned From TaskNexus platform",
     );
 
@@ -95,16 +104,38 @@ const createTask = asyncHandler(async (req, res) => {
 
   // req.user is Available Due To The VerifyJWT Middleware Used before this Controller...
   const userID = req.user._id;
+  const LoggedInuserRole = req.user.role;
   console.log("userID: ", userID);
+  console.log("LoggedInuserRole: ", LoggedInuserRole);
+
   try {
-    // Check Whether Assigned To User Exixts Or Not....
+    // Check Whether Assigned To User & Project Exixts Or Not....
     const assignedToUser = await User.findById(assignedTo).select(
       "-password -refreshToken",
     );
+    const currentProject = await Project.findById(projectID);
 
     // If The Assigned To User Doesn't Exists.....
-    if (!assignedToUser) {
-      throw new ApiError(404, "Assigned To User Doesn't Exists");
+    if (!assignedToUser || !currentProject) {
+      throw new ApiError(404, "Assigned user or project not found");
+    }
+
+    // An Security Check Point.....
+    // Due To The validateProjectPermission middleware , assignedByUser Is ["admin", "project_admin"]....
+    // Now , Check Whether The assignedToUser is Part Of The project Or Not....
+    const assignedToUserProjectMember = await ProjectMember.findOne({
+      user: assignedToUser._id,
+      project: currentProject._id,
+    });
+
+    if (
+      assignedToUserProjectMember.role == "project_admin" &&
+      LoggedInuserRole != "project_admin"
+    ) {
+      throw new ApiError(
+        403,
+        "You Don't Have Permission To Perform The Action",
+      );
     }
 
     // If The Assigned To User & AssignedBy User Are Same.....
@@ -115,18 +146,10 @@ const createTask = asyncHandler(async (req, res) => {
       );
     }
 
-    // Check Whether The Project Exixts Or Not....
-    const currectProject = await Project.findById(projectID);
-
-    // If The Project Doesn't Exists.....
-    if (!currectProject) {
-      throw new ApiError(404, "Project Doesn't Exists");
-    }
-
     const newTask = await Task.create({
       title: title,
       description: description,
-      project: new mongoose.Types.ObjectId(currectProject._id),
+      project: new mongoose.Types.ObjectId(currentProject._id),
       assignedTo: new mongoose.Types.ObjectId(assignedToUser._id),
       assignedBy: new mongoose.Types.ObjectId(userID),
       status: status || "todo", // optional, defaults to "TODO"
@@ -274,6 +297,17 @@ const createSubTask = asyncHandler(async (req, res) => {
     // If No Task Found From The Database.....
     if (!requestedTask) {
       throw new ApiError(404, "Task Not Found");
+    }
+
+    // To Ensure The Current user is Either assignedTo Or assignedBy user In Task.....
+    if (
+      String(requestedTask.assignedTo) !== String(userID) &&
+      String(requestedTask.assignedBy) !== String(userID)
+    ) {
+      throw new ApiError(
+        403,
+        "You Are Not Authorized To Create New Sub-Task For This Task",
+      );
     }
 
     // Create An SubTask In The Database......

@@ -246,11 +246,11 @@ const getProjectMembers = asyncHandler(async (req, res) => {
   try {
     const currentProjectMembers = await ProjectMember.find({
       project: projectID,
-    });
+    }).populate("user", "username fullname avatar");
 
     // When No Enteries Found From The Database....
-    if (!currentProjectMembers) {
-      throw new ApiError(404, "Users Not Found");
+    if (currentProjectMembers.length === 0) {
+      throw new ApiError(404, "No project members found");
     }
 
     // Set cookies and redirect
@@ -267,7 +267,7 @@ const getProjectMembers = asyncHandler(async (req, res) => {
     throw new ApiError(500, "Internal server error", [
       {
         field: "server",
-        message: "Internal server error In The createProject Controller",
+        message: "Internal server error In The getProjectMembers Controller",
       },
     ]);
   }
@@ -283,6 +283,12 @@ const addMemberToProject = asyncHandler(async (req, res) => {
   if (!userID) {
     throw new ApiError(400, "The userID Field Is Required");
   }
+
+  // req.user is Available Due To The VerifyJWT Middleware Used before this Controller...
+  const LoggedInuserID = req.user._id;
+  const LoggedInuserRole = req.user.role;
+  console.log("LoggedInuserID: ", LoggedInuserID);
+  console.log("LoggedInuserRole: ", LoggedInuserRole);
   try {
     const memberUser = await User.findById(userID);
     const currentProject = await Project.findById(projectID);
@@ -290,6 +296,26 @@ const addMemberToProject = asyncHandler(async (req, res) => {
     // If User OR Project Not Found In The Database....
     if (!memberUser || !currentProject) {
       throw new ApiError(404, "Object Not Found In The Database");
+    }
+
+    // To ensure the user isn’t already part of the project.....
+    const IsExistingMemberPresent = await ProjectMember.findOne({
+      project: currentProject._id,
+      user: memberUser._id,
+    });
+
+    // When The Requested User Is Already part Of That Project....
+    if (IsExistingMemberPresent) {
+      throw new ApiError(400, "User is already a member of this project");
+    }
+
+    // One More Securtity Check Point.....
+    // If New Project Member Role is "project_admin", Then Only "project_admin" Can Create New "project_admin".....
+    if (role == "project_admin" && LoggedInuserRole != "project_admin") {
+      throw new ApiError(
+        403,
+        "You Don't Have Permission To Perform The Action",
+      );
     }
 
     const newProjectMember = await ProjectMember.create({
@@ -316,7 +342,7 @@ const addMemberToProject = asyncHandler(async (req, res) => {
     throw new ApiError(500, "Internal server error", [
       {
         field: "server",
-        message: "Internal server error In The createProject Controller",
+        message: "Internal server error In The createProjectMember Controller",
       },
     ]);
   }
@@ -332,18 +358,41 @@ const updateMemberRole = asyncHandler(async (req, res) => {
   if (!role) {
     throw new ApiError(400, "The role Field Is Required");
   }
+
+  // req.user is Available Due To The VerifyJWT Middleware Used before this Controller...
+  const LoggedInuserID = req.user._id;
+  const LoggedInuserRole = req.projectMemberRole;
+  console.log("LoggedInuserID: ", LoggedInuserID);
+  console.log("LoggedInuserRole: ", LoggedInuserRole);
   try {
+    const requestedProjectMember =
+      await ProjectMember.findById(projectMemberID);
+
+    // If requestedProjectMember Not Found In The Database....
+    if (!requestedProjectMember) {
+      throw new ApiError(404, "ProjectMember Object Not Found In The Database");
+    }
+
+    // If The Requested New Role & Old Role Were Same.....
+    if (requestedProjectMember.role === role) {
+      throw new ApiError(400, "User already has the same role");
+    }
+
+    // One More Securtity Check Point.....
+    // If New Project Member Role is "project_admin", Then Only "project_admin" Can Update New "project_admin".....
+    if (role == "project_admin" && LoggedInuserRole != "project_admin") {
+      throw new ApiError(
+        403,
+        "You Don't Have Permission To Perform The Action",
+      );
+    }
+
     // findByIdAndUpdate The Role Of Project Member In The Database...
     const currentProjectMember = await ProjectMember.findByIdAndUpdate(
       projectMemberID,
       { role: role },
       { new: true }, // returns the updated document
-    );
-
-    // If currentProjectMember Not Found In The Database....
-    if (!currentProjectMember) {
-      throw new ApiError(404, "ProjectMember Object Not Found In The Database");
-    }
+    ).populate("user", "username fullname avatar");
 
     // Set cookies and redirect
     const response = new ApiResponse(
@@ -359,7 +408,7 @@ const updateMemberRole = asyncHandler(async (req, res) => {
     throw new ApiError(500, "Internal server error", [
       {
         field: "server",
-        message: "Internal server error In The createProject Controller",
+        message: "Internal server error In The updateProjectMember Controller",
       },
     ]);
   }
