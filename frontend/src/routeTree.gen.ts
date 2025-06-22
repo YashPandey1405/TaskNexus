@@ -14,6 +14,8 @@ import { Route as authLogoutRouteImport } from './routes/(auth)/logout'
 import { Route as authLoginRouteImport } from './routes/(auth)/login'
 import { Route as authForgotPasswordRouteImport } from './routes/(auth)/forgot-password'
 import { Route as HomeprojectIndexRouteImport } from './routes/home/(project)/index'
+import { Route as HomeprojectCreateRouteImport } from './routes/home/(project)/create'
+import { Route as HomeprojectEditPidRouteImport } from './routes/home/(project)/edit.$pid'
 
 const authSignupRoute = authSignupRouteImport.update({
   id: '/(auth)/signup',
@@ -40,20 +42,34 @@ const HomeprojectIndexRoute = HomeprojectIndexRouteImport.update({
   path: '/home/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HomeprojectCreateRoute = HomeprojectCreateRouteImport.update({
+  id: '/home/(project)/create',
+  path: '/home/create',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HomeprojectEditPidRoute = HomeprojectEditPidRouteImport.update({
+  id: '/home/(project)/edit/$pid',
+  path: '/home/edit/$pid',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/forgot-password': typeof authForgotPasswordRoute
   '/login': typeof authLoginRoute
   '/logout': typeof authLogoutRoute
   '/signup': typeof authSignupRoute
+  '/home/create': typeof HomeprojectCreateRoute
   '/home': typeof HomeprojectIndexRoute
+  '/home/edit/$pid': typeof HomeprojectEditPidRoute
 }
 export interface FileRoutesByTo {
   '/forgot-password': typeof authForgotPasswordRoute
   '/login': typeof authLoginRoute
   '/logout': typeof authLogoutRoute
   '/signup': typeof authSignupRoute
+  '/home/create': typeof HomeprojectCreateRoute
   '/home': typeof HomeprojectIndexRoute
+  '/home/edit/$pid': typeof HomeprojectEditPidRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -61,20 +77,38 @@ export interface FileRoutesById {
   '/(auth)/login': typeof authLoginRoute
   '/(auth)/logout': typeof authLogoutRoute
   '/(auth)/signup': typeof authSignupRoute
+  '/home/(project)/create': typeof HomeprojectCreateRoute
   '/home/(project)/': typeof HomeprojectIndexRoute
+  '/home/(project)/edit/$pid': typeof HomeprojectEditPidRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/forgot-password' | '/login' | '/logout' | '/signup' | '/home'
+  fullPaths:
+    | '/forgot-password'
+    | '/login'
+    | '/logout'
+    | '/signup'
+    | '/home/create'
+    | '/home'
+    | '/home/edit/$pid'
   fileRoutesByTo: FileRoutesByTo
-  to: '/forgot-password' | '/login' | '/logout' | '/signup' | '/home'
+  to:
+    | '/forgot-password'
+    | '/login'
+    | '/logout'
+    | '/signup'
+    | '/home/create'
+    | '/home'
+    | '/home/edit/$pid'
   id:
     | '__root__'
     | '/(auth)/forgot-password'
     | '/(auth)/login'
     | '/(auth)/logout'
     | '/(auth)/signup'
+    | '/home/(project)/create'
     | '/home/(project)/'
+    | '/home/(project)/edit/$pid'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -82,7 +116,9 @@ export interface RootRouteChildren {
   authLoginRoute: typeof authLoginRoute
   authLogoutRoute: typeof authLogoutRoute
   authSignupRoute: typeof authSignupRoute
+  HomeprojectCreateRoute: typeof HomeprojectCreateRoute
   HomeprojectIndexRoute: typeof HomeprojectIndexRoute
+  HomeprojectEditPidRoute: typeof HomeprojectEditPidRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -122,6 +158,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HomeprojectIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/home/(project)/create': {
+      id: '/home/(project)/create'
+      path: '/home/create'
+      fullPath: '/home/create'
+      preLoaderRoute: typeof HomeprojectCreateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/home/(project)/edit/$pid': {
+      id: '/home/(project)/edit/$pid'
+      path: '/home/edit/$pid'
+      fullPath: '/home/edit/$pid'
+      preLoaderRoute: typeof HomeprojectEditPidRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -130,7 +180,9 @@ const rootRouteChildren: RootRouteChildren = {
   authLoginRoute: authLoginRoute,
   authLogoutRoute: authLogoutRoute,
   authSignupRoute: authSignupRoute,
+  HomeprojectCreateRoute: HomeprojectCreateRoute,
   HomeprojectIndexRoute: HomeprojectIndexRoute,
+  HomeprojectEditPidRoute: HomeprojectEditPidRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
