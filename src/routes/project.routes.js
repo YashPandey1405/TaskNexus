@@ -27,7 +27,7 @@ import { Router } from "express";
 
 const router = Router();
 
-router.route("/getproject").get(getProjects);
+router.route("/getproject").get(verifyJWT, getProjects);
 router.route("/getproject/:projectID").get(verifyJWT, getProjectById);
 
 // ["admin", "project_admin"] Are Allowed To Update An ProjectMember Role.....
