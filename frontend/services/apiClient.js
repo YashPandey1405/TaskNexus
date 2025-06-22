@@ -58,24 +58,16 @@ class ApiClient {
     });
   }
 
-  async getLoginPage() {
-    return this.customFetch("/login");
-  }
-
-  async getSignupPage() {
-    return this.customFetch("/signup");
-  }
-
-  async getProfiles() {
-    return this.customFetch("/me");
-  }
-
   async logout() {
-    return this.customFetch("/logout");
+    return this.customFetch("/auth/logout", {
+      method: "POST",
+    });
   }
 
-  async isloggedIn() {
-    return this.customFetch("/status");
+  async getProjects() {
+    return this.customFetch("/project/getproject", {
+      method: "GET",
+    });
   }
 }
 

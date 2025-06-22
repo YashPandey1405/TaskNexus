@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as projectHomeRouteImport } from './routes/(project)/home'
 import { Route as authSignupRouteImport } from './routes/(auth)/signup'
+import { Route as authLogoutRouteImport } from './routes/(auth)/logout'
 import { Route as authLoginRouteImport } from './routes/(auth)/login'
 import { Route as authForgotPasswordRouteImport } from './routes/(auth)/forgot-password'
 
@@ -22,6 +23,11 @@ const projectHomeRoute = projectHomeRouteImport.update({
 const authSignupRoute = authSignupRouteImport.update({
   id: '/(auth)/signup',
   path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const authLogoutRoute = authLogoutRouteImport.update({
+  id: '/(auth)/logout',
+  path: '/logout',
   getParentRoute: () => rootRouteImport,
 } as any)
 const authLoginRoute = authLoginRouteImport.update({
@@ -38,12 +44,14 @@ const authForgotPasswordRoute = authForgotPasswordRouteImport.update({
 export interface FileRoutesByFullPath {
   '/forgot-password': typeof authForgotPasswordRoute
   '/login': typeof authLoginRoute
+  '/logout': typeof authLogoutRoute
   '/signup': typeof authSignupRoute
   '/home': typeof projectHomeRoute
 }
 export interface FileRoutesByTo {
   '/forgot-password': typeof authForgotPasswordRoute
   '/login': typeof authLoginRoute
+  '/logout': typeof authLogoutRoute
   '/signup': typeof authSignupRoute
   '/home': typeof projectHomeRoute
 }
@@ -51,18 +59,20 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/(auth)/forgot-password': typeof authForgotPasswordRoute
   '/(auth)/login': typeof authLoginRoute
+  '/(auth)/logout': typeof authLogoutRoute
   '/(auth)/signup': typeof authSignupRoute
   '/(project)/home': typeof projectHomeRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/forgot-password' | '/login' | '/signup' | '/home'
+  fullPaths: '/forgot-password' | '/login' | '/logout' | '/signup' | '/home'
   fileRoutesByTo: FileRoutesByTo
-  to: '/forgot-password' | '/login' | '/signup' | '/home'
+  to: '/forgot-password' | '/login' | '/logout' | '/signup' | '/home'
   id:
     | '__root__'
     | '/(auth)/forgot-password'
     | '/(auth)/login'
+    | '/(auth)/logout'
     | '/(auth)/signup'
     | '/(project)/home'
   fileRoutesById: FileRoutesById
@@ -70,6 +80,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   authForgotPasswordRoute: typeof authForgotPasswordRoute
   authLoginRoute: typeof authLoginRoute
+  authLogoutRoute: typeof authLogoutRoute
   authSignupRoute: typeof authSignupRoute
   projectHomeRoute: typeof projectHomeRoute
 }
@@ -88,6 +99,13 @@ declare module '@tanstack/react-router' {
       path: '/signup'
       fullPath: '/signup'
       preLoaderRoute: typeof authSignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(auth)/logout': {
+      id: '/(auth)/logout'
+      path: '/logout'
+      fullPath: '/logout'
+      preLoaderRoute: typeof authLogoutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/(auth)/login': {
@@ -110,6 +128,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   authForgotPasswordRoute: authForgotPasswordRoute,
   authLoginRoute: authLoginRoute,
+  authLogoutRoute: authLogoutRoute,
   authSignupRoute: authSignupRoute,
   projectHomeRoute: projectHomeRoute,
 }
