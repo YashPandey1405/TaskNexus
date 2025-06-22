@@ -9,16 +9,30 @@ import { Task } from "../models/task.models.js";
 import { SubTask } from "../models/subtask.models.js";
 
 const getProjects = asyncHandler(async (req, res) => {
+  // req.user is Available Due To The VerifyJWT Middleware Used before this Controller...
+  const userID = req.user._id;
+  console.log("userID: ", userID);
+
   try {
-    const allProjects = await Project.find({}).populate(
-      "createdBy",
-      "avatar username fullname email",
-    );
+    const allProjectsAssociatedWithUser = await ProjectMember.find({
+      // Filter ProjectMember documents where the user matches the given userID
+      user: new mongoose.Types.ObjectId(userID),
+    }).populate({
+      // Populate the 'project' field in ProjectMember with selected fields
+      path: "project",
+      select: "name description createdBy", // Only include these fields from the Project model
+
+      // Nested populate to get the details of 'createdBy' inside the 'project'
+      populate: {
+        path: "createdBy", // This refers to the user who created the project
+        select: "username", // Only fetch the username of the creator
+      },
+    });
 
     // Set cookies and redirect
     const response = new ApiResponse(
       200,
-      allProjects,
+      allProjectsAssociatedWithUser,
       "All Projects Registered On TaskNexus Platform",
     );
 
