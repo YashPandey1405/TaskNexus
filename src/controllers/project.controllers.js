@@ -17,17 +17,34 @@ const getProjects = asyncHandler(async (req, res) => {
     const allProjectsAssociatedWithUser = await ProjectMember.find({
       // Filter ProjectMember documents where the user matches the given userID
       user: new mongoose.Types.ObjectId(userID),
-    }).populate({
-      // Populate the 'project' field in ProjectMember with selected fields
-      path: "project",
-      select: "name description createdBy", // Only include these fields from the Project model
+    })
+      .populate({
+        // Populate the 'project' field in ProjectMember with selected fields
+        path: "project",
+        select: "name description createdBy", // Only include these fields from the Project model
 
-      // Nested populate to get the details of 'createdBy' inside the 'project'
-      populate: {
-        path: "createdBy", // This refers to the user who created the project
-        select: "username", // Only fetch the username of the creator
-      },
-    });
+        // Nested populate to get the details of 'createdBy' inside the 'project'
+        populate: {
+          path: "createdBy", // This refers to the user who created the project
+          select: "username", // Only fetch the username of the creator
+        },
+      })
+      .lean(); // makes ProjectMember itself a plain JS object
+
+    // Method to count total users and tasks in each project.......
+    await Promise.all(
+      allProjectsAssociatedWithUser.map(async (projectMember) => {
+        const projectID = projectMember.project._id;
+
+        const [totalUsersInProject, totalTasksInProject] = await Promise.all([
+          ProjectMember.countDocuments({ project: projectID }),
+          Task.countDocuments({ project: projectID }),
+        ]);
+
+        projectMember.project.totalUsersInProject = totalUsersInProject;
+        projectMember.project.totalTasksInProject = totalTasksInProject;
+      }),
+    );
 
     // Set cookies and redirect
     const response = new ApiResponse(

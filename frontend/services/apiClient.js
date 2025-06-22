@@ -37,7 +37,7 @@ class ApiClient {
     }
   }
 
-  //Auth endpoints
+  // Auth endpoints
 
   async signup(email, username, fullname, password) {
     return this.customFetch("/auth/register", {
@@ -64,9 +64,43 @@ class ApiClient {
     });
   }
 
+  // Project endpoints
+
   async getProjects() {
     return this.customFetch("/project/getproject", {
       method: "GET",
+    });
+  }
+
+  async getProjectByID(projectID) {
+    return this.customFetch(`/project/getproject/${projectID}`, {
+      method: "GET",
+    });
+  }
+
+  async createProject(name, description) {
+    return this.customFetch("/project", {
+      method: "POST",
+      body: JSON.stringify({ name, description }),
+    });
+  }
+
+  async editProject(name, description, projectID) {
+    return this.customFetch(`/project/${projectID}`, {
+      method: "PUT",
+      body: JSON.stringify({ name, description }),
+    });
+  }
+
+  async updateProject(projectID) {
+    return this.customFetch(`/project/${projectID}`, {
+      method: "DELETE",
+    });
+  }
+
+  async deleteProject(projectID) {
+    return this.customFetch(`/project/${projectID}`, {
+      method: "DELETE",
     });
   }
 }

@@ -6,7 +6,7 @@ const Navbar = () => {
   const router = useRouter();
 
   const handleCreate = () => {
-    router.navigate({ to: "/create" });
+    router.navigate({ to: "/home/create" });
   };
 
   const handleLogout = () => {
@@ -20,7 +20,7 @@ const Navbar = () => {
         <div className="container-fluid">
           {/* Brand */}
           <Link
-            to="/"
+            to="/home"
             className="navbar-brand d-flex align-items-center text-white"
           >
             <i className="fas fa-diagram-project fa-xl text-warning"></i>

@@ -2,6 +2,7 @@ import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import apiClient from "../../../services/apiClient";
+import { authStore } from "../../store/authStore.js";
 
 export const Route = createFileRoute("/(auth)/signup")({
   component: RouteComponent,
@@ -9,6 +10,9 @@ export const Route = createFileRoute("/(auth)/signup")({
 
 function RouteComponent() {
   const router = useRouter();
+
+  const isLoggedInZustand = authStore((state) => state.isLoggedIn);
+  const loginUserZustand = authStore((state) => state.loginUser);
 
   const [formData, setFormData] = useState({
     email: "",
@@ -42,6 +46,8 @@ function RouteComponent() {
       setData(signupUser);
 
       if (signupUser.success) {
+        let userId = signupUser.data._id;
+        loginUserZustand(userId);
         setTimeout(() => {
           router.navigate({ to: "/home" });
         }, 3000);

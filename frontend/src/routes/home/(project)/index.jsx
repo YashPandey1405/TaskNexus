@@ -15,6 +15,8 @@ function RouteComponent() {
   const loggedInUserIdZudtand = authStore((state) => state.loggedInUserId);
 
   const [data, setData] = useState(null);
+  const [showAlert, setShowAlert] = useState(true);
+  const [projectDelete, setprojectDelete] = useState(null);
 
   useEffect(() => {
     const getAllProjects = async () => {
@@ -45,9 +47,32 @@ function RouteComponent() {
     getAllProjects();
   }, [router, isLoggedInZustand]);
 
+  function handleEditClick(projectID) {
+    router.navigate({ to: `/home/edit/${projectID}` });
+  }
+
+  async function handleProjectDelete(projectID) {
+    try {
+      const projectCreated = await apiClient.deleteProject(projectID);
+      setprojectDelete(projectCreated);
+
+      if (projectCreated.success) {
+        setTimeout(() => {
+          window.location.reload();
+        }, 3000);
+      }
+    } catch (error) {
+      setprojectDelete({
+        success: false,
+        message: "Project Deletion failed in Frontend. Try again later.",
+      });
+    }
+  }
+
   return (
     <div className="bg-dark text-light min-vh-100">
       <Navbar />
+
       <div className="container py-2">
         {/* Top Welcome Banner */}
         <div className="row mb-4">
@@ -59,6 +84,22 @@ function RouteComponent() {
           </div>
         </div>
         {/* <h1>{loggedInUserIdZudtand}</h1> */}
+
+        {/* Alert */}
+        {projectDelete && showAlert && (
+          <div
+            className={`alert ${projectDelete.success ? "alert-success" : "alert-danger"} alert-dismissible fade show`}
+            role="alert"
+          >
+            {projectDelete.message}
+            <button
+              type="button"
+              className="btn-close btn-close-dark"
+              aria-label="Close"
+              onClick={() => setShowAlert(false)}
+            ></button>
+          </div>
+        )}
 
         {/* Conditional Content Rendering */}
         {!data ? (
@@ -85,9 +126,16 @@ function RouteComponent() {
                     style={{ backgroundColor: "#f8f9fa", color: "#212529" }}
                   >
                     <div className="card-body">
-                      <h5 className="card-title fw-bold text-dark mb-2">
-                        {project.name}
+                      <h5 className="card-title fw-bold text-dark mb-2 d-flex justify-content-between align-items-center">
+                        <span>{project.name}</span>
+                        <span className="text-muted fs-6 d-flex align-items-center">
+                          <i className="fas fa-users me-1 text-primary"></i>
+                          {project.totalUsersInProject}
+                          <i className="fas fa-tasks ms-3 me-1 text-success"></i>
+                          {project.totalTasksInProject}
+                        </span>
                       </h5>
+
                       <p className="card-text small text-muted mb-3">
                         {project.description}
                       </p>
@@ -102,7 +150,7 @@ function RouteComponent() {
                           : project.createdBy.username}
                       </p>
                       <p className="text-muted small mb-0">
-                        Created On: {createdDate}
+                        <strong>Created On:</strong> {createdDate}
                       </p>
                     </div>
                     <div className="card-footer bg-transparent border-0 d-flex gap-2">
@@ -110,10 +158,27 @@ function RouteComponent() {
                       <button className="btn btn-warning w-100">View</button>
 
                       {/* Edit - switch to btn-primary (a calmer but bold blue) */}
-                      <button className="btn btn-primary w-100">Edit</button>
+                      <button
+                        className="btn btn-primary w-100"
+                        disabled={item.role === "member"}
+                        onClick={() => handleEditClick(item.project._id)}
+                      >
+                        Edit
+                      </button>
 
                       {/* Delete - keep red but use btn-outline-danger for visual balance */}
-                      <button className="btn btn-outline-danger w-100">
+                      <button
+                        className="btn btn-outline-danger w-100"
+                        disabled={item.role !== "project_admin"}
+                        onClick={() => {
+                          const confirmDelete = window.confirm(
+                            `Are you sure you want to delete the project "${item.project.name}"? This action cannot be undone.`,
+                          );
+                          if (confirmDelete) {
+                            handleProjectDelete(item.project._id);
+                          }
+                        }}
+                      >
                         Delete
                       </button>
                     </div>
