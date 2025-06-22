@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useRouter, Link } from "@tanstack/react-router";
 import Navbar from "../../../../Components/Navbar.jsx";
 import apiClient from "../../../../services/apiClient.js";
+import { authStore } from "../../../store/authStore.js";
 
 export const Route = createFileRoute("/home/(project)/")({
   component: RouteComponent,
@@ -10,11 +11,20 @@ export const Route = createFileRoute("/home/(project)/")({
 
 function RouteComponent() {
   const router = useRouter();
+  const isLoggedInZustand = authStore((state) => state.isLoggedIn);
+
   const [data, setData] = useState(null);
 
   useEffect(() => {
     const getAllProjects = async () => {
       try {
+        // Redirect early if not logged in
+        if (!isLoggedInZustand) {
+          console.log("User is not logged in, redirecting to login page...");
+          router.navigate({ to: "/login" });
+          return; // stop further execution
+        }
+
         const response = await apiClient.getProjects();
         setData(response);
 
@@ -32,7 +42,7 @@ function RouteComponent() {
     };
 
     getAllProjects();
-  }, [router]);
+  }, [router, isLoggedInZustand]);
 
   return (
     <div className="bg-dark text-light min-vh-100">

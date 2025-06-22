@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { useRouter } from "@tanstack/react-router";
 import apiClient from "../../../services/apiClient";
+import { authStore } from "../../store/authStore.js";
 
 export const Route = createFileRoute("/(auth)/logout")({
   component: RouteComponent,
@@ -9,15 +10,26 @@ export const Route = createFileRoute("/(auth)/logout")({
 
 function RouteComponent() {
   const router = useRouter();
+  const isLoggedInZustand = authStore((state) => state.isLoggedIn);
+  const logoutUserZustand = authStore((state) => state.logoutUser);
+
   const [data, setData] = useState(null);
 
   useEffect(() => {
+    // If user is not logged in, redirect to login
+    if (!isLoggedInZustand) {
+      console.log("User already logged out, redirecting to login.");
+      router.navigate({ to: "/login" });
+      return;
+    }
+
     const performLogout = async () => {
       try {
         const logoutUser = await apiClient.logout();
         setData(logoutUser);
 
         if (logoutUser.success) {
+          logoutUserZustand(); // Reset Zustand state
           setTimeout(() => {
             router.navigate({ to: "/login" });
           }, 3000);
@@ -28,7 +40,7 @@ function RouteComponent() {
     };
 
     performLogout();
-  }, [router]);
+  }, [router, isLoggedInZustand]);
 
   return (
     <div className="d-flex justify-content-center align-items-center vh-100 bg-dark text-white">

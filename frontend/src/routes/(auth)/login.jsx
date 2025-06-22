@@ -1,7 +1,8 @@
 import { createFileRoute, useRouter } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "@tanstack/react-router";
 import apiClient from "../../../services/apiClient";
+import { authStore } from "../../store/authStore.js";
 
 export const Route = createFileRoute("/(auth)/login")({
   component: RouteComponent,
@@ -9,6 +10,16 @@ export const Route = createFileRoute("/(auth)/login")({
 
 function RouteComponent() {
   const router = useRouter();
+
+  const isLoggedInZustand = authStore((state) => state.isLoggedIn);
+  const loginUserZustand = authStore((state) => state.loginUser);
+
+  useEffect(() => {
+    if (isLoggedInZustand) {
+      console.log("User already logged in. Redirecting to /home...");
+      router.navigate({ to: "/home" });
+    }
+  }, [isLoggedInZustand, router]);
 
   const [formData, setFormData] = useState({
     email: "",
@@ -39,14 +50,22 @@ function RouteComponent() {
         formData.password,
       );
       setData(loginUser);
+      console.log("Login response:", loginUser);
 
       if (loginUser.success) {
+        let userId = loginUser.data._id;
+        loginUserZustand(userId);
+        console.log("User logged in:", authStore.getState());
+
         setTimeout(() => {
           router.navigate({ to: "/home" });
         }, 3000);
       }
     } catch (error) {
-      setData({ success: false, message: "Login failed. Try again later." });
+      setData({
+        success: false,
+        message: "Login failed in Frontend. Try again later.",
+      });
     }
 
     setIsLoggingIn(false);
@@ -81,6 +100,7 @@ function RouteComponent() {
           }}
         >
           <h2 className="text-center mb-4">Log In to TaskNexus</h2>
+          <p>isLoggedInZustand : {isLoggedInZustand}</p>
 
           {data && showAlert && (
             <div
