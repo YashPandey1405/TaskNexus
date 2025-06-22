@@ -12,6 +12,7 @@ export const Route = createFileRoute("/home/(project)/")({
 function RouteComponent() {
   const router = useRouter();
   const isLoggedInZustand = authStore((state) => state.isLoggedIn);
+  const loggedInUserIdZudtand = authStore((state) => state.loggedInUserId);
 
   const [data, setData] = useState(null);
 
@@ -57,6 +58,7 @@ function RouteComponent() {
             </h2>
           </div>
         </div>
+        {/* <h1>{loggedInUserIdZudtand}</h1> */}
 
         {/* Conditional Content Rendering */}
         {!data ? (
@@ -71,7 +73,7 @@ function RouteComponent() {
             No projects found.
           </div>
         ) : (
-          <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+          <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mb-4">
             {data.data.map((item) => {
               const { project } = item;
               const createdDate = new Date(item.createdAt).toLocaleDateString();
@@ -95,7 +97,9 @@ function RouteComponent() {
                       </p>
                       <p className="mb-1">
                         <strong>Created By:</strong>{" "}
-                        {project.createdBy.username}
+                        {project.createdBy._id == loggedInUserIdZudtand
+                          ? "You"
+                          : project.createdBy.username}
                       </p>
                       <p className="text-muted small mb-0">
                         Created On: {createdDate}

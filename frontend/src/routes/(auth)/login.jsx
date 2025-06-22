@@ -14,13 +14,6 @@ function RouteComponent() {
   const isLoggedInZustand = authStore((state) => state.isLoggedIn);
   const loginUserZustand = authStore((state) => state.loginUser);
 
-  useEffect(() => {
-    if (isLoggedInZustand) {
-      console.log("User already logged in. Redirecting to /home...");
-      router.navigate({ to: "/home" });
-    }
-  }, [isLoggedInZustand, router]);
-
   const [formData, setFormData] = useState({
     email: "",
     username: "",
@@ -100,7 +93,6 @@ function RouteComponent() {
           }}
         >
           <h2 className="text-center mb-4">Log In to TaskNexus</h2>
-          <p>isLoggedInZustand : {isLoggedInZustand}</p>
 
           {data && showAlert && (
             <div
