@@ -1,12 +1,48 @@
-# React + Vite
+# 🚀 TaskNexus Frontend Overview
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+> Modern task management interface powered by React.
 
-Currently, two official plugins are available:
+![React](https://img.shields.io/badge/React-18.0-blue?logo=react&logoColor=white)
+![TanStack Router](https://img.shields.io/badge/TanStack%20Router-Routing-informational?logo=reactrouter&logoColor=white&color=blueviolet)
+![Zustand](https://img.shields.io/badge/Zustand-State--Management-ff69b4?logo=zotero&logoColor=white)
+![Custom Hooks](https://img.shields.io/badge/Custom%20Hooks-React-blue?logo=react)
+![apiClient](https://img.shields.io/badge/apiClient-Singleton-orange?logo=axios&logoColor=white)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## Expanding the ESLint configuration
+## 🧩 Overview
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+This is the **frontend module** of the **TaskNexus** platform, built entirely in **pure React**. The UI is sleek, responsive, and optimized for performance and scalability. The project uses **modern React architecture**, emphasizing clean code and maintainability.
+
+---
+
+## 🔧 Tech Stack & Tools
+
+- **React** for UI rendering and component architecture.
+- **TanStack Router** for modern file-based routing and nested layouts.
+- **Zustand** for minimal and scalable global state management.
+- **Custom Hooks** for reusable logic and side-effect management.
+- **Singleton `apiClient`** for centralized API handling using Axios.
+- **Bootstrap + Custom SCSS** for UI styling and responsiveness.
+
+---
+
+## 📁 Project Highlights
+
+- Robust routing with layout separation using TanStack Router.
+- Global state like auth and user roles managed using Zustand store.
+- Alerts, auth states, form handlers built via **custom React hooks**.
+- All API communication flows through a **singleton Axios client** with pre-configured base URL and interceptors.
+- Protected routes and conditional UI rendering based on roles like `project_admin` or `member`.
+
+---
+
+## 🚀 Getting Started
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+> Built with ❤️ for scalable collaboration and productivity on the TaskNexus platform.
