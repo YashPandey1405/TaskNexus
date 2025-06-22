@@ -9,17 +9,12 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as projectHomeRouteImport } from './routes/(project)/home'
 import { Route as authSignupRouteImport } from './routes/(auth)/signup'
 import { Route as authLogoutRouteImport } from './routes/(auth)/logout'
 import { Route as authLoginRouteImport } from './routes/(auth)/login'
 import { Route as authForgotPasswordRouteImport } from './routes/(auth)/forgot-password'
+import { Route as HomeprojectIndexRouteImport } from './routes/home/(project)/index'
 
-const projectHomeRoute = projectHomeRouteImport.update({
-  id: '/(project)/home',
-  path: '/home',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const authSignupRoute = authSignupRouteImport.update({
   id: '/(auth)/signup',
   path: '/signup',
@@ -40,20 +35,25 @@ const authForgotPasswordRoute = authForgotPasswordRouteImport.update({
   path: '/forgot-password',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HomeprojectIndexRoute = HomeprojectIndexRouteImport.update({
+  id: '/home/(project)/',
+  path: '/home/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/forgot-password': typeof authForgotPasswordRoute
   '/login': typeof authLoginRoute
   '/logout': typeof authLogoutRoute
   '/signup': typeof authSignupRoute
-  '/home': typeof projectHomeRoute
+  '/home': typeof HomeprojectIndexRoute
 }
 export interface FileRoutesByTo {
   '/forgot-password': typeof authForgotPasswordRoute
   '/login': typeof authLoginRoute
   '/logout': typeof authLogoutRoute
   '/signup': typeof authSignupRoute
-  '/home': typeof projectHomeRoute
+  '/home': typeof HomeprojectIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -61,7 +61,7 @@ export interface FileRoutesById {
   '/(auth)/login': typeof authLoginRoute
   '/(auth)/logout': typeof authLogoutRoute
   '/(auth)/signup': typeof authSignupRoute
-  '/(project)/home': typeof projectHomeRoute
+  '/home/(project)/': typeof HomeprojectIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -74,7 +74,7 @@ export interface FileRouteTypes {
     | '/(auth)/login'
     | '/(auth)/logout'
     | '/(auth)/signup'
-    | '/(project)/home'
+    | '/home/(project)/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -82,18 +82,11 @@ export interface RootRouteChildren {
   authLoginRoute: typeof authLoginRoute
   authLogoutRoute: typeof authLogoutRoute
   authSignupRoute: typeof authSignupRoute
-  projectHomeRoute: typeof projectHomeRoute
+  HomeprojectIndexRoute: typeof HomeprojectIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/(project)/home': {
-      id: '/(project)/home'
-      path: '/home'
-      fullPath: '/home'
-      preLoaderRoute: typeof projectHomeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/(auth)/signup': {
       id: '/(auth)/signup'
       path: '/signup'
@@ -122,6 +115,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof authForgotPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/home/(project)/': {
+      id: '/home/(project)/'
+      path: '/home'
+      fullPath: '/home'
+      preLoaderRoute: typeof HomeprojectIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -130,7 +130,7 @@ const rootRouteChildren: RootRouteChildren = {
   authLoginRoute: authLoginRoute,
   authLogoutRoute: authLogoutRoute,
   authSignupRoute: authSignupRoute,
-  projectHomeRoute: projectHomeRoute,
+  HomeprojectIndexRoute: HomeprojectIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -80,7 +80,7 @@ function RouteComponent() {
             color: "#ffffff",
           }}
         >
-          <h2 className="text-center mb-4">Log In to TaskNexux</h2>
+          <h2 className="text-center mb-4">Log In to TaskNexus</h2>
 
           {data && showAlert && (
             <div
