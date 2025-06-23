@@ -160,13 +160,22 @@ export const validateTaskPermission = async (req, res, next) => {
       throw new ApiError(404, "task Not Found");
     }
 
+    // To Check Whether The Current User Is Involved In That Project....
+    const currentProjectMember = await ProjectMember.findOne({
+      user: LoggedInuserID,
+      project: currentTask.project,
+    });
+
     // Check Condition....
     // Only assignedBy User Of Task Can Update/Delete The Task....
+    // Project Admin Can Also Update/Delete The Task....
     if (String(currentTask.assignedBy) !== String(LoggedInuserID)) {
-      throw new ApiError(
-        403,
-        "You Don't Have Permission To Perform The Action",
-      );
+      if (currentProjectMember.role !== "project_admin") {
+        throw new ApiError(
+          403,
+          "You Don't Have Permission To Perform The Action",
+        );
+      }
     }
 
     next();

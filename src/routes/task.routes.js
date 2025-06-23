@@ -1,7 +1,9 @@
 import {
   getTasks,
   getTaskById,
+  getDataForcreateTask,
   createTask,
+  quickUpdateTask,
   updateTask,
   deleteTask,
   createSubTask,
@@ -34,6 +36,7 @@ router.route("/get-tasks/:taskID").get(verifyJWT, getTaskById);
 // ["admin", "project_admin"] Are Allowed To Create An Task Of An Project.....
 router
   .route("/create-task/:projectID")
+  .get(verifyJWT, getDataForcreateTask)
   .post(
     verifyJWT,
     validateProjectPermission([
@@ -52,6 +55,10 @@ router
 router.route("/subtask/create/:taskID").post(verifyJWT, createSubTask);
 
 // Update & Delete Route To Task.....
+router
+  .route("/quick-change/:taskID")
+  .put(verifyJWT, validateTaskPermission, quickUpdateTask);
+
 router
   .route("/:taskID")
   .put(verifyJWT, validateTaskPermission, updateTask)

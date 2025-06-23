@@ -19,8 +19,8 @@ const getTasks = asyncHandler(async (req, res) => {
   }
 
   // req.user is Available Due To The VerifyJWT Middleware Used before this Controller...
-  // const userID = req.user._id;
-  // console.log("userID: ", userID);
+  const userID = req.user._id;
+  console.log("userID: ", userID);
   try {
     console.log("1");
     // 1. Get tasks assigned in the current project
@@ -75,6 +75,12 @@ const getTasks = asyncHandler(async (req, res) => {
     }).populate("user", "username email");
 
     console.log("7");
+    const currentUserInProject = await ProjectMember.findOne({
+      user: userID,
+      project: projectID,
+    }).populate("user", "username email");
+
+    console.log("8");
     // Set cookies and redirect
     const response = new ApiResponse(
       200,
@@ -83,6 +89,7 @@ const getTasks = asyncHandler(async (req, res) => {
         projectTotalUsers: totalUsersInTheProject,
         projectCreator: projectAdmins,
         projectAdmins: admins,
+        currentUser: currentUserInProject,
       },
       "All Assigned Tasks To Project Returned From TaskNexus platform",
     );
@@ -129,6 +136,65 @@ const getTaskById = asyncHandler(async (req, res) => {
       {
         field: "server",
         message: "Internal server error In The getTaskById Controller",
+      },
+    ]);
+  }
+});
+
+const getDataForcreateTask = asyncHandler(async (req, res) => {
+  const projectID = req.params.projectID;
+  console.log("projectID: ", projectID);
+
+  // req.user is Available Due To The VerifyJWT Middleware Used before this Controller...
+  const userID = req.user._id;
+  console.log("userID: ", userID);
+
+  try {
+    console.log("1");
+    // Check Whether Assigned To User & Project Exists Or Not....
+    const currentLoggedInUserRole = await ProjectMember.findOne({
+      user: userID,
+      project: projectID,
+    });
+
+    console.log("2");
+    // If The Assigned To User Doesn't Exists.....
+    if (!currentLoggedInUserRole) {
+      throw new ApiError(404, "Assigned user or project not found");
+    }
+
+    console.log("3");
+    // Get All The Project Members Of The Project......
+    const allProjectMembers = await ProjectMember.find({
+      project: projectID,
+    }).populate("user", "username email");
+
+    console.log("4");
+    // If The Current Project Doesn't Exists.....
+    if (!allProjectMembers) {
+      throw new ApiError(404, "No Project Not Found");
+    }
+
+    console.log("5");
+    // Set cookies and redirect
+    const response = new ApiResponse(
+      200,
+      {
+        currentUserDetails: currentLoggedInUserRole,
+        allProjectMembers: allProjectMembers,
+      },
+      "All Data Been Shared Sucsessfully Shared from TaskNexus platform",
+    );
+
+    // Send All Projects To The Frontend....
+    return res.status(response.statusCode).json(response);
+  } catch (error) {
+    // Handle any errors that occur during user creation
+    throw new ApiError(500, "Internal server error", [
+      {
+        field: "server",
+        message:
+          "Internal server error In The Send Data For createTask Controller",
       },
     ]);
   }
@@ -225,6 +291,52 @@ const createTask = asyncHandler(async (req, res) => {
       {
         field: "server",
         message: "Internal server error In The createTask Controller",
+      },
+    ]);
+  }
+});
+
+const quickUpdateTask = asyncHandler(async (req, res) => {
+  console.log("quickUpdateTask Controller Called");
+  const { status } = req.body;
+  console.log(req.body);
+
+  const taskID = req.params.taskID;
+  console.log("taskID: ", taskID);
+
+  try {
+    console.log("1");
+    // Find the task by ID and update it
+    const updatedTask = await Task.findByIdAndUpdate(
+      taskID,
+      {
+        status: status || "todo",
+      },
+      { new: true }, // To return the updated document
+    );
+
+    console.log("2");
+    // When No Task Are Found From The Database....
+    if (!updatedTask) {
+      throw new ApiError(404, "Task Not Found");
+    }
+
+    console.log("3");
+    // Set cookies and redirect
+    const response = new ApiResponse(
+      200,
+      undefined,
+      "Requested Task Updated On TaskNexus platform",
+    );
+
+    // Send All Projects To The Frontend....
+    return res.status(response.statusCode).json(response);
+  } catch (error) {
+    // Handle any errors that occur during user creation
+    throw new ApiError(500, "Internal server error", [
+      {
+        field: "server",
+        message: "Internal server error In The getProjects Controller",
       },
     ]);
   }
@@ -489,7 +601,9 @@ const deleteSubTask = asyncHandler(async (req, res) => {
 
 export {
   createSubTask,
+  getDataForcreateTask,
   createTask,
+  quickUpdateTask,
   deleteSubTask,
   deleteTask,
   getTaskById,

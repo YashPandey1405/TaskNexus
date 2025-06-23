@@ -17,6 +17,7 @@ import { Route as HomeprojectIndexRouteImport } from './routes/home/(project)/in
 import { Route as HomeprojectCreateRouteImport } from './routes/home/(project)/create'
 import { Route as HomeprojectEditPidRouteImport } from './routes/home/(project)/edit.$pid'
 import { Route as HometasksprojectHomePageProjectPidRouteImport } from './routes/home/(tasks)/(project-HomePage)/project.$pid'
+import { Route as HometasksprojectHomePageTaskCreatePidRouteImport } from './routes/home/(tasks)/(project-HomePage)/task/create.$pid'
 
 const authSignupRoute = authSignupRouteImport.update({
   id: '/(auth)/signup',
@@ -59,6 +60,12 @@ const HometasksprojectHomePageProjectPidRoute =
     path: '/home/project/$pid',
     getParentRoute: () => rootRouteImport,
   } as any)
+const HometasksprojectHomePageTaskCreatePidRoute =
+  HometasksprojectHomePageTaskCreatePidRouteImport.update({
+    id: '/home/(tasks)/(project-HomePage)/task/create/$pid',
+    path: '/home/task/create/$pid',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/forgot-password': typeof authForgotPasswordRoute
@@ -69,6 +76,7 @@ export interface FileRoutesByFullPath {
   '/home': typeof HomeprojectIndexRoute
   '/home/edit/$pid': typeof HomeprojectEditPidRoute
   '/home/project/$pid': typeof HometasksprojectHomePageProjectPidRoute
+  '/home/task/create/$pid': typeof HometasksprojectHomePageTaskCreatePidRoute
 }
 export interface FileRoutesByTo {
   '/forgot-password': typeof authForgotPasswordRoute
@@ -79,6 +87,7 @@ export interface FileRoutesByTo {
   '/home': typeof HomeprojectIndexRoute
   '/home/edit/$pid': typeof HomeprojectEditPidRoute
   '/home/project/$pid': typeof HometasksprojectHomePageProjectPidRoute
+  '/home/task/create/$pid': typeof HometasksprojectHomePageTaskCreatePidRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -90,6 +99,7 @@ export interface FileRoutesById {
   '/home/(project)/': typeof HomeprojectIndexRoute
   '/home/(project)/edit/$pid': typeof HomeprojectEditPidRoute
   '/home/(tasks)/(project-HomePage)/project/$pid': typeof HometasksprojectHomePageProjectPidRoute
+  '/home/(tasks)/(project-HomePage)/task/create/$pid': typeof HometasksprojectHomePageTaskCreatePidRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -102,6 +112,7 @@ export interface FileRouteTypes {
     | '/home'
     | '/home/edit/$pid'
     | '/home/project/$pid'
+    | '/home/task/create/$pid'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/forgot-password'
@@ -112,6 +123,7 @@ export interface FileRouteTypes {
     | '/home'
     | '/home/edit/$pid'
     | '/home/project/$pid'
+    | '/home/task/create/$pid'
   id:
     | '__root__'
     | '/(auth)/forgot-password'
@@ -122,6 +134,7 @@ export interface FileRouteTypes {
     | '/home/(project)/'
     | '/home/(project)/edit/$pid'
     | '/home/(tasks)/(project-HomePage)/project/$pid'
+    | '/home/(tasks)/(project-HomePage)/task/create/$pid'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -133,6 +146,7 @@ export interface RootRouteChildren {
   HomeprojectIndexRoute: typeof HomeprojectIndexRoute
   HomeprojectEditPidRoute: typeof HomeprojectEditPidRoute
   HometasksprojectHomePageProjectPidRoute: typeof HometasksprojectHomePageProjectPidRoute
+  HometasksprojectHomePageTaskCreatePidRoute: typeof HometasksprojectHomePageTaskCreatePidRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -193,6 +207,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HometasksprojectHomePageProjectPidRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/home/(tasks)/(project-HomePage)/task/create/$pid': {
+      id: '/home/(tasks)/(project-HomePage)/task/create/$pid'
+      path: '/home/task/create/$pid'
+      fullPath: '/home/task/create/$pid'
+      preLoaderRoute: typeof HometasksprojectHomePageTaskCreatePidRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -206,6 +227,8 @@ const rootRouteChildren: RootRouteChildren = {
   HomeprojectEditPidRoute: HomeprojectEditPidRoute,
   HometasksprojectHomePageProjectPidRoute:
     HometasksprojectHomePageProjectPidRoute,
+  HometasksprojectHomePageTaskCreatePidRoute:
+    HometasksprojectHomePageTaskCreatePidRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

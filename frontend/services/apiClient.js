@@ -103,6 +103,27 @@ class ApiClient {
       method: "DELETE",
     });
   }
+
+  // Task endpoints
+  async getAllProjectMembersDetails(projectID) {
+    return this.customFetch(`/task/create-task/${projectID}`, {
+      method: "GET",
+    });
+  }
+
+  async createTask(title, description, assignedTo, status, projectID) {
+    return this.customFetch(`/task/create-task/${projectID}`, {
+      method: "POST",
+      body: JSON.stringify({ title, description, assignedTo, status }),
+    });
+  }
+
+  async quickUpdateState(taskId, status) {
+    return this.customFetch(`/task/quick-change/${taskId}`, {
+      method: "PUT",
+      body: JSON.stringify({ status }),
+    });
+  }
 }
 
 const apiClient = new ApiClient();
