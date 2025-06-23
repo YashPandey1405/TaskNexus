@@ -47,6 +47,10 @@ function RouteComponent() {
     getAllProjects();
   }, [router, isLoggedInZustand]);
 
+  function handleViewClick(projectID) {
+    router.navigate({ to: `/home/project/${projectID}` });
+  }
+
   function handleEditClick(projectID) {
     router.navigate({ to: `/home/edit/${projectID}` });
   }
@@ -155,7 +159,12 @@ function RouteComponent() {
                     </div>
                     <div className="card-footer bg-transparent border-0 d-flex gap-2">
                       {/* View - keep as is */}
-                      <button className="btn btn-warning w-100">View</button>
+                      <button
+                        className="btn btn-warning w-100"
+                        onClick={() => handleViewClick(item.project._id)}
+                      >
+                        View
+                      </button>
 
                       {/* Edit - switch to btn-primary (a calmer but bold blue) */}
                       <button
