@@ -9,33 +9,82 @@ import { Task } from "../models/task.models.js";
 import { SubTask } from "../models/subtask.models.js";
 
 const getTasks = asyncHandler(async (req, res) => {
+  // Extracting projectID from the request parameters....
+  const projectID = req.params.projectID;
+  console.log("projectID: ", projectID);
+
+  // Validate the projectID format.....
+  if (!mongoose.isValidObjectId(projectID)) {
+    throw new ApiError(400, "Invalid project ID format");
+  }
+
   // req.user is Available Due To The VerifyJWT Middleware Used before this Controller...
-  const userID = req.user._id;
-  console.log("userID: ", userID);
+  // const userID = req.user._id;
+  // console.log("userID: ", userID);
   try {
-    // Search Tasks Assgined To The Current Logged In user...
-    const currentUser_TasksAssignedToUser = await Task.find({
-      assignedTo: userID,
-    }).populate("project", "name description");
+    console.log("1");
+    // 1. Get tasks assigned in the current project
+    const currentProject_TasksAssigned = await Task.find({
+      project: projectID,
+    })
+      .populate("assignedTo", "username email")
+      .populate("assignedBy", "username email")
+      .lean();
 
-    // Search Tasks Assgined By The Current Logged In user...
-    const currentUser_TasksAssignedByUser = await Task.find({
-      assignedBy: userID,
-    }).populate("project", "name description");
+    console.log("currentProject_TasksAssigned: ", currentProject_TasksAssigned);
 
+    console.log("2");
     // When No Task Are Found From The Database....
-    if (!currentUser_TasksAssignedToUser || !currentUser_TasksAssignedByUser) {
+    if (!currentProject_TasksAssigned) {
       throw new ApiError(404, "Tasks Not Found");
     }
 
+    console.log("3");
+    // 2. Add subtask count to each task
+    await Promise.all(
+      currentProject_TasksAssigned.map(async (task) => {
+        const totalSubTasksInTask = await SubTask.countDocuments({
+          task: task._id,
+        });
+        task.subTask = {
+          totalSubTasksInTask,
+        };
+      }),
+    );
+
+    console.log("4");
+    // 3. Get total users in the project
+    const totalUsersInTheProject = await ProjectMember.countDocuments({
+      project: projectID,
+    });
+
+    console.log("5");
+    // 4. Get project admins
+    const projectAdmins = await ProjectMember.findOne({
+      project: projectID,
+      role: "project_admin",
+    })
+      .populate("user", "username email")
+      .populate("project", "name description");
+
+    console.log("6");
+    // 5. Get global admins
+    const admins = await ProjectMember.find({
+      project: projectID,
+      role: "admin",
+    }).populate("user", "username email");
+
+    console.log("7");
     // Set cookies and redirect
     const response = new ApiResponse(
       200,
       {
-        AssignedToUser: currentUser_TasksAssignedToUser,
-        AssignedByUser: currentUser_TasksAssignedByUser,
+        tasks: currentProject_TasksAssigned,
+        projectTotalUsers: totalUsersInTheProject,
+        projectCreator: projectAdmins,
+        projectAdmins: admins,
       },
-      "All Assigned Tasks To currectUser Returned From TaskNexus platform",
+      "All Assigned Tasks To Project Returned From TaskNexus platform",
     );
 
     // Send All Projects To The Frontend....

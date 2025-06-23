@@ -92,9 +92,9 @@ class ApiClient {
     });
   }
 
-  async updateProject(projectID) {
-    return this.customFetch(`/project/${projectID}`, {
-      method: "DELETE",
+  async getAllTasksOfProject(projectID) {
+    return this.customFetch(`/task/get-tasks/project/${projectID}`, {
+      method: "GET",
     });
   }
 

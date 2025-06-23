@@ -28,7 +28,7 @@ import { Router } from "express";
 
 const router = Router();
 
-router.route("/get-tasks").get(verifyJWT, getTasks);
+router.route("/get-tasks/project/:projectID").get(verifyJWT, getTasks);
 router.route("/get-tasks/:taskID").get(verifyJWT, getTaskById);
 
 // ["admin", "project_admin"] Are Allowed To Create An Task Of An Project.....
