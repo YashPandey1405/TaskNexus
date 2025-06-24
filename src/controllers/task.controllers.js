@@ -124,6 +124,18 @@ const getTaskById = asyncHandler(async (req, res) => {
       throw new ApiError(404, "Task Not Found");
     }
 
+    // To Get The Task Creator Role In The Current Project....
+    const assignedByUserRole = await ProjectMember.findOne({
+      user: currentUserTask.assignedBy._id,
+      project: currentUserTask.project._id,
+    }).select("role");
+
+    // To Get The Task Assignee Role In The Current Project....
+    const assignedToUserRole = await ProjectMember.findOne({
+      user: currentUserTask.assignedTo._id,
+      project: currentUserTask.project._id,
+    }).select("role");
+
     const currentLoggedInUserDetails = await ProjectMember.findOne({
       user: userID,
       project: currentUserTask.project,
@@ -134,6 +146,8 @@ const getTaskById = asyncHandler(async (req, res) => {
       200,
       {
         currentUserTask: currentUserTask,
+        assignedByUserRole: assignedByUserRole,
+        assignedToUserRole: assignedToUserRole,
         currentLoggedInUserDetails: currentLoggedInUserDetails,
       },
       "Requested Task Sucsessfully Returned From TaskNexus platform",
@@ -368,6 +382,7 @@ const updateTask = asyncHandler(async (req, res) => {
     );
   }
   try {
+    console.log(1);
     // Find the task by ID and update it
     const updatedTask = await Task.findByIdAndUpdate(
       taskID,
@@ -380,11 +395,13 @@ const updateTask = asyncHandler(async (req, res) => {
       { new: true }, // To return the updated document
     ).populate("project", "name description");
 
+    console.log(2);
     // When No Task Are Found From The Database....
     if (!updatedTask) {
       throw new ApiError(404, "Task Not Found");
     }
 
+    console.log(3);
     // Set cookies and redirect
     const response = new ApiResponse(
       200,

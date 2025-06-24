@@ -27,7 +27,8 @@ function RouteComponent() {
   const [data, setData] = useState(null);
   const [currentUserDetails, setcurrentUserDetails] = useState(null);
   const [showAlert, setShowAlert] = useState(true);
-  const [isTaskCreated, setisTaskCreated] = useState(false);
+  const [isTaskUpdated, setisTaskUpdated] = useState(false);
+  const [projectID, setProjectID] = useState(null);
 
   const isLoggedInZustand = authStore((state) => state.isLoggedIn);
   const loggedInUserIdZudtand = authStore((state) => state.loggedInUserId);
@@ -44,16 +45,40 @@ function RouteComponent() {
         const response = await apiClient.getTaskByID(tid);
         setcurrentUserDetails(response);
 
-        // Only ["admin", "project_admin"] Are Allowed To Create An Task Of An Project.....
-        // if (response?.data?.currentUserDetails?.role === "member") {
-        //   console.log("User is a member, redirecting to project home page...");
-        //   router.navigate({ to: `/home/project/${pid}` });
-        //   return; // stop further execution
-        // }
+        // Only Task Creator & "project_admin" Are Allowed To Edit An Task Of An Project.....
+        if (
+          response?.data?.currentUserTask?.assignedBy?._id !=
+            loggedInUserIdZudtand ||
+          response?.currentLoggedInUserDetails?.role === "project_admin"
+        ) {
+          console.log("You Are Not Allowed To Change The Task");
+          router.navigate({ to: `/home` });
+          return; // stop further execution
+        }
 
         if (response.success) {
-          formData.title = response?.data?.currentUserTask?.title;
-          formData.description = response?.data?.currentUserTask?.description;
+          const responseData = response?.data;
+
+          // Set The Project ID Which Will Be Used While reDirect.....
+          setProjectID(responseData?.currentUserTask?.project?._id);
+
+          const assignedByUserName =
+            responseData?.currentUserTask?.assignedBy?._id ==
+            loggedInUserIdZudtand
+              ? "You"
+              : responseData?.currentUserTask?.assignedBy?.username;
+
+          const assignedToUserName =
+            responseData?.currentUserTask?.assignedTo?._id ==
+            loggedInUserIdZudtand
+              ? "You"
+              : responseData?.currentUserTask?.assignedTo?.username;
+
+          formData.title = responseData?.currentUserTask?.title;
+          formData.description = responseData?.currentUserTask?.description;
+          formData.assignedBy = `${assignedByUserName} (${responseData?.assignedByUserRole?.role})`;
+          formData.assignedTo = `${assignedToUserName} (${responseData?.assignedToUserRole?.role})`;
+          formData.status = responseData?.currentUserTask?.status;
           console.log("Member details fetched successfully:", response);
         }
       } catch (error) {
@@ -67,6 +92,8 @@ function RouteComponent() {
     getTheTaskDetails();
   }, [router, isLoggedInZustand]);
 
+  console.log("The Current User Id : ", loggedInUserIdZudtand);
+
   const handleChange = (e) => {
     setFormData((prev) => ({
       ...prev,
@@ -76,34 +103,35 @@ function RouteComponent() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setisTaskCreated(true);
+    setisTaskUpdated(true);
     setShowAlert(true);
 
     try {
       console.log("Form Data before API call:", formData);
-      const projectUpdation = await apiClient.createTask(
+      const taskUpdated = await apiClient.updateTask(
         formData.title,
         formData.description,
-        formData.assignedTo,
         formData.status,
-        pid,
+        tid,
       );
-      setData(projectUpdation);
-      console.log("Project Updated response:", projectUpdation);
+      console.log("1");
+      setData(taskUpdated);
+      console.log("Task Updated response:", taskUpdated);
 
-      if (projectUpdation.success) {
+      if (taskUpdated.success) {
+        console.log("1");
         setTimeout(() => {
-          router.navigate({ to: `/home/project/${pid}` });
+          router.navigate({ to: `/home/project/${projectID}` });
         }, 3000);
       }
     } catch (error) {
       setData({
         success: false,
-        message: "Task Creation failed in Frontend. Try again later.",
+        message: "Task Updation failed in Frontend. Try again later.",
       });
     }
 
-    setisTaskCreated(false);
+    setisTaskUpdated(false);
   };
 
   return (
@@ -178,38 +206,38 @@ function RouteComponent() {
                 ></textarea>
               </div>
 
-              {/* Assigned To Dropdown */}
-              {/* <div className="mb-3">
-                <label htmlFor="assignedTo" className="form-label">
-                  Assign Task To
+              {/* AssignedBy User Field */}
+              <div className="mb-3">
+                <label htmlFor="assignedBy" className="form-label">
+                  Task Creator
                 </label>
-                <select
-                  className="form-select bg-dark text-light border-secondary"
+                <input
+                  type="text"
+                  className="form-control bg-dark text-light border-secondary"
+                  id="assignedBy"
+                  name="assignedBy"
+                  value={formData.assignedBy}
+                  disabled
+                ></input>
+              </div>
+
+              {/* AssignedTo User Field */}
+              <div className="mb-3">
+                <label htmlFor="assignedTo" className="form-label">
+                  Task Assignee
+                </label>
+                <input
+                  type="text"
+                  className="form-control bg-dark text-light border-secondary"
                   id="assignedTo"
                   name="assignedTo"
                   value={formData.assignedTo}
-                  onChange={handleChange}
-                  required
-                >
-                  <option value="" disabled>
-                    Select a member
-                  </option>
-                  {ProjectMemberList.map((member) => (
-                    <option key={member.id} value={member.id}>
-                      {member.username} ({member.role})
-                    </option>
-                  ))}
-                </select>
-                <div className="form-text text-light mt-1">
-                  Only <strong>admin</strong> and <strong>project_admin</strong>{" "}
-                  can create tasks. <br />
-                  <strong>Admin</strong> cannot assign tasks to{" "}
-                  <strong>project_admin</strong>, but vice versa is allowed.
-                </div>
-              </div> */}
+                  disabled
+                ></input>
+              </div>
 
               {/* Current Status Field */}
-              {/* <div className="mb-3">
+              <div className="mb-3">
                 <label htmlFor="status" className="form-label">
                   Current Status of the Task
                 </label>
@@ -225,15 +253,15 @@ function RouteComponent() {
                   <option value="in_progress">In Progress</option>
                   <option value="done">Done</option>
                 </select>
-              </div> */}
+              </div>
 
               {/* Submit Button */}
               <button
                 type="submit"
                 className="btn btn-primary w-100"
-                disabled={isTaskCreated}
+                disabled={isTaskUpdated}
               >
-                {isTaskCreated ? "Creating Task..." : "Create Task"}
+                {isTaskUpdated ? "Updating Task..." : "Update Task"}
               </button>
             </form>
           </div>

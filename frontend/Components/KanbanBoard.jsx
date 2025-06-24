@@ -43,6 +43,25 @@ const TaskCard = ({ id, data, isDragDisabled }) => {
     router.navigate({ to: `/home/task/update/${taskID}` });
   }
 
+  // Function To Handle The Edit Of The Task Functionality.....
+  async function handleDeleteTask(taskID) {
+    try {
+      const teskDeleted = await apiClient.deleteTask(taskID);
+      console.log("Task Updated response:", teskDeleted);
+
+      if (teskDeleted.success) {
+        setTimeout(() => {
+          window.location.reload();
+        }, 3000);
+      }
+    } catch (error) {
+      setData({
+        success: false,
+        message: "Task Deletion failed in Frontend. Try again later.",
+      });
+    }
+  }
+
   return (
     <div
       ref={setNodeRef}
@@ -143,6 +162,13 @@ const TaskCard = ({ id, data, isDragDisabled }) => {
               }
               data-bs-toggle="tooltip"
               title="Delete Task"
+              onClick={() => {
+                if (
+                  window.confirm("Are you sure you want to delete this task?")
+                ) {
+                  handleDeleteTask(id);
+                }
+              }}
             >
               <i className="fas fa-trash-alt"></i>
               Delete

@@ -130,6 +130,19 @@ class ApiClient {
       body: JSON.stringify({ status }),
     });
   }
+
+  async updateTask(title, description, status, taskId) {
+    return this.customFetch(`/task/${taskId}`, {
+      method: "PUT",
+      body: JSON.stringify({ title, description, status }),
+    });
+  }
+
+  async deleteTask(taskId) {
+    return this.customFetch(`/task/${taskId}`, {
+      method: "DELETE",
+    });
+  }
 }
 
 const apiClient = new ApiClient();
