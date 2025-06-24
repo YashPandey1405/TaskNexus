@@ -87,7 +87,12 @@ function RouteComponent() {
               year: "numeric",
             })}
           </span>
-          <button className="btn btn-primary ms-3" onClick={handleCreateTask}>
+          {/* <p>{apiresponse?.currentUser?.role}</p> */}
+          <button
+            className="btn btn-primary ms-3"
+            onClick={handleCreateTask}
+            disabled={apiresponse?.currentUser?.role === "member"}
+          >
             Create Task
           </button>
         </div>
@@ -121,7 +126,10 @@ function RouteComponent() {
       </div>
 
       <div className="flex-grow-1">
-        <KanbanBoard KanbanBoardTaskData={apiresponse?.tasks} />
+        <KanbanBoard
+          KanbanBoardTaskData={apiresponse?.tasks}
+          currentUser={apiresponse?.currentUser}
+        />
       </div>
     </div>
   );

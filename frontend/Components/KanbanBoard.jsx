@@ -15,78 +15,185 @@ import {
   arrayMove,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { Tooltip } from "bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 import apiClient from "../services/apiClient";
+import { compareSync } from "bcryptjs";
 
 // The Component Which Will Actually Display All The Tasks On The Respective Kanban Board......
-const TaskCard = ({ id, data }) => {
+const TaskCard = ({ id, data, isDragDisabled }) => {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({
       id,
-      data: { ...data }, // ✅ spread all task data
+      disabled: isDragDisabled, // 🚫 disable dragging if condition met
+      data: { ...data },
     });
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    cursor: "grab",
+    cursor: isDragDisabled ? "default" : "grab", // 👈 visual feedback
   };
 
   return (
     <div
       ref={setNodeRef}
-      {...attributes}
-      {...listeners}
-      style={style}
-      className="card mb-2 shadow-sm bg-secondary text-light border-light"
+      {...(!isDragDisabled && attributes)} // 👈 only spread if not disabled
+      {...(!isDragDisabled && listeners)} // 👈 only spread if not disabled
+      className="card mb-2 shadow-sm text-dark border-0 text-dark"
+      style={{ ...style, backgroundColor: "#7a828a" }}
     >
-      <div className="card-body p-1 mx-2 my-2">
-        <span className="fw-semibold">
-          <p>{data.title}</p>
-          {/* <p>{id}, Hello Yash Pandey Here</p>
-          <p>{id}, Hello Yash Pandey Here</p> */}
-        </span>
+      <div className="card-body px-3 py-2">
+        {/* Title + Subtask Count */}
+        <div className="d-flex justify-content-between align-items-center flex-wrap mb-1">
+          <p className="fw-semibold mb-0 text-light text-truncate w-75">
+            {data?.title}
+          </p>
+          <span
+            className="text-info small d-flex align-items-center mt-1 mt-sm-0"
+            data-bs-toggle="tooltip"
+            title="Total Subtasks"
+          >
+            <i className="fas fa-layer-group me-1"></i>
+            {data?.subTask?.totalSubTasksInTask ?? 0}
+          </span>
+        </div>
+
+        {/* Description */}
+        <p className="text-light-50 small mb-2 text-wrap">
+          {data?.description}
+          {/* {data?.currentUser} */}
+        </p>
+
+        {/* Assigned Info */}
+        <div className="d-flex flex-wrap align-items-center small text-light mb-1">
+          <i
+            className="fas fa-user-edit me-1 fs-6"
+            style={{ color: "#2c3e50" }}
+            data-bs-toggle="tooltip"
+            title="Task Owner & Assignee"
+          ></i>
+          <span className="text-wrap">
+            Assigned by{" "}
+            <strong className="text-info fw-semibold">
+              {data?.assignedBy?._id === data?.currentUser
+                ? "You"
+                : data?.assignedBy?.username}
+            </strong>{" "}
+            to{" "}
+            <strong style={{ color: "#a3e635", fontWeight: "600" }}>
+              {data?.assignedTo?._id === data?.currentUser
+                ? "You"
+                : data?.assignedTo?.username}
+            </strong>
+          </span>
+        </div>
+
+        {/* If The Current User Is Neither Task Creator Nor Project Admin */}
+        {(data?.createdBy?._id === data?.currentUser ||
+          data?.currentUserRole !== "project_admin") && (
+          <p className="text-warning small">
+            <i
+              className="fas fa-lock me-2"
+              data-bs-toggle="tooltip"
+              data-bs-placement="top"
+              title="Permission restricted"
+            ></i>
+            Only creator/Admin can move, edit, or delete tasks
+          </p>
+        )}
+
+        {/* Code Section To Show Edit And Delete Button along with the Task Creation time */}
+        <div className="d-flex justify-content-between align-items-center mt-2">
+          {/* Edit & Delete Buttons */}
+          <div className="d-flex gap-2">
+            <button
+              type="button"
+              className="btn btn-sm btn-outline-info rounded-pill d-flex align-items-center gap-1"
+              disabled={
+                !(
+                  data?.createdBy?._id === data?.currentUser ||
+                  data?.currentUserRole === "project_admin"
+                )
+              }
+              data-bs-toggle="tooltip"
+              title="Edit Task"
+            >
+              <i className="fas fa-pen"></i>
+              Edit
+            </button>
+
+            <button
+              type="button"
+              className="btn btn-sm btn-outline-danger rounded-pill d-flex align-items-center gap-1"
+              disabled={
+                !(
+                  data?.createdBy?._id === data?.currentUser ||
+                  data?.currentUserRole === "project_admin"
+                )
+              }
+              data-bs-toggle="tooltip"
+              title="Delete Task"
+            >
+              <i className="fas fa-trash-alt"></i>
+              Delete
+            </button>
+          </div>
+
+          {/* Created Time */}
+          <div
+            className="small text-nowrap"
+            data-bs-toggle="tooltip"
+            title="Created On"
+            style={{ color: "#333333" }}
+          >
+            <i className="fas fa-clock me-1"></i>
+            {new Date(data?.createdAt).toLocaleDateString("en-GB", {
+              day: "2-digit",
+              month: "long",
+              year: "numeric",
+            })}{" "}
+            at{" "}
+            {new Date(data?.createdAt).toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+              hour12: true,
+            })}
+          </div>
+        </div>
       </div>
     </div>
   );
 };
 
 // The Section That Represents Each Column In The Kanban Board......
-const KanbanColumn = ({ columnId, tasks }) => {
-  // Register the column as a drop zone
+const KanbanColumn = ({ columnId, tasks, shouldDisableDrag }) => {
   const { setNodeRef, isOver } = useDroppable({
     id: columnId,
     data: { isColumn: true },
   });
 
-  // The UI Which Is Been Displayed For Each Column In The Kanban Board......
-  // It uses the SortableContext to make the tasks sortable within the column.
-  // If the column is empty, it shows a placeholder message.
   return (
-    // This connects the column to the dnd-kit's internal drag-and-drop system.
     <div
       ref={setNodeRef}
       className={`flex-grow-1 ${isOver ? `bg-dark-subtle border-light` : ``}`}
       style={{ minHeight: "70vh" }}
     >
-      {/* This is a component from @dnd-kit/sortable that wraps all sortable items inside a droppable zone.*/}
-      {/*items={tasks} tells dnd-kit what order these tasks are currently in.*/}
-      {/*strategy={verticalListSortingStrategy} means the tasks should be treated as a vertical list when sorting. */}
       <SortableContext items={tasks} strategy={verticalListSortingStrategy}>
-        {/* If there are tasks, map over them and render a TaskCard for each one. */}
         {tasks.length > 0 ? (
           <div className="d-flex flex-column gap-2">
-            {/* Your Actual Block Which Loads The Task On The Kanban Board..... */}
             {tasks.map((task) => (
-              // key={task}: a unique identifier for React's internal list rendering optimization
-              // id={task}: used by useSortable({ id }) inside TaskCard to make it draggable.
-              <TaskCard key={task.id} id={task.id} data={task.data} />
+              <TaskCard
+                key={task.id}
+                id={task.id}
+                data={task.data}
+                isDragDisabled={shouldDisableDrag(task)}
+              />
             ))}
           </div>
         ) : (
           <div className="h-100 d-flex align-items-center justify-content-center">
-            {/* UI To Display Empty Board When there Are No Tasks */}
             <em className="text-secondary">Drop tasks here</em>
           </div>
         )}
@@ -95,9 +202,11 @@ const KanbanColumn = ({ columnId, tasks }) => {
   );
 };
 
-const KanbanBoard = ({ KanbanBoardTaskData }) => {
+const KanbanBoard = ({ KanbanBoardTaskData, currentUser }) => {
   const [updationresponse, setupdationresponse] = useState(null);
   const [updating, setupdating] = useState(false);
+
+  console.log("In Kanban Block , Current User:", currentUser);
 
   // 🎯 Local state to manage columns and currently active (dragging) task
   const [columns, setColumns] = useState({
@@ -117,6 +226,11 @@ const KanbanBoard = ({ KanbanBoardTaskData }) => {
       done: [],
     };
 
+    const tooltipTriggerList = document.querySelectorAll(
+      '[data-bs-toggle="tooltip"]',
+    );
+    tooltipTriggerList.forEach((el) => new Tooltip(el));
+
     // 🧹 Format tasks into expected structure and sort into columns
     KanbanBoardTaskData.forEach((task) => {
       const formattedTask = {
@@ -128,6 +242,8 @@ const KanbanBoard = ({ KanbanBoardTaskData }) => {
           assignedTo: task?.assignedTo,
           assignedBy: task?.assignedBy,
           status: task?.status,
+          currentUser: currentUser?.user?._id,
+          currentUserRole: currentUser?.role,
           createdAt: task?.createdAt,
           subTask: task?.subTask?.totalSubTasksInTask || 0,
         },
@@ -142,7 +258,7 @@ const KanbanBoard = ({ KanbanBoardTaskData }) => {
 
     // 🪄 Update local state with newly structured data
     setColumns(KanbanBoardData);
-  }, [KanbanBoardTaskData]);
+  }, [KanbanBoardTaskData, currentUser]);
 
   // 🧲 Configure drag sensors (trigger drag only after pointer moves 5px)
   const sensors = useSensors(
@@ -159,6 +275,27 @@ const KanbanBoard = ({ KanbanBoardTaskData }) => {
 
   // 🎬 When dragging starts, set the activeTask to display a floating preview
   const handleDragStart = (event) => {
+    const taskId = event.active.id;
+    const fromCol = findTaskColumn(taskId);
+    const task = columns[fromCol]?.find((t) => t.id === taskId);
+
+    console.log("Dragging task:", task);
+    const assignedByUserID = task?.data?.assignedBy?._id;
+    const currentUserID = currentUser?.user?._id;
+
+    console.log("Assigned By User ID:", assignedByUserID);
+    console.log("Current User ID:", currentUserID);
+
+    // 🛑 Your custom condition here (example: prevent dragging if task is done)
+    if (
+      assignedByUserID !== currentUserID ||
+      currentUser?.role !== "project_admin"
+    ) {
+      // Cancel drag
+      event.active.data.current = null;
+      return;
+    }
+
     setActiveTask({
       id: event.active.id,
       title: event?.active?.data?.current?.title || "Untitled Task",
@@ -248,6 +385,17 @@ const KanbanBoard = ({ KanbanBoardTaskData }) => {
     }
   }
 
+  // Function To Only Allow Task Creator And Project Admin To Drag Tasks......
+  const shouldDisableDrag = (task) => {
+    const assignedByUserID = task?.data?.assignedBy?._id;
+    const currentUserID = currentUser?.user?._id;
+
+    return (
+      assignedByUserID !== currentUserID ||
+      currentUser?.role !== "project_admin"
+    );
+  };
+
   // 🎨 Column headers config with Bootstrap classes
   const columnConfig = {
     todo: { title: "To Do", color: "bg-primary" },
@@ -296,7 +444,11 @@ const KanbanBoard = ({ KanbanBoardTaskData }) => {
                 </div>
                 <div className="card-body p-2 d-flex flex-column mt-2 px-2">
                   {/* 🧩 Pass individual task lists to KanbanColumn */}
-                  <KanbanColumn columnId={columnId} tasks={tasks} />
+                  <KanbanColumn
+                    columnId={columnId}
+                    tasks={tasks}
+                    shouldDisableDrag={shouldDisableDrag}
+                  />
                 </div>
               </div>
             </div>

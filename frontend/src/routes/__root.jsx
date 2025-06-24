@@ -26,8 +26,6 @@ function RootComponent() {
           router.navigate({ to: "/login" });
           return; // stop further execution
         }
-        router.navigate({ to: "/home" });
-        return;
       } catch (error) {
         setData({
           success: false,
