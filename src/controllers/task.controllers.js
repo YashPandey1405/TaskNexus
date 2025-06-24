@@ -110,21 +110,32 @@ const getTasks = asyncHandler(async (req, res) => {
 const getTaskById = asyncHandler(async (req, res) => {
   const taskID = req.params.taskID;
   console.log("taskID: ", taskID);
-  try {
-    const currentUserTask = await Task.findById(taskID).populate(
-      "project",
-      "name description",
-    );
 
+  // req.user is Available Due To The VerifyJWT Middleware Used before this Controller...
+  const userID = req.user._id;
+  console.log("userID: ", userID);
+  try {
+    const currentUserTask = await Task.findById(taskID)
+      .populate("project", "name description")
+      .populate("assignedBy", "username email")
+      .populate("assignedTo", "username email");
     // When No Task Are Found From The Database....
     if (!currentUserTask) {
       throw new ApiError(404, "Task Not Found");
     }
 
+    const currentLoggedInUserDetails = await ProjectMember.findOne({
+      user: userID,
+      project: currentUserTask.project,
+    });
+
     // Set cookies and redirect
     const response = new ApiResponse(
       200,
-      currentUserTask,
+      {
+        currentUserTask: currentUserTask,
+        currentLoggedInUserDetails: currentLoggedInUserDetails,
+      },
       "Requested Task Sucsessfully Returned From TaskNexus platform",
     );
 

@@ -111,6 +111,12 @@ class ApiClient {
     });
   }
 
+  async getTaskByID(taskID) {
+    return this.customFetch(`/task/get-tasks/${taskID}`, {
+      method: "GET",
+    });
+  }
+
   async createTask(title, description, assignedTo, status, projectID) {
     return this.customFetch(`/task/create-task/${projectID}`, {
       method: "POST",

@@ -18,11 +18,13 @@ import { CSS } from "@dnd-kit/utilities";
 import { Tooltip } from "bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 
+import { useRouter, Link } from "@tanstack/react-router";
 import apiClient from "../services/apiClient";
 import { compareSync } from "bcryptjs";
 
 // The Component Which Will Actually Display All The Tasks On The Respective Kanban Board......
 const TaskCard = ({ id, data, isDragDisabled }) => {
+  const router = useRouter();
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({
       id,
@@ -35,6 +37,11 @@ const TaskCard = ({ id, data, isDragDisabled }) => {
     transition,
     cursor: isDragDisabled ? "default" : "grab", // 👈 visual feedback
   };
+
+  // Function To Handle The Edit Of The Task Functionality.....
+  function handleEditTask(taskID) {
+    router.navigate({ to: `/home/task/update/${taskID}` });
+  }
 
   return (
     <div
@@ -119,6 +126,7 @@ const TaskCard = ({ id, data, isDragDisabled }) => {
               }
               data-bs-toggle="tooltip"
               title="Edit Task"
+              onClick={() => handleEditTask(id)}
             >
               <i className="fas fa-pen"></i>
               Edit

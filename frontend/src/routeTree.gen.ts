@@ -17,6 +17,7 @@ import { Route as HomeprojectIndexRouteImport } from './routes/home/(project)/in
 import { Route as HomeprojectCreateRouteImport } from './routes/home/(project)/create'
 import { Route as HomeprojectEditPidRouteImport } from './routes/home/(project)/edit.$pid'
 import { Route as HometasksprojectHomePageProjectPidRouteImport } from './routes/home/(tasks)/(project-HomePage)/project.$pid'
+import { Route as HometasksprojectHomePageTaskUpdateTidRouteImport } from './routes/home/(tasks)/(project-HomePage)/task/update.$tid'
 import { Route as HometasksprojectHomePageTaskCreatePidRouteImport } from './routes/home/(tasks)/(project-HomePage)/task/create.$pid'
 
 const authSignupRoute = authSignupRouteImport.update({
@@ -60,6 +61,12 @@ const HometasksprojectHomePageProjectPidRoute =
     path: '/home/project/$pid',
     getParentRoute: () => rootRouteImport,
   } as any)
+const HometasksprojectHomePageTaskUpdateTidRoute =
+  HometasksprojectHomePageTaskUpdateTidRouteImport.update({
+    id: '/home/(tasks)/(project-HomePage)/task/update/$tid',
+    path: '/home/task/update/$tid',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const HometasksprojectHomePageTaskCreatePidRoute =
   HometasksprojectHomePageTaskCreatePidRouteImport.update({
     id: '/home/(tasks)/(project-HomePage)/task/create/$pid',
@@ -77,6 +84,7 @@ export interface FileRoutesByFullPath {
   '/home/edit/$pid': typeof HomeprojectEditPidRoute
   '/home/project/$pid': typeof HometasksprojectHomePageProjectPidRoute
   '/home/task/create/$pid': typeof HometasksprojectHomePageTaskCreatePidRoute
+  '/home/task/update/$tid': typeof HometasksprojectHomePageTaskUpdateTidRoute
 }
 export interface FileRoutesByTo {
   '/forgot-password': typeof authForgotPasswordRoute
@@ -88,6 +96,7 @@ export interface FileRoutesByTo {
   '/home/edit/$pid': typeof HomeprojectEditPidRoute
   '/home/project/$pid': typeof HometasksprojectHomePageProjectPidRoute
   '/home/task/create/$pid': typeof HometasksprojectHomePageTaskCreatePidRoute
+  '/home/task/update/$tid': typeof HometasksprojectHomePageTaskUpdateTidRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -100,6 +109,7 @@ export interface FileRoutesById {
   '/home/(project)/edit/$pid': typeof HomeprojectEditPidRoute
   '/home/(tasks)/(project-HomePage)/project/$pid': typeof HometasksprojectHomePageProjectPidRoute
   '/home/(tasks)/(project-HomePage)/task/create/$pid': typeof HometasksprojectHomePageTaskCreatePidRoute
+  '/home/(tasks)/(project-HomePage)/task/update/$tid': typeof HometasksprojectHomePageTaskUpdateTidRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -113,6 +123,7 @@ export interface FileRouteTypes {
     | '/home/edit/$pid'
     | '/home/project/$pid'
     | '/home/task/create/$pid'
+    | '/home/task/update/$tid'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/forgot-password'
@@ -124,6 +135,7 @@ export interface FileRouteTypes {
     | '/home/edit/$pid'
     | '/home/project/$pid'
     | '/home/task/create/$pid'
+    | '/home/task/update/$tid'
   id:
     | '__root__'
     | '/(auth)/forgot-password'
@@ -135,6 +147,7 @@ export interface FileRouteTypes {
     | '/home/(project)/edit/$pid'
     | '/home/(tasks)/(project-HomePage)/project/$pid'
     | '/home/(tasks)/(project-HomePage)/task/create/$pid'
+    | '/home/(tasks)/(project-HomePage)/task/update/$tid'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -147,6 +160,7 @@ export interface RootRouteChildren {
   HomeprojectEditPidRoute: typeof HomeprojectEditPidRoute
   HometasksprojectHomePageProjectPidRoute: typeof HometasksprojectHomePageProjectPidRoute
   HometasksprojectHomePageTaskCreatePidRoute: typeof HometasksprojectHomePageTaskCreatePidRoute
+  HometasksprojectHomePageTaskUpdateTidRoute: typeof HometasksprojectHomePageTaskUpdateTidRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -207,6 +221,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HometasksprojectHomePageProjectPidRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/home/(tasks)/(project-HomePage)/task/update/$tid': {
+      id: '/home/(tasks)/(project-HomePage)/task/update/$tid'
+      path: '/home/task/update/$tid'
+      fullPath: '/home/task/update/$tid'
+      preLoaderRoute: typeof HometasksprojectHomePageTaskUpdateTidRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/home/(tasks)/(project-HomePage)/task/create/$pid': {
       id: '/home/(tasks)/(project-HomePage)/task/create/$pid'
       path: '/home/task/create/$pid'
@@ -229,6 +250,8 @@ const rootRouteChildren: RootRouteChildren = {
     HometasksprojectHomePageProjectPidRoute,
   HometasksprojectHomePageTaskCreatePidRoute:
     HometasksprojectHomePageTaskCreatePidRoute,
+  HometasksprojectHomePageTaskUpdateTidRoute:
+    HometasksprojectHomePageTaskUpdateTidRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
