@@ -7,6 +7,7 @@ import { Project } from "../models/project.models.js";
 import { ProjectMember } from "../models/projectmember.models.js";
 import { Task } from "../models/task.models.js";
 import { SubTask } from "../models/subtask.models.js";
+import { ProjectNote } from "../models/note.models.js";
 
 const getProjects = asyncHandler(async (req, res) => {
   // req.user is Available Due To The VerifyJWT Middleware Used before this Controller...
@@ -275,19 +276,45 @@ const getProjectMembers = asyncHandler(async (req, res) => {
   console.log("projectID: ", projectID);
 
   try {
+    console.log("1");
+    const currentProject = await Project.findById(projectID).populate(
+      "createdBy",
+      "username email",
+    );
+
+    console.log("2");
+    // When No Project Is Been Found.....
+    if (!currentProject) {
+      throw new ApiError(404, "No project  found");
+    }
+
+    console.log("3");
     const currentProjectMembers = await ProjectMember.find({
       project: projectID,
     }).populate("user", "username fullname avatar");
 
+    console.log("4");
     // When No Enteries Found From The Database....
     if (currentProjectMembers.length === 0) {
       throw new ApiError(404, "No project members found");
     }
 
+    console.log("5");
+    const [totalTasks, totalNotes] = await Promise.all([
+      Task.countDocuments({ project: projectID }),
+      ProjectNote.countDocuments({ project: projectID }),
+    ]);
+
+    console.log("6");
     // Set cookies and redirect
     const response = new ApiResponse(
       200,
-      currentProjectMembers,
+      {
+        currentProject,
+        currentProjectMembers,
+        totalTasks,
+        totalNotes,
+      },
       "All Project-Members successfully Shared From TaskNexus platform",
     );
 

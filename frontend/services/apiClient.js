@@ -143,6 +143,13 @@ class ApiClient {
       method: "DELETE",
     });
   }
+
+  // Project-Member Routes.....
+  async getProjectMembers(projectID) {
+    return this.customFetch(`/project/project-member/${projectID}`, {
+      method: "GET",
+    });
+  }
 }
 
 const apiClient = new ApiClient();

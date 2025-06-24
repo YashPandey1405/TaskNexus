@@ -63,6 +63,10 @@ function RouteComponent() {
     router.navigate({ to: `/home/task/create/${pid}` });
   }
 
+  function handleProjectMemberGET() {
+    router.navigate({ to: `/home/project-member/details/${pid}` });
+  }
+
   return (
     <div className="min-vh-100 bg-dark text-white d-flex flex-column">
       <Navbar />
@@ -94,6 +98,12 @@ function RouteComponent() {
             disabled={apiresponse?.currentUser?.role === "member"}
           >
             Create Task
+          </button>
+          <button
+            className="btn btn-primary ms-3"
+            onClick={handleProjectMemberGET}
+          >
+            View Project Member
           </button>
         </div>
 
