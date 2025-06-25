@@ -2,6 +2,7 @@ import { asyncHandler } from "../utils/async-handler.js";
 import { ApiError } from "../utils/api-error.js";
 import { ApiResponse } from "../utils/api-response.js";
 import { User } from "../models/user.models.js";
+import { uploadOnCloudinary } from "../utils/Cloudinary.js";
 import crypto from "crypto";
 
 // Importing the mailgen content and sendEmail function from utils/mail.js.....
@@ -33,12 +34,70 @@ const generateAccessAndRefereshTokens = async (userId) => {
   }
 };
 
+// Just To Learn How To Integrate Cloudinary And Multer In TaskNexus Project......
+const tempCheckRoute = asyncHandler(async (req, res) => {
+  try {
+    console.log("1");
+    // get data from request body
+    console.log("2");
+    const { email, username, fullname, password } = req.body;
+    console.log(req.body);
+    console.log("+++++++++++++++++++++++++++++++++++++++++++++++");
+    console.log(req.file);
+
+    const localFilePath = req.file?.path;
+    console.log("The Local Path Is ::: ", localFilePath);
+
+    let imageUrl = null;
+
+    if (localFilePath) {
+      console.log("The Control Reached Here");
+      const cloudinaryResult = await uploadOnCloudinary(localFilePath);
+      console.log("The Image Cloudinary Response Is ::: ", cloudinaryResult);
+
+      console.log(1);
+      if (!cloudinaryResult) {
+        return res.status(500).json({ message: "Failed to upload image" });
+      }
+
+      console.log(12);
+      imageUrl = cloudinaryResult.secure_url;
+    }
+    console.log("The Image Cloudinary URL Is ::: ", imageUrl);
+
+    const newUser = {
+      email,
+      username,
+      fullname,
+      imageUrl,
+    };
+
+    console.log("3");
+    // Set cookies and redirect
+    const response = new ApiResponse(
+      200,
+      newUser,
+      "Control Reached successful On TaskNexus Platform",
+    );
+
+    return res.json(response);
+  } catch (error) {
+    // Handle any errors that occur during user creation
+    throw new ApiError(500, "Internal server error", [
+      {
+        field: "server",
+        message: "Internal server error In The registerUser Controller",
+      },
+    ]);
+  }
+});
+
 const registerUser = asyncHandler(async (req, res) => {
   // get data from request body
   const { email, username, fullname, password } = req.body;
   console.log(req.body);
 
-  //validation
+  //validation Of The Input Fields....
   const errors = [];
   if (!email) errors.push({ field: "email", message: "Email is required" });
   if (!username)
@@ -53,12 +112,42 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new ApiError(400, "All fields are required", errors);
   }
 
+  // Get The Local Path Of The Image Uploaded By The Multer.....
+  const localFilePath = req.file?.path;
+  console.log("The Local Path Is ::: ", localFilePath);
+
+  // If The LocalPath Isn't Got Created , Throw Error....
+  if (!localFilePath) {
+    throw new ApiError(500, "File Not Got Uploaded On The Server", [
+      { field: "Image", message: "File Not Got Uploaded On The Server" },
+    ]);
+  }
+
+  // Variale Which Will Actually Hold An Cloudinary Public URL.....
+  let imageUrl = null;
+
+  // Now , We Will Upload On The Cloudinary Cloud Service.....
+  if (localFilePath) {
+    console.log("The Control Reached Here");
+    const cloudinaryResult = await uploadOnCloudinary(localFilePath);
+
+    if (!cloudinaryResult) {
+      return res.status(500).json({ message: "Failed to upload image" });
+    }
+
+    console.log("The URL Is Been Generated");
+    imageUrl = cloudinaryResult.secure_url;
+  }
+  console.log("The Image Cloudinary URL Is ::: ", imageUrl);
+
   try {
+    console.log("1");
     // Check if user already exists
     const existingUser = await User.findOne({
       $or: [{ email }, { username }],
     });
 
+    console.log("2");
     // If user already exists, throw an error.....
     if (existingUser) {
       if (existingUser.email === email) {
@@ -72,15 +161,21 @@ const registerUser = asyncHandler(async (req, res) => {
       }
     }
 
+    console.log("3");
     console.log("Creating new user...");
     // Creates a new User document & Saves it to your MongoDB database.
     // await newUser.save(); --> No need as it's already saved in the create method
     const newUser = await User.create({
-      email: email,
-      username: username,
-      fullname: fullname,
-      password: password,
+      email,
+      username,
+      fullname,
+      password,
+      avatar: {
+        url: imageUrl,
+      },
     });
+
+    console.log("4");
     console.log(newUser);
 
     // If the user is not created, throw an error.....
@@ -90,16 +185,19 @@ const registerUser = asyncHandler(async (req, res) => {
       ]);
     }
 
+    console.log("5");
     // Generate tokens
     const { accessToken, refreshToken } = await generateAccessAndRefereshTokens(
       newUser._id,
     );
 
+    console.log("6");
     // Get Above Created user info without password & refreshToken
     const loggedInUser = await User.findById(newUser._id).select(
       "-password -refreshToken",
     );
 
+    console.log("7");
     // Send verification email to the user.....
     const { hashedToken, unHashedToken, tokenExpiry } =
       loggedInUser.generateTemporaryToken();
@@ -119,11 +217,11 @@ const registerUser = asyncHandler(async (req, res) => {
     console.log("Mailgen Content Created : ", EmailVerification_MailgenContent);
 
     // Send the email To The User.....
-    await sendEmail({
-      email: loggedInUser.email, // receiver's email
-      subject: "Please Verify your email address", // subject line
-      mailgenContent: EmailVerification_MailgenContent, // Mailgen formatted content
-    });
+    // await sendEmail({
+    //   email: loggedInUser.email, // receiver's email
+    //   subject: "Please Verify your email address", // subject line
+    //   mailgenContent: EmailVerification_MailgenContent, // Mailgen formatted content
+    // });
     console.log("Email sent successfully");
 
     // Cookie options
@@ -752,4 +850,5 @@ export {
   resendEmailVerification,
   resetForgottenPassword,
   verifyEmail,
+  tempCheckRoute,
 };

@@ -47,7 +47,8 @@ function RouteComponent() {
 
       if (loginUser.success) {
         let userId = loginUser.data._id;
-        loginUserZustand(userId);
+        let userAvatorURl = loginUser.data.avatar?.url;
+        loginUserZustand(userId, userAvatorURl);
         console.log("User logged in:", authStore.getState());
 
         setTimeout(() => {

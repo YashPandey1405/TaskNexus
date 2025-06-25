@@ -13,10 +13,11 @@ class ApiClient {
       const headers = { ...this.defaultHeaders, ...options.headers };
 
       // // If the body is FormData, do not set Content-Type header manually
-      // if (options.body instanceof FormData) {
-      //   delete headers["Content-Type"]; // Let the browser handle Content-Type for FormData
-      //   // headers["Content-Type"] = "multipart/form-data"; // To Send 'multipart/form-data' To The Server......
-      // } else if (options.body) {
+      if (options.body instanceof FormData) {
+        delete headers["Content-Type"]; // Let the browser handle Content-Type for FormData
+        // headers["Content-Type"] = "multipart/form-data"; // To Send 'multipart/form-data' To The Server......
+      }
+      // else if (options.body) {
       //   headers["Content-Type"] = "application/json"; // Default to application/json if not FormData
       // }
 
@@ -39,16 +40,26 @@ class ApiClient {
 
   // Auth endpoints
 
-  async signup(email, username, fullname, password) {
-    return this.customFetch("/auth/register", {
-      method: "POST",
-      body: JSON.stringify({
-        email,
-        username,
-        fullname,
-        password,
-      }),
-    });
+  // This Is Just An Dummy Thing......
+  async signup(formData) {
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/auth/register`,
+        {
+          method: "POST",
+          body: formData, // 👈 formData contains both text and file fields
+          // ✅ Don't set headers — browser sets Content-Type correctly with boundary
+        },
+      );
+
+      const result = await response.json(); // 👈 parse the response body
+
+      console.log("Inside apiClient , The Response Is : ", result);
+      return result;
+    } catch (error) {
+      console.error("Signup error:", error);
+      throw error;
+    }
   }
 
   async login(email, username, password) {

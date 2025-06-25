@@ -1,5 +1,6 @@
 import {
   registerUser,
+  tempCheckRoute,
   loginUser,
   verifyEmail,
   logoutUser,
@@ -22,6 +23,7 @@ import {
 // Middlewares Import.....
 import { validate } from "../middlewares/validator.middlewares.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
+import upload from "../middlewares/multer.middlewares.js";
 
 import { Router } from "express";
 
@@ -31,7 +33,12 @@ const router = Router();
 router.route("/login").post(userLoginValidator(), validate, loginUser);
 router
   .route("/register")
-  .post(userRegistrationValidator(), validate, registerUser);
+  .post(
+    upload.single("profileImage"),
+    userRegistrationValidator(),
+    validate,
+    registerUser,
+  );
 
 router.route("/resend-token").get(refreshAccessToken);
 router.route("/verify-email/:token").get(verifyEmail);

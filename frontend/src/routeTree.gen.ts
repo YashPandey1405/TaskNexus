@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as authSignupRouteImport } from './routes/(auth)/signup'
+import { Route as authShowProfileRouteImport } from './routes/(auth)/showProfile'
 import { Route as authLogoutRouteImport } from './routes/(auth)/logout'
 import { Route as authLoginRouteImport } from './routes/(auth)/login'
 import { Route as authForgotPasswordRouteImport } from './routes/(auth)/forgot-password'
@@ -24,6 +25,11 @@ import { Route as HometasksprojectHomePageProjectMemberDetailsPidRouteImport } f
 const authSignupRoute = authSignupRouteImport.update({
   id: '/(auth)/signup',
   path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const authShowProfileRoute = authShowProfileRouteImport.update({
+  id: '/(auth)/showProfile',
+  path: '/showProfile',
   getParentRoute: () => rootRouteImport,
 } as any)
 const authLogoutRoute = authLogoutRouteImport.update({
@@ -85,6 +91,7 @@ export interface FileRoutesByFullPath {
   '/forgot-password': typeof authForgotPasswordRoute
   '/login': typeof authLoginRoute
   '/logout': typeof authLogoutRoute
+  '/showProfile': typeof authShowProfileRoute
   '/signup': typeof authSignupRoute
   '/home/create': typeof HomeprojectCreateRoute
   '/home': typeof HomeprojectIndexRoute
@@ -98,6 +105,7 @@ export interface FileRoutesByTo {
   '/forgot-password': typeof authForgotPasswordRoute
   '/login': typeof authLoginRoute
   '/logout': typeof authLogoutRoute
+  '/showProfile': typeof authShowProfileRoute
   '/signup': typeof authSignupRoute
   '/home/create': typeof HomeprojectCreateRoute
   '/home': typeof HomeprojectIndexRoute
@@ -112,6 +120,7 @@ export interface FileRoutesById {
   '/(auth)/forgot-password': typeof authForgotPasswordRoute
   '/(auth)/login': typeof authLoginRoute
   '/(auth)/logout': typeof authLogoutRoute
+  '/(auth)/showProfile': typeof authShowProfileRoute
   '/(auth)/signup': typeof authSignupRoute
   '/home/(project)/create': typeof HomeprojectCreateRoute
   '/home/(project)/': typeof HomeprojectIndexRoute
@@ -127,6 +136,7 @@ export interface FileRouteTypes {
     | '/forgot-password'
     | '/login'
     | '/logout'
+    | '/showProfile'
     | '/signup'
     | '/home/create'
     | '/home'
@@ -140,6 +150,7 @@ export interface FileRouteTypes {
     | '/forgot-password'
     | '/login'
     | '/logout'
+    | '/showProfile'
     | '/signup'
     | '/home/create'
     | '/home'
@@ -153,6 +164,7 @@ export interface FileRouteTypes {
     | '/(auth)/forgot-password'
     | '/(auth)/login'
     | '/(auth)/logout'
+    | '/(auth)/showProfile'
     | '/(auth)/signup'
     | '/home/(project)/create'
     | '/home/(project)/'
@@ -167,6 +179,7 @@ export interface RootRouteChildren {
   authForgotPasswordRoute: typeof authForgotPasswordRoute
   authLoginRoute: typeof authLoginRoute
   authLogoutRoute: typeof authLogoutRoute
+  authShowProfileRoute: typeof authShowProfileRoute
   authSignupRoute: typeof authSignupRoute
   HomeprojectCreateRoute: typeof HomeprojectCreateRoute
   HomeprojectIndexRoute: typeof HomeprojectIndexRoute
@@ -184,6 +197,13 @@ declare module '@tanstack/react-router' {
       path: '/signup'
       fullPath: '/signup'
       preLoaderRoute: typeof authSignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(auth)/showProfile': {
+      id: '/(auth)/showProfile'
+      path: '/showProfile'
+      fullPath: '/showProfile'
+      preLoaderRoute: typeof authShowProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/(auth)/logout': {
@@ -263,6 +283,7 @@ const rootRouteChildren: RootRouteChildren = {
   authForgotPasswordRoute: authForgotPasswordRoute,
   authLoginRoute: authLoginRoute,
   authLogoutRoute: authLogoutRoute,
+  authShowProfileRoute: authShowProfileRoute,
   authSignupRoute: authSignupRoute,
   HomeprojectCreateRoute: HomeprojectCreateRoute,
   HomeprojectIndexRoute: HomeprojectIndexRoute,

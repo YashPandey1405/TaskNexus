@@ -6,11 +6,18 @@ export const authStore = create(
   persist((set) => ({
     isLoggedIn: false,
     loggedInUserId: null,
+    userAvatorURl: null,
 
     // Sets isLoggedIn to true
-    loginUser: (userID) => set({ isLoggedIn: true, loggedInUserId: userID }),
+    loginUser: (userID, userAvatorURl) =>
+      set({
+        isLoggedIn: true,
+        loggedInUserId: userID,
+        userAvatorURl: userAvatorURl,
+      }),
 
     // Sets isLoggedIn to false
-    logoutUser: () => set({ isLoggedIn: false, loggedInUserId: null }),
+    logoutUser: () =>
+      set({ isLoggedIn: false, loggedInUserId: null, userAvatorURl: null }),
   })),
 );

@@ -14,6 +14,12 @@ function RouteComponent() {
   const isLoggedInZustand = authStore((state) => state.isLoggedIn);
   const loginUserZustand = authStore((state) => state.loginUser);
 
+  const [email, setEmail] = useState("");
+  const [fullname, setFullname] = useState("");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [profileImage, setprofileImage] = useState(null);
+
   const [formData, setFormData] = useState({
     email: "",
     fullname: "",
@@ -36,18 +42,20 @@ function RouteComponent() {
     setisSigningIn(true);
     setShowAlert(true);
 
-    try {
-      const signupUser = await apiClient.signup(
-        formData.email,
-        formData.username,
-        formData.fullname,
-        formData.password,
-      );
-      setData(signupUser);
+    const formData = new FormData(); // very important!
+    formData.append("email", email);
+    formData.append("username", username);
+    formData.append("fullname", fullname);
+    formData.append("password", password);
+    formData.append("profileImage", profileImage);
 
+    try {
+      const signupUser = await apiClient.signup(formData);
+      setData(signupUser);
       if (signupUser.success) {
         let userId = signupUser.data._id;
-        loginUserZustand(userId);
+        let userAvatorURl = signupUser.data.avatar?.url;
+        loginUserZustand(userId,userAvatorURl);
         setTimeout(() => {
           router.navigate({ to: "/home" });
         }, 3000);
@@ -90,7 +98,7 @@ function RouteComponent() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} encType="multipart/form-data">
             <div className="mb-3">
               <label htmlFor="email" className="form-label">
                 Email address
@@ -101,41 +109,57 @@ function RouteComponent() {
                 id="email"
                 name="email"
                 placeholder="Enter your email"
-                value={formData.email}
-                onChange={handleChange}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
               />
             </div>
 
-            <div className="mb-3">
-              <label htmlFor="username" className="form-label">
-                User Name
-              </label>
-              <input
-                type="text"
-                className="form-control"
-                id="username"
-                placeholder="Enter your username"
-                name="username"
-                value={formData.username}
-                onChange={handleChange}
-                required
-              />
+            <div className="row">
+              <div className="col mb-3 me-0">
+                <label htmlFor="username" className="form-label">
+                  User Name
+                </label>
+                <input
+                  type="text"
+                  className="form-control"
+                  id="username"
+                  placeholder="Enter your username"
+                  name="username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="col mb-3">
+                <label htmlFor="fullname" className="form-label">
+                  Full Name
+                </label>
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Enter your full name"
+                  id="fullname"
+                  name="fullname"
+                  value={fullname}
+                  onChange={(e) => setFullname(e.target.value)}
+                  required
+                />
+              </div>
             </div>
 
             <div className="mb-3">
-              <label htmlFor="fullname" className="form-label">
-                Full Name
+              <label htmlFor="profileImage" className="form-label">
+                Profile Image
               </label>
               <input
-                type="text"
+                type="file"
                 className="form-control"
-                placeholder="Enter your full name"
-                id="fullname"
-                name="fullname"
-                value={formData.fullname}
-                onChange={handleChange}
-                required
+                id="profileImage"
+                name="profileImage"
+                accept="image/*"
+                onChange={(e) => setprofileImage(e.target.files[0])}
               />
             </div>
 
@@ -149,8 +173,8 @@ function RouteComponent() {
                 id="password"
                 placeholder="Enter your password"
                 name="password"
-                value={formData.password}
-                onChange={handleChange}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 required
               />
             </div>

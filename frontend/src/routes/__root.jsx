@@ -13,7 +13,7 @@ function RootComponent() {
 
   const isLoggedInZustand = authStore((state) => state.isLoggedIn);
   const loggedInUserIdZudtand = authStore((state) => state.loggedInUserId);
-  console.log("User ID:", isLoggedInZustand);
+  console.log("Is User Logged In:", isLoggedInZustand);
   console.log("User ID:", loggedInUserIdZudtand);
 
   // Redirect to login if not logged in , Else Redirect to home.....

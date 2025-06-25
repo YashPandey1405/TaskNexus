@@ -14,7 +14,10 @@ const storage = multer.diskStorage({
 // Middleware responsible to read form data and upload the File object to the mentioned path
 export const upload = multer({
   storage,
+  // Max File Size Support Of 3 MB.....
   limits: {
-    fileSize: 1 * 1000 * 1000,
+    fileSize: 3 * 1000 * 1000,
   },
 });
+
+export default upload;
