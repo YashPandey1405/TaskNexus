@@ -331,6 +331,115 @@ const getProjectMembers = asyncHandler(async (req, res) => {
   }
 });
 
+const getAvailableMembers = asyncHandler(async (req, res) => {
+  const projectID = req.params.projectID;
+  console.log("projectID: ", projectID);
+
+  // req.user is Available Due To The VerifyJWT Middleware Used before this Controller...
+  const userID = req.user._id;
+  console.log("userID: ", userID);
+
+  try {
+    console.log("1");
+    const allCurrentProjectMembers = await ProjectMember.find({
+      project: projectID,
+    }).populate("user", "username");
+
+    if (allCurrentProjectMembers.length === 0) {
+      throw new ApiError(404, "No project members found");
+    }
+
+    console.log("2");
+    const allUsersInDatabase = await User.find().select("_id username email");
+
+    if (allUsersInDatabase.length === 0) {
+      throw new ApiError(404, "No users found");
+    }
+
+    console.log("3");
+    // Set cookies and redirect
+    const response = new ApiResponse(
+      200,
+      {
+        allCurrentProjectMembers,
+        allUsersInDatabase,
+      },
+      "All Project-Members & DB Users successfully Shared From TaskNexus platform",
+    );
+
+    // Send All Projects To The Frontend....
+    return res.status(response.statusCode).json(response);
+  } catch (error) {
+    // Handle any errors that occur during user creation
+    throw new ApiError(500, "Internal server error", [
+      {
+        field: "server",
+        message: "Internal server error In The getProjectMembers Controller",
+      },
+    ]);
+  }
+});
+
+const getProjectMemberByID = asyncHandler(async (req, res) => {
+  const projectID = req.params.projectID;
+  console.log("projectID: ", projectID);
+
+  try {
+    console.log("1");
+    const currentProject = await Pro.findById(projectID).populate(
+      "createdBy",
+      "username email",
+    );
+
+    console.log("2");
+    // When No Project Is Been Found.....
+    if (!currentProject) {
+      throw new ApiError(404, "No project  found");
+    }
+
+    console.log("3");
+    const currentProjectMembers = await ProjectMember.find({
+      project: projectID,
+    }).populate("user", "username fullname avatar");
+
+    console.log("4");
+    // When No Enteries Found From The Database....
+    if (currentProjectMembers.length === 0) {
+      throw new ApiError(404, "No project members found");
+    }
+
+    console.log("5");
+    const [totalTasks, totalNotes] = await Promise.all([
+      Task.countDocuments({ project: projectID }),
+      ProjectNote.countDocuments({ project: projectID }),
+    ]);
+
+    console.log("6");
+    // Set cookies and redirect
+    const response = new ApiResponse(
+      200,
+      {
+        currentProject,
+        currentProjectMembers,
+        totalTasks,
+        totalNotes,
+      },
+      "All Project-Members successfully Shared From TaskNexus platform",
+    );
+
+    // Send All Projects To The Frontend....
+    return res.status(response.statusCode).json(response);
+  } catch (error) {
+    // Handle any errors that occur during user creation
+    throw new ApiError(500, "Internal server error", [
+      {
+        field: "server",
+        message: "Internal server error In The getProjectMembers Controller",
+      },
+    ]);
+  }
+});
+
 const addMemberToProject = asyncHandler(async (req, res) => {
   const projectID = req.params.projectID;
   console.log("projectID: ", projectID);
@@ -347,6 +456,24 @@ const addMemberToProject = asyncHandler(async (req, res) => {
   const LoggedInuserRole = req.user.role;
   console.log("LoggedInuserID: ", LoggedInuserID);
   console.log("LoggedInuserRole: ", LoggedInuserRole);
+
+  // Any Member Can't Add Any Project Member.....
+  // There Can Be Only 1 Project Admin And More Than 2 Isn't Allowed
+  if (LoggedInuserRole === "member" || role === "project_admin") {
+    throw new ApiError(
+      401,
+      "You Are Not Authorized For Project Member Creation",
+    );
+  }
+
+  // Admin Can't Make Any New Admin In The Project , Only Project Admin Are Authorized To Do This Task.....
+  if (LoggedInuserRole === "admin" && role === "admin") {
+    throw new ApiError(
+      401,
+      "You Are Not Authorized For Project Member Creation",
+    );
+  }
+
   try {
     const memberUser = await User.findById(userID);
     const currentProject = await Project.findById(projectID);
@@ -365,15 +492,6 @@ const addMemberToProject = asyncHandler(async (req, res) => {
     // When The Requested User Is Already part Of That Project....
     if (IsExistingMemberPresent) {
       throw new ApiError(400, "User is already a member of this project");
-    }
-
-    // One More Securtity Check Point.....
-    // If New Project Member Role is "project_admin", Then Only "project_admin" Can Create New "project_admin".....
-    if (role == "project_admin" && LoggedInuserRole != "project_admin") {
-      throw new ApiError(
-        403,
-        "You Don't Have Permission To Perform The Action",
-      );
     }
 
     const newProjectMember = await ProjectMember.create({
@@ -513,7 +631,9 @@ export {
   deleteProject,
   getProjectById,
   getProjectMembers,
+  getProjectMemberByID,
   getProjects,
   updateMemberRole,
   updateProject,
+  getAvailableMembers,
 };

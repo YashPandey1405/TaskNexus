@@ -161,6 +161,28 @@ class ApiClient {
       method: "GET",
     });
   }
+
+  async getProjectMembersList(projectID) {
+    return this.customFetch(`/project/project-member/list/${projectID}`, {
+      method: "GET",
+    });
+  }
+
+  async createProjectMember(userID, role, projectID) {
+    return this.customFetch(`/project/project-member/${projectID}`, {
+      method: "POST",
+      body: JSON.stringify({ userID, role }),
+    });
+  }
+
+  async deleteProjectMember(projectMemberID) {
+    return this.customFetch(
+      `/project/project-member/change/${projectMemberID}`,
+      {
+        method: "DELETE",
+      },
+    );
+  }
 }
 
 const apiClient = new ApiClient();

@@ -5,6 +5,7 @@ import {
   updateProject,
   deleteProject,
   getProjectMembers,
+  getAvailableMembers,
   addMemberToProject,
   updateMemberRole,
   deleteMember,
@@ -30,16 +31,12 @@ const router = Router();
 router.route("/getproject").get(verifyJWT, getProjects);
 router.route("/getproject/:projectID").get(verifyJWT, getProjectById);
 
-// ["admin", "project_admin"] Are Allowed To Update An ProjectMember Role.....
-// Only ["project_admin"] Are Allowed To Delete An ProjectMember.....
+// ["project_admin"] Are Allowed To Update& Delete An ProjectMember Role.....
 router
   .route("/project-member/change/:projectMemberID")
   .put(
     verifyJWT,
-    validateProjectMemberPermission([
-      UserRolesEnum.ADMIN,
-      UserRolesEnum.PROJECT_ADMIN,
-    ]),
+    validateProjectMemberPermission([UserRolesEnum.PROJECT_ADMIN]),
     updateMemberRole,
   )
   .delete(
@@ -47,6 +44,10 @@ router
     validateProjectMemberPermission([UserRolesEnum.PROJECT_ADMIN]),
     deleteMember,
   );
+
+router
+  .route("/project-member/list/:projectID")
+  .get(verifyJWT, getAvailableMembers);
 
 // ["admin", "project_admin"] Are Allowed To Create An ProjectMember.....
 router

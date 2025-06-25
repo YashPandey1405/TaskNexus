@@ -61,6 +61,23 @@ function RouteComponent() {
   );
   console.log("currentLoggedInUser: ", currentLoggedInUser);
 
+  function handleAddProjectMember() {
+    router.navigate({ to: `/home/project-member/create/${pid}` });
+  }
+
+  async function handleDeleteMember(projectMemberID) {
+    try {
+      const response = await apiClient.deleteProjectMember(projectMemberID);
+      if (response.success) {
+        setTimeout(() => {
+          window.location.reload();
+        }, 3000); // 3000 ms = 3 seconds
+      }
+    } catch (error) {
+      router.navigate({ to: `/home` });
+    }
+  }
+
   return (
     <div className="bg-dark min-vh-100">
       <Navbar />
@@ -94,7 +111,10 @@ function RouteComponent() {
             </span>
           </h5>
 
-          <button className="btn btn-outline-light px-4 py-2">
+          <button
+            className="btn btn-outline-light px-4 py-2"
+            onClick={handleAddProjectMember}
+          >
             + Add Member
           </button>
         </div>
@@ -126,10 +146,10 @@ function RouteComponent() {
 
                 const rowClass =
                   role === "project_admin"
-                    ? "table-primary"
+                    ? "table-danger" // 🔴 Bold red — ultimate authority
                     : role === "admin"
-                      ? "table-warning"
-                      : "table-secondary";
+                      ? "table-primary" // 🔵 Strong blue — trusted role
+                      : "table-success"; // 🟢 Green — friendly member
 
                 return (
                   <tr key={_id} className={rowClass}>
@@ -165,13 +185,8 @@ function RouteComponent() {
                       <button
                         className="btn btn-info btn-sm me-2 px-3 py-2"
                         // Project_Admin Can Edit Anyone's Role
-                        // Admin can Update Member Role But Can't Project_Admin Role
-                        // member can't Edit Anyone's Role
-                        disabled={
-                          currentLoggedInUser?.role === "member" ||
-                          (currentLoggedInUser?.role !== "project_admin" &&
-                            role === "project_admin")
-                        }
+                        // Admin & Member can't Update An Member.....
+                        disabled={currentLoggedInUser?.role !== "project_admin"}
                         onClick={() => handleEditMember(_id)}
                       >
                         ✏️ Edit
@@ -179,14 +194,17 @@ function RouteComponent() {
                       <button
                         className="btn btn-danger btn-sm px-3 py-2"
                         // Project_Admin Can Delete Anyone's Role
-                        // Admin can Delete Member Role But Can't Project_Admin Role
-                        // member can't Delete Anyone's Role
-                        disabled={
-                          currentLoggedInUser?.role === "member" ||
-                          (currentLoggedInUser?.role !== "project_admin" &&
-                            role === "project_admin")
-                        }
-                        onClick={() => handleDeleteMember(_id)}
+                        // Admin & Member can't Delete An Member.....
+                        disabled={currentLoggedInUser?.role !== "project_admin"}
+                        onClick={() => {
+                          if (
+                            window.confirm(
+                              "Are you sure you want to remove this member?",
+                            )
+                          ) {
+                            handleDeleteMember(_id);
+                          }
+                        }}
                       >
                         🗑️ Delete
                       </button>
