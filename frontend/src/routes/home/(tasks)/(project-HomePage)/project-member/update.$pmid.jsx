@@ -6,18 +6,18 @@ import apiClient from "../../../../../../services/apiClient";
 import { authStore } from "../../../../../store/authStore";
 
 export const Route = createFileRoute(
-  "/home/(tasks)/(project-HomePage)/project-member/create/$pid",
+  "/home/(tasks)/(project-HomePage)/project-member/update/$pmid",
 )({
   component: RouteComponent,
 });
 
 function RouteComponent() {
   const router = useRouter();
-  const { pid } = Route.useParams();
-  console.log("Project ID from params:", pid);
+  const { pmid } = Route.useParams();
+  console.log("Project Member ID from params:", pmid);
 
   const [formData, setFormData] = useState({
-    userID: "",
+    member: "",
     role: "",
   });
 
@@ -25,14 +25,15 @@ function RouteComponent() {
   const [MemberList, setMemberList] = useState(null);
   const [formdatavalues, setformdatavalues] = useState(null);
   const [showAlert, setShowAlert] = useState(true);
-  const [isMemberCreated, setisMemberCreated] = useState(false);
+  const [isMemberUpdated, setisMemberUpdated] = useState(false);
 
   const isLoggedInZustand = authStore((state) => state.isLoggedIn);
   const loggedInUserIdZustand = authStore((state) => state.loggedInUserId);
+  let availableRolesForCreation = [];
 
   // UseEffect to fetch project members data and the Related Tasks Of The Project.....
   useEffect(() => {
-    const getTheProjectMemberList = async () => {
+    const getTheProjectMember = async () => {
       try {
         if (!isLoggedInZustand) {
           console.log("User is not logged in, redirecting to login page...");
@@ -40,20 +41,21 @@ function RouteComponent() {
           return;
         }
 
-        const response = await apiClient.getProjectMembersList(pid);
+        const response = await apiClient.getProjectMemberByID(pmid);
 
         if (response.success) {
+          console.log(response.data);
           setMemberList(response.data);
         }
       } catch (error) {
-        setapiData({
+        setData({
           success: false,
           message: "User Not Logged In failed. Try again later.",
         });
       }
     };
 
-    getTheProjectMemberList();
+    getTheProjectMember();
   }, [router, isLoggedInZustand]);
 
   const handleChange = (e) => {
@@ -65,20 +67,21 @@ function RouteComponent() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setisMemberCreated(true);
+    setisMemberUpdated(true);
     setShowAlert(true);
 
     try {
       console.log("Form Data before API call:", formData);
-      const projectUpdation = await apiClient.createProjectMember(
-        formData.userID,
+      const projectUpdation = await apiClient.UpdateProjectMember(
         formData.role,
-        pid,
+        pmid,
       );
       setData(projectUpdation);
       console.log("Project Member Created response:", projectUpdation);
 
       if (projectUpdation.success) {
+        const pid = projectUpdation?.data?.project;
+        // console.log(pid);
         setTimeout(() => {
           router.navigate({ to: `/home/project-member/details/${pid}` });
         }, 3000);
@@ -86,42 +89,34 @@ function RouteComponent() {
     } catch (error) {
       setData({
         success: false,
-        message: "Project Member Creation failed in Frontend. Try again later.",
+        message: "Project Member Updation failed in Frontend. Try again later.",
       });
     }
 
-    setisMemberCreated(false);
+    setisMemberUpdated(false);
   };
 
-  // Logic To Get Users Which Are Not Part Of The Current Project
-  // Step 1: Get a Set of user IDs who are already project members
-  const memberUserIds = new Set(
-    MemberList?.allCurrentProjectMembers?.map((member) =>
-      member?.user?._id.toString(),
-    ),
-  );
+  //   Use Effect To Ensure That Only Project_Admin Can Edit The Project Admin
+  useEffect(() => {
+    const currentLoggedInUserRole = MemberList?.currentLoggedInUserRole?.role;
+    console.log(currentLoggedInUserRole);
 
-  // Step 2: Filter out those users from allUsersInDatabase
-  const nonProjectUsers = MemberList?.allUsersInDatabase?.filter(
-    (user) => !memberUserIds.has(user?._id.toString()),
-  );
+    if (
+      currentLoggedInUserRole &&
+      currentLoggedInUserRole !== "project_admin"
+    ) {
+      console.log("OUCHhhhhhhhh-------------------");
+      router.navigate({ to: "/home" });
+    }
+    const AddedByMember = `${MemberList?.requestedProjectMember?.user?.username} (${MemberList?.requestedProjectMember?.role})`;
+    formData.member = AddedByMember;
+  }, [MemberList]);
 
-  //   console.log("The Non Project Users Are :: ", nonProjectUsers);
-
-  const currentUserInProject = MemberList?.allCurrentProjectMembers.find(
-    (member) => member.user._id.toString() === loggedInUserIdZustand,
-  );
-  const AddedByMember = `${currentUserInProject?.user?.username} (${currentUserInProject?.role})`;
-
-  //   Security Check : Member Can't Add Any Project Member........
-  if (currentUserInProject?.role === "member") {
-    router.navigate({ to: `/home/project/${pid}` });
+  if (MemberList?.requestedProjectMember?.role === "admin") {
+    availableRolesForCreation.push("member");
+  } else {
+    availableRolesForCreation.push("admin");
   }
-  const availableRolesForCreation =
-    currentUserInProject?.role === "project_admin"
-      ? ["member", "admin"]
-      : ["member"];
-
   //   console.log("AddedByMember", AddedByMember);
   //   console.log("availableRolesForCreation", availableRolesForCreation);
 
@@ -141,7 +136,7 @@ function RouteComponent() {
             }}
           >
             <h2 className="text-center mb-4 fw-semibold">
-              Create An Project Member
+              Update An Project Member
             </h2>
             {/* <p>{formData.userID}</p>
             <p>{formData.role}</p> */}
@@ -168,41 +163,16 @@ function RouteComponent() {
               {/* Added To Project By Field */}
               <div className="mb-3">
                 <label htmlFor="AddedBy" className="form-label">
-                  Added To Project By
+                  Current Project Member & Role
                 </label>
                 <input
                   type="text"
                   className="form-control bg-dark text-light border-secondary"
                   id="AddedBy"
                   name="AddedBy"
-                  value={AddedByMember}
+                  value={formData.member}
                   readOnly
                 />
-              </div>
-
-              {/* Project Member Creator Field */}
-              <div className="mb-3">
-                <label htmlFor="userID" className="form-label">
-                  New Project Member
-                </label>
-                <select
-                  className="form-select bg-dark text-light border-secondary"
-                  id="userID"
-                  name="userID"
-                  value={formData.userID}
-                  onChange={handleChange}
-                  required
-                >
-                  <option value="" disabled hidden>
-                    -- Select a user --
-                  </option>
-
-                  {nonProjectUsers?.map((user) => (
-                    <option key={user._id} value={user._id}>
-                      {user.username}
-                    </option>
-                  ))}
-                </select>
               </div>
 
               {/* new Project Member Role */}
@@ -239,9 +209,9 @@ function RouteComponent() {
               <button
                 type="submit"
                 className="btn btn-primary w-100"
-                disabled={isMemberCreated}
+                disabled={isMemberUpdated}
               >
-                {isMemberCreated ? "Creating Member..." : "Create New Member"}
+                {isMemberUpdated ? "Updating Member..." : "Update Member Role"}
               </button>
             </form>
           </div>

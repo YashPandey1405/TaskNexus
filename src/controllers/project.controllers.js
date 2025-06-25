@@ -251,6 +251,9 @@ const deleteProject = asyncHandler(async (req, res) => {
     // Similar Work With ProjectMember Model As Well.....
     await ProjectMember.deleteMany({ project: currentProject._id });
 
+    // Similar Work With Notes Model As Well.....
+    await ProjectNote.deleteMany({ project: currentProject._id });
+
     // Set cookies and redirect
     const response = new ApiResponse(
       200,
@@ -381,50 +384,47 @@ const getAvailableMembers = asyncHandler(async (req, res) => {
 });
 
 const getProjectMemberByID = asyncHandler(async (req, res) => {
-  const projectID = req.params.projectID;
-  console.log("projectID: ", projectID);
+  const projectMemberID = req.params.projectMemberID;
+  console.log("projectMemberID: ", projectMemberID);
+
+  // req.user is Available Due To The VerifyJWT Middleware Used before this Controller...
+  const userID = req.user._id;
+  console.log("userID: ", userID);
 
   try {
     console.log("1");
-    const currentProject = await Pro.findById(projectID).populate(
-      "createdBy",
-      "username email",
-    );
+    const requestedProjectMember = await ProjectMember.findById(
+      projectMemberID,
+    ).populate("user", "username email");
 
     console.log("2");
-    // When No Project Is Been Found.....
-    if (!currentProject) {
+    console.log("requestedProjectMember: ", requestedProjectMember);
+    // When No Project Member Is Been Found.....
+    if (!requestedProjectMember) {
       throw new ApiError(404, "No project  found");
     }
 
     console.log("3");
-    const currentProjectMembers = await ProjectMember.find({
-      project: projectID,
+    const currentLoggedInUserRole = await ProjectMember.findOne({
+      user: userID,
+      project: requestedProjectMember.project,
     }).populate("user", "username fullname avatar");
 
     console.log("4");
     // When No Enteries Found From The Database....
-    if (currentProjectMembers.length === 0) {
+    if (!currentLoggedInUserRole) {
       throw new ApiError(404, "No project members found");
     }
-
-    console.log("5");
-    const [totalTasks, totalNotes] = await Promise.all([
-      Task.countDocuments({ project: projectID }),
-      ProjectNote.countDocuments({ project: projectID }),
-    ]);
 
     console.log("6");
     // Set cookies and redirect
     const response = new ApiResponse(
       200,
       {
-        currentProject,
-        currentProjectMembers,
-        totalTasks,
-        totalNotes,
+        requestedProjectMember,
+        currentLoggedInUserRole,
       },
-      "All Project-Members successfully Shared From TaskNexus platform",
+      "Requested Project-Members successfully Shared From TaskNexus platform",
     );
 
     // Send All Projects To The Frontend....
@@ -603,6 +603,41 @@ const deleteMember = asyncHandler(async (req, res) => {
     if (!currentProjectMember) {
       throw new ApiError(404, "ProjectMember Object Not Found In The Database");
     }
+
+    // Major Step To Perform Cascade Delete In MongoDB Schema....
+    // Manually delete all Tasks & SubTasks Associates to this current Deleted Member.....
+
+    // Step 1: Find all tasks Associated to the current Deleted Member.....
+    const tasksToDelete = await Task.find({
+      $or: [
+        { assignedBy: currentProjectMember.user },
+        { assignedTo: currentProjectMember.user },
+      ],
+    });
+
+    // Step 2: Delete the tasks
+    await Task.deleteMany({
+      $or: [
+        { assignedBy: currentProjectMember.user },
+        { assignedTo: currentProjectMember.user },
+      ],
+    });
+
+    // Step 3: Use the IDs of the deleted tasks to delete corresponding subtasks
+    if (tasksToDelete.length > 0) {
+      const taskIds = tasksToDelete.map((task) => task._id); // Extract task IDs
+
+      // Cascade delete subtasks linked to these tasks
+      await SubTask.deleteMany({
+        task: { $in: taskIds }, // Delete all subtasks linked to the tasks
+      });
+
+      // Log the deletion of subtasks for debugging purposes
+      console.log(`Deleted all subtasks linked to tasks: ${taskIds}`);
+    }
+
+    // Delete The Notes Associated With The Current Deleted Member.....
+    await ProjectNote.deleteMany({ createdBy: currentProjectMember.user });
 
     // Set cookies and redirect
     const response = new ApiResponse(

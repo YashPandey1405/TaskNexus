@@ -168,11 +168,30 @@ class ApiClient {
     });
   }
 
+  async getProjectMemberByID(projectMemberID) {
+    return this.customFetch(
+      `/project/project-member/member/${projectMemberID}`,
+      {
+        method: "GET",
+      },
+    );
+  }
+
   async createProjectMember(userID, role, projectID) {
     return this.customFetch(`/project/project-member/${projectID}`, {
       method: "POST",
       body: JSON.stringify({ userID, role }),
     });
+  }
+
+  async UpdateProjectMember(role, projectMemberID) {
+    return this.customFetch(
+      `/project/project-member/change/${projectMemberID}`,
+      {
+        method: "PUT",
+        body: JSON.stringify({ role }),
+      },
+    );
   }
 
   async deleteProjectMember(projectMemberID) {

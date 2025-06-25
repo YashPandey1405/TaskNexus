@@ -65,6 +65,10 @@ function RouteComponent() {
     router.navigate({ to: `/home/project-member/create/${pid}` });
   }
 
+  function handleUpdateProjectMember(projectMemberID) {
+    router.navigate({ to: `/home/project-member/update/${projectMemberID}` });
+  }
+
   async function handleDeleteMember(projectMemberID) {
     try {
       const response = await apiClient.deleteProjectMember(projectMemberID);
@@ -187,7 +191,7 @@ function RouteComponent() {
                         // Project_Admin Can Edit Anyone's Role
                         // Admin & Member can't Update An Member.....
                         disabled={currentLoggedInUser?.role !== "project_admin"}
-                        onClick={() => handleEditMember(_id)}
+                        onClick={() => handleUpdateProjectMember(_id)}
                       >
                         ✏️ Edit
                       </button>

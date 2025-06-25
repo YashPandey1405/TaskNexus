@@ -7,6 +7,7 @@ import {
   getProjectMembers,
   getAvailableMembers,
   addMemberToProject,
+  getProjectMemberByID,
   updateMemberRole,
   deleteMember,
 } from "../controllers/project.controllers.js";
@@ -48,6 +49,10 @@ router
 router
   .route("/project-member/list/:projectID")
   .get(verifyJWT, getAvailableMembers);
+
+  router
+  .route("/project-member/member/:projectMemberID")
+  .get(verifyJWT, getProjectMemberByID);
 
 // ["admin", "project_admin"] Are Allowed To Create An ProjectMember.....
 router
