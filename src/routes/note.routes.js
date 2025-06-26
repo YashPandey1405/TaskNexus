@@ -38,16 +38,21 @@ router
   )
   .delete(
     verifyJWT,
-    validateProjectPermission([
-      UserRolesEnum.PROJECT_ADMIN,
-      UserRolesEnum.ADMIN,
-    ]),
+    validateProjectPermission([UserRolesEnum.PROJECT_ADMIN]),
     deleteNote,
   );
 
 router
   .route("/:projectID")
-  .get(verifyJWT, getNotes)
+  .get(
+    verifyJWT,
+    validateProjectPermission([
+      UserRolesEnum.ADMIN,
+      UserRolesEnum.PROJECT_ADMIN,
+      UserRolesEnum.MEMBER,
+    ]),
+    getNotes,
+  )
   .post(
     verifyJWT,
     validateProjectPermission([

@@ -6,6 +6,7 @@ import { User } from "../models/user.models.js";
 import { Project } from "../models/project.models.js";
 import { ProjectNote } from "../models/note.models.js";
 import { Task } from "../models/task.models.js";
+import { ProjectMember } from "../models/projectmember.models.js";
 
 const getNotes = asyncHandler(async (req, res) => {
   // Get The Project Id From The Params.....
@@ -14,10 +15,15 @@ const getNotes = asyncHandler(async (req, res) => {
 
   // req.user is Available Due To The VerifyJWT Middleware Used before this Controller...
   const userID = req.user._id;
+  const currentUserRole = req.user.role;
   console.log("userID: ", userID);
+  console.log("currentUserRole: ", currentUserRole);
 
   try {
-    const currentProject = await Project.findById(projectID);
+    const currentProject = await Project.findById(projectID).populate(
+      "createdBy",
+      "username",
+    );
 
     // Check Condition....
     if (!currentProject) {
@@ -27,7 +33,25 @@ const getNotes = asyncHandler(async (req, res) => {
     // All Notes Associated With That Project Along With User's Details
     const allProjectNotes = await ProjectNote.find({
       project: new mongoose.Types.ObjectId(currentProject._id),
-    }).populate("createdBy", "username fullname avatar");
+    })
+      .populate("createdBy", "username fullname avatar")
+      .sort({ createdAt: 1 }) // 1 = ascending (earliest first)
+      .lean();
+
+    // Method to get The Role Of The Note Creator In The Project.......
+    await Promise.all(
+      allProjectNotes.map(async (projectNote) => {
+        const projectID = projectNote.project;
+        const createdBy = projectNote.createdBy._id;
+
+        const roleDoc = await ProjectMember.findOne({
+          project: projectID,
+          user: createdBy,
+        }).select("role");
+
+        projectNote.role = roleDoc?.role ?? null;
+      }),
+    );
 
     // Check Condition....
     if (allProjectNotes.length === 0) {
@@ -37,7 +61,7 @@ const getNotes = asyncHandler(async (req, res) => {
     // Set cookies and redirect
     const response = new ApiResponse(
       200,
-      allProjectNotes,
+      { allProjectNotes, currentUserRole, currentProject },
       "All Assigned Notes To currectProject Returned From TaskNexus platform",
     );
 

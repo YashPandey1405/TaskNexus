@@ -1,6 +1,7 @@
 import { useRouter } from "@tanstack/react-router";
 import { Link } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
+import Dropdown from "bootstrap/js/dist/dropdown";
 import BootstrapLoader from "./BootstrapLoader";
 import { authStore } from "../src/store/authStore";
 import { Tooltip } from "bootstrap";

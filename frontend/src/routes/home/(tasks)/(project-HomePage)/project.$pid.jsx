@@ -67,6 +67,10 @@ function RouteComponent() {
     router.navigate({ to: `/home/project-member/details/${pid}` });
   }
 
+  function handleNotesGET() {
+    router.navigate({ to: `/home/notes/details/${pid}` });
+  }
+
   return (
     <div className="min-vh-100 bg-dark text-white d-flex flex-column">
       <Navbar />
@@ -104,6 +108,9 @@ function RouteComponent() {
             onClick={handleProjectMemberGET}
           >
             View Project Member
+          </button>
+          <button className="btn btn-primary ms-3" onClick={handleNotesGET}>
+            View Project Notes
           </button>
         </div>
 

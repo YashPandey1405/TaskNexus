@@ -24,6 +24,8 @@ import { Route as HometasksprojectHomePageTaskCreatePidRouteImport } from './rou
 import { Route as HometasksprojectHomePageProjectMemberUpdatePmidRouteImport } from './routes/home/(tasks)/(project-HomePage)/project-member/update.$pmid'
 import { Route as HometasksprojectHomePageProjectMemberDetailsPidRouteImport } from './routes/home/(tasks)/(project-HomePage)/project-member/details.$pid'
 import { Route as HometasksprojectHomePageProjectMemberCreatePidRouteImport } from './routes/home/(tasks)/(project-HomePage)/project-member/create.$pid'
+import { Route as HometasksprojectHomePageNotesDetailsPidRouteImport } from './routes/home/(tasks)/(project-HomePage)/notes/details.$pid'
+import { Route as HometasksprojectHomePageNotesCreatePidRouteImport } from './routes/home/(tasks)/(project-HomePage)/notes/create.$pid'
 
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
@@ -106,6 +108,18 @@ const HometasksprojectHomePageProjectMemberCreatePidRoute =
     path: '/home/project-member/create/$pid',
     getParentRoute: () => rootRouteImport,
   } as any)
+const HometasksprojectHomePageNotesDetailsPidRoute =
+  HometasksprojectHomePageNotesDetailsPidRouteImport.update({
+    id: '/home/(tasks)/(project-HomePage)/notes/details/$pid',
+    path: '/home/notes/details/$pid',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const HometasksprojectHomePageNotesCreatePidRoute =
+  HometasksprojectHomePageNotesCreatePidRouteImport.update({
+    id: '/home/(tasks)/(project-HomePage)/notes/create/$pid',
+    path: '/home/notes/create/$pid',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
@@ -118,6 +132,8 @@ export interface FileRoutesByFullPath {
   '/home': typeof HomeprojectIndexRoute
   '/home/edit/$pid': typeof HomeprojectEditPidRoute
   '/home/project/$pid': typeof HometasksprojectHomePageProjectPidRoute
+  '/home/notes/create/$pid': typeof HometasksprojectHomePageNotesCreatePidRoute
+  '/home/notes/details/$pid': typeof HometasksprojectHomePageNotesDetailsPidRoute
   '/home/project-member/create/$pid': typeof HometasksprojectHomePageProjectMemberCreatePidRoute
   '/home/project-member/details/$pid': typeof HometasksprojectHomePageProjectMemberDetailsPidRoute
   '/home/project-member/update/$pmid': typeof HometasksprojectHomePageProjectMemberUpdatePmidRoute
@@ -135,6 +151,8 @@ export interface FileRoutesByTo {
   '/home': typeof HomeprojectIndexRoute
   '/home/edit/$pid': typeof HomeprojectEditPidRoute
   '/home/project/$pid': typeof HometasksprojectHomePageProjectPidRoute
+  '/home/notes/create/$pid': typeof HometasksprojectHomePageNotesCreatePidRoute
+  '/home/notes/details/$pid': typeof HometasksprojectHomePageNotesDetailsPidRoute
   '/home/project-member/create/$pid': typeof HometasksprojectHomePageProjectMemberCreatePidRoute
   '/home/project-member/details/$pid': typeof HometasksprojectHomePageProjectMemberDetailsPidRoute
   '/home/project-member/update/$pmid': typeof HometasksprojectHomePageProjectMemberUpdatePmidRoute
@@ -153,6 +171,8 @@ export interface FileRoutesById {
   '/home/(project)/': typeof HomeprojectIndexRoute
   '/home/(project)/edit/$pid': typeof HomeprojectEditPidRoute
   '/home/(tasks)/(project-HomePage)/project/$pid': typeof HometasksprojectHomePageProjectPidRoute
+  '/home/(tasks)/(project-HomePage)/notes/create/$pid': typeof HometasksprojectHomePageNotesCreatePidRoute
+  '/home/(tasks)/(project-HomePage)/notes/details/$pid': typeof HometasksprojectHomePageNotesDetailsPidRoute
   '/home/(tasks)/(project-HomePage)/project-member/create/$pid': typeof HometasksprojectHomePageProjectMemberCreatePidRoute
   '/home/(tasks)/(project-HomePage)/project-member/details/$pid': typeof HometasksprojectHomePageProjectMemberDetailsPidRoute
   '/home/(tasks)/(project-HomePage)/project-member/update/$pmid': typeof HometasksprojectHomePageProjectMemberUpdatePmidRoute
@@ -172,6 +192,8 @@ export interface FileRouteTypes {
     | '/home'
     | '/home/edit/$pid'
     | '/home/project/$pid'
+    | '/home/notes/create/$pid'
+    | '/home/notes/details/$pid'
     | '/home/project-member/create/$pid'
     | '/home/project-member/details/$pid'
     | '/home/project-member/update/$pmid'
@@ -189,6 +211,8 @@ export interface FileRouteTypes {
     | '/home'
     | '/home/edit/$pid'
     | '/home/project/$pid'
+    | '/home/notes/create/$pid'
+    | '/home/notes/details/$pid'
     | '/home/project-member/create/$pid'
     | '/home/project-member/details/$pid'
     | '/home/project-member/update/$pmid'
@@ -206,6 +230,8 @@ export interface FileRouteTypes {
     | '/home/(project)/'
     | '/home/(project)/edit/$pid'
     | '/home/(tasks)/(project-HomePage)/project/$pid'
+    | '/home/(tasks)/(project-HomePage)/notes/create/$pid'
+    | '/home/(tasks)/(project-HomePage)/notes/details/$pid'
     | '/home/(tasks)/(project-HomePage)/project-member/create/$pid'
     | '/home/(tasks)/(project-HomePage)/project-member/details/$pid'
     | '/home/(tasks)/(project-HomePage)/project-member/update/$pmid'
@@ -224,6 +250,8 @@ export interface RootRouteChildren {
   HomeprojectIndexRoute: typeof HomeprojectIndexRoute
   HomeprojectEditPidRoute: typeof HomeprojectEditPidRoute
   HometasksprojectHomePageProjectPidRoute: typeof HometasksprojectHomePageProjectPidRoute
+  HometasksprojectHomePageNotesCreatePidRoute: typeof HometasksprojectHomePageNotesCreatePidRoute
+  HometasksprojectHomePageNotesDetailsPidRoute: typeof HometasksprojectHomePageNotesDetailsPidRoute
   HometasksprojectHomePageProjectMemberCreatePidRoute: typeof HometasksprojectHomePageProjectMemberCreatePidRoute
   HometasksprojectHomePageProjectMemberDetailsPidRoute: typeof HometasksprojectHomePageProjectMemberDetailsPidRoute
   HometasksprojectHomePageProjectMemberUpdatePmidRoute: typeof HometasksprojectHomePageProjectMemberUpdatePmidRoute
@@ -338,6 +366,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HometasksprojectHomePageProjectMemberCreatePidRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/home/(tasks)/(project-HomePage)/notes/details/$pid': {
+      id: '/home/(tasks)/(project-HomePage)/notes/details/$pid'
+      path: '/home/notes/details/$pid'
+      fullPath: '/home/notes/details/$pid'
+      preLoaderRoute: typeof HometasksprojectHomePageNotesDetailsPidRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/home/(tasks)/(project-HomePage)/notes/create/$pid': {
+      id: '/home/(tasks)/(project-HomePage)/notes/create/$pid'
+      path: '/home/notes/create/$pid'
+      fullPath: '/home/notes/create/$pid'
+      preLoaderRoute: typeof HometasksprojectHomePageNotesCreatePidRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -353,6 +395,10 @@ const rootRouteChildren: RootRouteChildren = {
   HomeprojectEditPidRoute: HomeprojectEditPidRoute,
   HometasksprojectHomePageProjectPidRoute:
     HometasksprojectHomePageProjectPidRoute,
+  HometasksprojectHomePageNotesCreatePidRoute:
+    HometasksprojectHomePageNotesCreatePidRoute,
+  HometasksprojectHomePageNotesDetailsPidRoute:
+    HometasksprojectHomePageNotesDetailsPidRoute,
   HometasksprojectHomePageProjectMemberCreatePidRoute:
     HometasksprojectHomePageProjectMemberCreatePidRoute,
   HometasksprojectHomePageProjectMemberDetailsPidRoute:

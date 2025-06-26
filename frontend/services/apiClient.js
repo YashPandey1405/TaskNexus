@@ -202,6 +202,13 @@ class ApiClient {
       },
     );
   }
+
+  // Notes Controllers.....
+  async getAllNotesOfProject(projectID) {
+    return this.customFetch(`/note/${projectID}`, {
+      method: "GET",
+    });
+  }
 }
 
 const apiClient = new ApiClient();
