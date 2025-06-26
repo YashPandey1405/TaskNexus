@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as AboutRouteImport } from './routes/about'
 import { Route as authSignupRouteImport } from './routes/(auth)/signup'
 import { Route as authShowProfileRouteImport } from './routes/(auth)/showProfile'
 import { Route as authLogoutRouteImport } from './routes/(auth)/logout'
@@ -24,6 +25,11 @@ import { Route as HometasksprojectHomePageProjectMemberUpdatePmidRouteImport } f
 import { Route as HometasksprojectHomePageProjectMemberDetailsPidRouteImport } from './routes/home/(tasks)/(project-HomePage)/project-member/details.$pid'
 import { Route as HometasksprojectHomePageProjectMemberCreatePidRouteImport } from './routes/home/(tasks)/(project-HomePage)/project-member/create.$pid'
 
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const authSignupRoute = authSignupRouteImport.update({
   id: '/(auth)/signup',
   path: '/signup',
@@ -102,6 +108,7 @@ const HometasksprojectHomePageProjectMemberCreatePidRoute =
   } as any)
 
 export interface FileRoutesByFullPath {
+  '/about': typeof AboutRoute
   '/forgot-password': typeof authForgotPasswordRoute
   '/login': typeof authLoginRoute
   '/logout': typeof authLogoutRoute
@@ -118,6 +125,7 @@ export interface FileRoutesByFullPath {
   '/home/task/update/$tid': typeof HometasksprojectHomePageTaskUpdateTidRoute
 }
 export interface FileRoutesByTo {
+  '/about': typeof AboutRoute
   '/forgot-password': typeof authForgotPasswordRoute
   '/login': typeof authLoginRoute
   '/logout': typeof authLogoutRoute
@@ -135,6 +143,7 @@ export interface FileRoutesByTo {
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
+  '/about': typeof AboutRoute
   '/(auth)/forgot-password': typeof authForgotPasswordRoute
   '/(auth)/login': typeof authLoginRoute
   '/(auth)/logout': typeof authLogoutRoute
@@ -153,6 +162,7 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
+    | '/about'
     | '/forgot-password'
     | '/login'
     | '/logout'
@@ -169,6 +179,7 @@ export interface FileRouteTypes {
     | '/home/task/update/$tid'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/about'
     | '/forgot-password'
     | '/login'
     | '/logout'
@@ -185,6 +196,7 @@ export interface FileRouteTypes {
     | '/home/task/update/$tid'
   id:
     | '__root__'
+    | '/about'
     | '/(auth)/forgot-password'
     | '/(auth)/login'
     | '/(auth)/logout'
@@ -202,6 +214,7 @@ export interface FileRouteTypes {
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
+  AboutRoute: typeof AboutRoute
   authForgotPasswordRoute: typeof authForgotPasswordRoute
   authLoginRoute: typeof authLoginRoute
   authLogoutRoute: typeof authLogoutRoute
@@ -220,6 +233,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/(auth)/signup': {
       id: '/(auth)/signup'
       path: '/signup'
@@ -322,6 +342,7 @@ declare module '@tanstack/react-router' {
 }
 
 const rootRouteChildren: RootRouteChildren = {
+  AboutRoute: AboutRoute,
   authForgotPasswordRoute: authForgotPasswordRoute,
   authLoginRoute: authLoginRoute,
   authLogoutRoute: authLogoutRoute,

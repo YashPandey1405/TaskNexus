@@ -42,7 +42,7 @@ const Navbar = () => {
         <div className="container-fluid">
           {/* Brand */}
           <Link
-            to="/home"
+            to="/about"
             className="navbar-brand d-flex align-items-center text-white"
           >
             <i className="fas fa-diagram-project fa-xl text-warning"></i>

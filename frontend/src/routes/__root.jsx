@@ -1,8 +1,8 @@
 import * as React from "react";
 import { Outlet, createRootRoute } from "@tanstack/react-router";
-import { useRouter, Link } from "@tanstack/react-router";
-import { useEffect } from "react";
-import { authStore } from "../store/authStore.js";
+import { useRouter } from "@tanstack/react-router";
+import { useState, useEffect } from "react";
+import { authStore } from "../store/authStore";
 
 export const Route = createRootRoute({
   component: RootComponent,
@@ -12,31 +12,23 @@ function RootComponent() {
   const router = useRouter();
 
   const isLoggedInZustand = authStore((state) => state.isLoggedIn);
-  const loggedInUserIdZudtand = authStore((state) => state.loggedInUserId);
-  console.log("Is User Logged In:", isLoggedInZustand);
-  console.log("User ID:", loggedInUserIdZudtand);
 
-  // Redirect to login if not logged in , Else Redirect to home.....
   useEffect(() => {
-    const getRedirect = async () => {
+    const redirectToAboutPage = async () => {
       try {
-        // Redirect early if not logged in
         if (!isLoggedInZustand) {
-          console.log("User is not logged in, redirecting to login page...");
-          router.navigate({ to: "/login" });
-          return; // stop further execution
+          router.navigate({ to: "/about" });
         }
       } catch (error) {
         setData({
           success: false,
-          message: "getProjects failed. Try again later.",
+          message: "User Not Logged In failed. Try again later.",
         });
       }
     };
 
-    getRedirect();
-  }, [router, isLoggedInZustand]);
-
+    redirectToAboutPage();
+  }, [router]);
   return (
     <React.Fragment>
       <Outlet />
