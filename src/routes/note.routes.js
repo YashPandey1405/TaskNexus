@@ -47,15 +47,7 @@ router
 
 router
   .route("/:projectID")
-  .get(
-    verifyJWT,
-    validateProjectPermission([
-      UserRolesEnum.ADMIN,
-      UserRolesEnum.PROJECT_ADMIN,
-      UserRolesEnum.MEMBER,
-    ]),
-    getNotes,
-  )
+  .get(verifyJWT, getNotes)
   .post(
     verifyJWT,
     validateProjectPermission([
