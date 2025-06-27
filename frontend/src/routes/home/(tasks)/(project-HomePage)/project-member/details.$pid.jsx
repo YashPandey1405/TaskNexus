@@ -65,6 +65,10 @@ function RouteComponent() {
     router.navigate({ to: `/home/project-member/create/${pid}` });
   }
 
+  function handleGetBackPage() {
+    router.navigate({ to: `/home/project/${pid}` });
+  }
+
   function handleUpdateProjectMember(projectMemberID) {
     router.navigate({ to: `/home/project-member/update/${projectMemberID}` });
   }
@@ -88,6 +92,12 @@ function RouteComponent() {
       <div className="text-light rounded mx-4 mt-4">
         <div className="d-flex flex-column flex-md-row justify-content-between align-items-center px-3 mb-4">
           <h5 className="text-light mb-3 mb-md-0">
+            <button
+              className="btn btn-primary me-2"
+              onClick={handleGetBackPage}
+            >
+              &lt;Back
+            </button>
             👋 Welcome to{" "}
             <strong className="text-primary">
               "{apiresponse?.currentProject?.name}"

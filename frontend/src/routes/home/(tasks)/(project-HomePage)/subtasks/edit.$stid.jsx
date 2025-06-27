@@ -6,15 +6,15 @@ import apiClient from "../../../../../../services/apiClient";
 import { authStore } from "../../../../../store/authStore";
 
 export const Route = createFileRoute(
-  "/home/(tasks)/(project-HomePage)/subtasks/create/$tid",
+  "/home/(tasks)/(project-HomePage)/subtasks/edit/$stid",
 )({
   component: RouteComponent,
 });
 
 function RouteComponent() {
   const router = useRouter();
-  const { tid } = Route.useParams();
-  console.log("Task ID from params:", tid);
+  const { stid } = Route.useParams();
+  console.log("Sub-Task ID from params:", stid);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -23,7 +23,7 @@ function RouteComponent() {
 
   const [data, setData] = useState(null);
   const [apiresponse, setapiresponse] = useState(null);
-  const [isSubTaskCreated, setisSubTaskCreated] = useState(false);
+  const [isSubTaskUpdated, setisSubTaskUpdated] = useState(false);
   const [showAlert, setShowAlert] = useState(true);
 
   const isLoggedInZustand = authStore((state) => state.isLoggedIn);
@@ -32,12 +32,24 @@ function RouteComponent() {
 
   // UseEffect to fetch project members data and the Related Tasks Of The Project.....
   useEffect(() => {
-    const getTheSubTasksList = async () => {
+    const getTheSubTaskByID = async () => {
       try {
         if (!isLoggedInZustand) {
           console.log("User is not logged in, redirecting to login page...");
           router.navigate({ to: "/login" });
           return;
+        }
+
+        const response = await apiClient.getAllSubTasksByID(stid);
+
+        if (response.success) {
+          console.log(response.data);
+          console.log("response?.data?.title: ", response?.data?.title);
+          setFormData((prev) => ({
+            ...prev,
+            title: response.data.title,
+            isCompleted: response.data.isCompleted,
+          }));
         }
       } catch (error) {
         setapiresponse({
@@ -47,7 +59,7 @@ function RouteComponent() {
       }
     };
 
-    getTheSubTasksList();
+    getTheSubTaskByID();
   }, [router, isLoggedInZustand]);
 
   const handleChange = (e) => {
@@ -59,32 +71,34 @@ function RouteComponent() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setisSubTaskCreated(true);
+    setisSubTaskUpdated(true);
     setShowAlert(true);
 
     try {
       console.log("Form Data before API call:", formData);
-      const projectUpdation = await apiClient.createSubTask(
+      const projectUpdation = await apiClient.updateSubTask(
         formData.title,
         formData.isCompleted,
-        tid,
+        stid,
       );
       setData(projectUpdation);
       console.log("Project Member Created response:", projectUpdation);
 
       if (projectUpdation.success) {
         setTimeout(() => {
-          router.navigate({ to: `/home/subtasks/details/${tid}` });
+          router.navigate({
+            to: `/home/subtasks/details/${projectUpdation?.data?.task}`,
+          });
         }, 3000);
       }
     } catch (error) {
       setData({
         success: false,
-        message: "Project Member Creation failed in Frontend. Try again later.",
+        message: "Project Member Updation failed in Frontend. Try again later.",
       });
     }
 
-    setisSubTaskCreated(false);
+    setisSubTaskUpdated(false);
   };
 
   return (
@@ -102,14 +116,16 @@ function RouteComponent() {
               color: "#ffffff",
             }}
           >
-            <h2 className="text-center mb-4 fw-semibold">Create An Sub-Task</h2>
+            <h2 className="text-center mb-4 fw-semibold">
+              Update Your Sub-Task
+            </h2>
             {/* <p>{formData.userID}</p>
             <p>{formData.role}</p> */}
 
             {/* Alert */}
             {data && showAlert && (
               <div
-                className={`alert ${data.success ? "alert-success" : "alert-danger"} alert-dismissible fade show`}
+                className={`alert ${data.success ? `alert-success` : `alert-danger`} alert-dismissible fade show`}
                 role="alert"
               >
                 {data.message}
@@ -171,11 +187,11 @@ function RouteComponent() {
               <button
                 type="submit"
                 className="btn btn-primary w-100"
-                disabled={isSubTaskCreated}
+                disabled={isSubTaskUpdated}
               >
-                {isSubTaskCreated
-                  ? "Creating Sub-Task..."
-                  : "Create New Sub-Task"}
+                {isSubTaskUpdated
+                  ? "Updating Sub-Task..."
+                  : "Update New Sub-Task"}
               </button>
             </form>
           </div>

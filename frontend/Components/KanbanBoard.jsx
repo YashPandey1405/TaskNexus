@@ -76,29 +76,28 @@ const TaskCard = ({ id, data, isDragDisabled }) => {
     >
       <div className="card-body px-3 py-2">
         {/* Title + Subtask Count */}
-        <div className="d-flex justify-content-between align-items-center flex-wrap mb-1">
-          <p className="fw-semibold mb-0 text-light text-truncate w-75">
+        <div className="d-flex justify-content-between align-items-start flex-column flex-sm-row gap-1 mb-2">
+          <p className="fw-semibold mb-0 text-light text-truncate w-100 w-sm-75">
             {data?.title}
           </p>
           <span
-            className="text-info small d-flex align-items-center mt-1 mt-sm-0"
+            className="text-info small d-flex align-items-center cursor-pointer"
             data-bs-toggle="tooltip"
             title="Click to View Subtasks"
             onClick={() => handleSubTasksGET(id)}
           >
             <i className="fas fa-layer-group me-1"></i>
-            {data?.subTask?.totalSubTasksInTask ?? 0}
+            {data?.subTask}
           </span>
         </div>
 
         {/* Description */}
         <p className="text-light-50 small mb-2 text-wrap">
           {data?.description}
-          {/* {data?.currentUser} */}
         </p>
 
         {/* Assigned Info */}
-        <div className="d-flex flex-wrap align-items-center small text-light mb-1">
+        <div className="d-flex flex-wrap align-items-start small text-light mb-2">
           <i
             className="fas fa-user-edit me-1 fs-6"
             style={{ color: "#2c3e50" }}
@@ -121,10 +120,10 @@ const TaskCard = ({ id, data, isDragDisabled }) => {
           </span>
         </div>
 
-        {/* If The Current User Is Neither Task Creator Nor Project Admin */}
+        {/* Role-based Warning */}
         {(data?.createdBy?._id === data?.currentUser ||
           data?.currentUserRole !== "project_admin") && (
-          <p className="text-warning small">
+          <p className="text-warning small mb-2">
             <i
               className="fas fa-lock me-2"
               data-bs-toggle="tooltip"
@@ -135,10 +134,10 @@ const TaskCard = ({ id, data, isDragDisabled }) => {
           </p>
         )}
 
-        {/* Code Section To Show Edit And Delete Button along with the Task Creation time */}
-        <div className="d-flex justify-content-between align-items-center mt-2">
-          {/* Edit & Delete Buttons */}
-          <div className="d-flex gap-2">
+        {/* Footer Section */}
+        <div className="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2 mt-2">
+          {/* Buttons */}
+          <div className="d-flex flex-wrap gap-2">
             <button
               type="button"
               className="btn btn-sm btn-outline-info rounded-pill d-flex align-items-center gap-1"
@@ -284,7 +283,7 @@ const KanbanBoard = ({ KanbanBoardTaskData, currentUser }) => {
           currentUser: currentUser?.user?._id,
           currentUserRole: currentUser?.role,
           createdAt: task?.createdAt,
-          subTask: task?.subTask?.totalSubTasksInTask || 0,
+          subTask: task?.subTask || 0,
         },
       };
 

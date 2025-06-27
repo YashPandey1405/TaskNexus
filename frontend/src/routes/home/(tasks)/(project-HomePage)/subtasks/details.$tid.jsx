@@ -77,6 +77,25 @@ function RouteComponent() {
     });
   }
 
+  function handleEditSubTask(subTaskID) {
+    router.navigate({
+      to: `/home/subtasks/edit/${subTaskID}`,
+    });
+  }
+
+  async function handleDeleteSubTask(subTaskID) {
+    try {
+      const response = await apiClient.deleteSubTask(subTaskID);
+      if (response.success) {
+        setTimeout(() => {
+          window.location.reload();
+        }, 3000); // 3000 ms = 3 seconds
+      }
+    } catch (error) {
+      router.navigate({ to: `/home` });
+    }
+  }
+
   currentUserRole = apiresponse?.currentUserRole?.role;
   console.log("currentUserRole: ", currentUserRole);
 
@@ -88,23 +107,20 @@ function RouteComponent() {
         <div className="row align-items-center">
           {/* Back Button */}
           <div className="col-2 col-sm-2 text-start">
-            <button
-              className="btn btn-primary py-2"
-              onClick={GetBackButton}
-            >
+            <button className="btn btn-primary py-2" onClick={GetBackButton}>
               &lt;Back
             </button>
           </div>
 
           {/* Title */}
-          <div className="col-8 col-sm-10 text-center">
+          <div className="col-8 col-sm-8 text-center">
             <h1 className="text-white h4 h3-sm m-0">
               Welcome To TaskNexus Platform
             </h1>
           </div>
 
           {/* Right Space Filler */}
-          <div className="col-2 col-sm-1"></div>
+          <div className="col-2 col-sm-2"></div>
         </div>
       </div>
 
@@ -218,6 +234,10 @@ function RouteComponent() {
               <button
                 className="btn btn-outline-warning btn-sm px-3"
                 onClick={createSubTask}
+                disabled={
+                  apiresponse?.requestedTask?.assignedBy._id !=
+                    loggedInUserIdZustand || currentUserRole !== "project_admin"
+                }
               >
                 ➕ create SubTask
               </button>
@@ -235,97 +255,121 @@ function RouteComponent() {
                 {apiresponse?.requestedTask.title}
               </span>
             </h2>
-            {apiresponse?.allAssociatedSubTasks?.map((subtask) => (
-              <div key={subtask._id} className="col-12 col-lg-6">
+            {apiresponse?.allAssociatedSubTasks?.length === 0 ? (
+              <div className="col-12">
                 <div
-                  className="card bg-dark text-light shadow-lg border border-secondary rounded-4 h-100"
-                  style={{
-                    boxShadow: "rgba(255, 255, 255, 0.08) 0px 5px 15px",
-                  }}
+                  className="alert alert-info text-center rounded-4 shadow-sm"
+                  role="alert"
                 >
-                  <div className="card-body p-4">
-                    <div className="d-flex align-items-center justify-content-between mb-3">
-                      <h5 className="card-title text-info mb-0">
-                        🧩 {subtask.title}
-                      </h5>
-                      <img
-                        src={subtask.currentSubTaskCreatorRole.user.avatar.url}
-                        alt="avatar"
-                        className="rounded-circle"
-                        style={{
-                          width: "40px",
-                          height: "40px",
-                          objectFit: "cover",
-                          border: "2px solid yellow", // Yellow border here
-                        }}
-                      />
-                    </div>
+                  📭 No subtasks available currently. Add one to get started!
+                </div>
+              </div>
+            ) : (
+              apiresponse.allAssociatedSubTasks.map((subtask) => (
+                <div key={subtask._id} className="col-12 col-lg-6">
+                  <div
+                    className="card bg-dark text-light shadow-lg border border-secondary rounded-4 h-100"
+                    style={{
+                      boxShadow: "rgba(255, 255, 255, 0.08) 0px 5px 15px",
+                    }}
+                  >
+                    <div className="card-body p-4">
+                      <div className="d-flex align-items-center justify-content-between mb-3">
+                        <h5 className="card-title text-info mb-0">
+                          🧩 {subtask.title}
+                        </h5>
+                        <img
+                          src={
+                            subtask?.currentSubTaskCreatorRole?.user?.avatar
+                              ?.url
+                          }
+                          alt="avatar"
+                          className="rounded-circle"
+                          style={{
+                            width: "40px",
+                            height: "40px",
+                            objectFit: "cover",
+                            border: "2px solid yellow",
+                          }}
+                        />
+                      </div>
 
-                    <p className="card-text mb-2">
-                      <strong>👤 Created By:</strong>{" "}
-                      {subtask.currentSubTaskCreatorRole.user.username}&nbsp;
-                      <span
-                        className={`badge text-uppercase fw-medium ${
-                          subtask.currentSubTaskCreatorRole.role === "member"
-                            ? "bg-warning text-dark"
-                            : subtask.currentSubTaskCreatorRole.role === "admin"
-                              ? "bg-primary"
-                              : "bg-success"
-                        }`}
-                      >
-                        {subtask.currentSubTaskCreatorRole.role}
-                      </span>
-                    </p>
-
-                    <p className="card-text mb-2">
-                      <strong>Status:</strong>{" "}
-                      <span
-                        className={`badge text-uppercase fw-small ${
-                          subtask.isCompleted
-                            ? "bg-success"
-                            : "bg-warning text-dark"
-                        }`}
-                      >
-                        {subtask.isCompleted ? "Completed" : "Pending"}
-                      </span>
-                    </p>
-
-                    <p className="card-text mb-1">
-                      <strong>📅 Created At:</strong>{" "}
-                      {new Date(subtask.createdAt).toLocaleString()}
-                    </p>
-                    <div className="d-flex justify-content-between align-items-center">
-                      <p className="card-text mb-0">
-                        <strong>🕒 Last Updated:</strong>{" "}
-                        {new Date(subtask.updatedAt).toLocaleString()}
+                      <p className="card-text mb-2">
+                        <strong>👤 Created By:</strong>{" "}
+                        {subtask?.currentSubTaskCreatorRole?.user?.username}
+                        &nbsp;
+                        <span
+                          className={`badge text-uppercase fw-medium ${
+                            subtask?.currentSubTaskCreatorRole?.role ===
+                            "member"
+                              ? "bg-warning text-dark"
+                              : subtask?.currentSubTaskCreatorRole?.role ===
+                                  "admin"
+                                ? "bg-primary"
+                                : "bg-success"
+                          }`}
+                        >
+                          {subtask?.currentSubTaskCreatorRole?.role}
+                        </span>
                       </p>
-                      <div>
-                        <button
-                          className="btn btn-sm btn-outline-warning me-2"
-                          onClick={() => handleEditSubTask(subtask._id)}
-                          disabled={
-                            subtask.createdBy != loggedInUserIdZustand ||
-                            currentUserRole !== "project_admin"
-                          }
+
+                      <p className="card-text mb-2">
+                        <strong>Status:</strong>{" "}
+                        <span
+                          className={`badge text-uppercase fw-small ${
+                            subtask.isCompleted
+                              ? "bg-success"
+                              : "bg-warning text-dark"
+                          }`}
                         >
-                          ✏️
-                        </button>
-                        <button
-                          className="btn btn-sm btn-outline-danger"
-                          onClick={() => handleDeleteSubTask(subtask._id)}
-                          disabled={
-                            subtask.createdBy != loggedInUserIdZustand ||
-                            currentUserRole !== "project_admin"
-                          }
-                        >
-                          🗑️
-                        </button>
+                          {subtask.isCompleted ? "Completed" : "Pending"}
+                        </span>
+                      </p>
+
+                      <p className="card-text mb-1">
+                        <strong>📅 Created At:</strong>{" "}
+                        {new Date(subtask.createdAt).toLocaleString()}
+                      </p>
+                      <div className="d-flex justify-content-between align-items-center">
+                        <p className="card-text mb-0">
+                          <strong>🕒 Last Updated:</strong>{" "}
+                          {new Date(subtask.updatedAt).toLocaleString()}
+                        </p>
+                        <div>
+                          <button
+                            className="btn btn-sm btn-outline-warning me-2"
+                            onClick={() => handleEditSubTask(subtask._id)}
+                            disabled={
+                              subtask.createdBy != loggedInUserIdZustand &&
+                              currentUserRole !== "project_admin"
+                            }
+                          >
+                            ✏️
+                          </button>
+                          <button
+                            className="btn btn-sm btn-outline-danger"
+                            onClick={() => {
+                              const confirmed = window.confirm(
+                                "Are you sure you want to delete this sub-task?",
+                              );
+                              if (confirmed) {
+                                handleDeleteSubTask(subtask._id);
+                              }
+                            }}
+                            disabled={
+                              subtask.createdBy != loggedInUserIdZustand &&
+                              currentUserRole !== "project_admin"
+                            }
+                          >
+                            🗑️
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
       )}

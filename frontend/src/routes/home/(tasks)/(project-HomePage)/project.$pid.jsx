@@ -74,71 +74,121 @@ function RouteComponent() {
   return (
     <div className="min-vh-100 bg-dark text-white d-flex flex-column">
       <Navbar />
-      <div className="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3 px-5 py-3 text-light bg-dark rounded shadow-sm">
-        {/* Centered Welcome Text */}
-        <div className="text-center fw-semibold fs-5 ">
-          Project&nbsp;
-          <span className="text-info">
-            ‘{apiresponse?.projectCreator?.project?.name}’
-          </span>
-          &nbsp;was created by&nbsp;
-          <span className="text-warning">
-            {apiresponse?.projectCreator?.user?.username}
-          </span>
-          &nbsp;on&nbsp;
-          <span className="text-secondary">
-            {new Date(
-              apiresponse?.projectCreator?.createdAt,
-            ).toLocaleDateString("en-GB", {
-              day: "2-digit",
-              month: "short",
-              year: "numeric",
-            })}
-          </span>
-          {/* <p>{apiresponse?.currentUser?.role}</p> */}
-          <button
-            className="btn btn-primary ms-3"
-            onClick={handleCreateTask}
-            disabled={apiresponse?.currentUser?.role === "member"}
-          >
-            Create Task
-          </button>
-          <button
-            className="btn btn-primary ms-3"
-            onClick={handleProjectMemberGET}
-          >
-            View Project Member
-          </button>
-          <button className="btn btn-primary ms-3" onClick={handleNotesGET}>
-            View Project Notes
-          </button>
-        </div>
+      <div className="container-fluid px-3 px-md-5 py-3 text-light bg-dark rounded shadow-sm">
+        <div className="row gy-3 align-items-center justify-content-between">
+          {/* Welcome Text + Dropdown */}
+          <div className="col-12 col-md-7">
+            <div className="text-center text-md-start fw-semibold fs-5">
+              Project&nbsp;
+              <span className="text-info">
+                ‘{apiresponse?.projectCreator?.project?.name}’
+              </span>
+              &nbsp;was created by&nbsp;
+              <span className="text-warning">
+                {apiresponse?.projectCreator?.user?.username}
+              </span>
+              &nbsp;on&nbsp;
+              <span className="text-secondary">
+                {new Date(
+                  apiresponse?.projectCreator?.createdAt,
+                ).toLocaleDateString("en-GB", {
+                  day: "2-digit",
+                  month: "short",
+                  year: "numeric",
+                })}
+              </span>
+              <div className="dropdown d-inline-block ms-2 mt-2 mt-md-0">
+                <button
+                  className="btn btn-outline-light dropdown-toggle btn-sm"
+                  type="button"
+                  id="projectActionsDropdown"
+                  data-bs-toggle="dropdown"
+                  aria-expanded="false"
+                >
+                  Project Actions
+                </button>
+                <ul
+                  className="dropdown-menu dropdown-menu-dark"
+                  aria-labelledby="projectActionsDropdown"
+                >
+                  <li>
+                    <button
+                      className="dropdown-item d-flex justify-content-between align-items-center"
+                      onClick={handleCreateTask}
+                      disabled={apiresponse?.currentUser?.role === "member"}
+                      title={
+                        apiresponse?.currentUser?.role === "member"
+                          ? "Only project admins can create tasks"
+                          : ""
+                      }
+                      style={
+                        apiresponse?.currentUser?.role === "member"
+                          ? { opacity: 0.5, pointerEvents: "none" }
+                          : {}
+                      }
+                    >
+                      <span>
+                        <i className="fas fa-plus me-2"></i>Create Task
+                      </span>
+                      {apiresponse?.currentUser?.role === "member" && (
+                        <i className="fas fa-lock text-warning ms-2"></i>
+                      )}
+                    </button>
+                  </li>
+                  <li>
+                    <button
+                      className="dropdown-item"
+                      onClick={handleProjectMemberGET}
+                    >
+                      <i className="fas fa-users me-2"></i>View Project Members
+                    </button>
+                  </li>
+                  <li>
+                    <button className="dropdown-item" onClick={handleNotesGET}>
+                      <i className="fas fa-sticky-note me-2"></i>View Project
+                      Notes
+                    </button>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
 
-        {/* Right-aligned Icons */}
-        <div className="d-flex gap-4 align-items-center">
-          {/* Total Users Icon */}
-          <span
-            className="d-flex align-items-center fw-bold fs-5"
-            style={{ color: "#17c0eb", cursor: "pointer" }}
-            data-bs-toggle="tooltip"
-            data-bs-placement="bottom"
-            title="Total Users In The Project"
-          >
-            <i className="fas fa-users me-2"></i>
-            {apiresponse?.projectTotalUsers}
-          </span>
+          {/* Stats Icons */}
+          <div className="col-12 col-md-5 d-flex flex-wrap justify-content-center justify-content-md-end gap-3">
+            <span
+              className="d-flex align-items-center fw-bold fs-5"
+              style={{ color: "#17c0eb", cursor: "pointer" }}
+              data-bs-toggle="tooltip"
+              data-bs-placement="bottom"
+              title="Total Users In The Project"
+            >
+              <i className="fas fa-users me-2"></i>
+              {apiresponse?.projectTotalUsers}
+            </span>
 
-          {/* Total Tasks Icon */}
-          <span
-            className="d-flex align-items-center fw-bold fs-5"
-            style={{ color: "#f9ca24", cursor: "pointer" }}
-            data-bs-toggle="tooltip"
-            data-bs-placement="bottom"
-            title="Total Tasks In The Project"
-          >
-            <i className="fas fa-tasks me-2"></i>
-            {apiresponse?.tasks?.length}
-          </span>
+            <span
+              className="d-flex align-items-center fw-bold fs-5"
+              style={{ color: "#f9ca24", cursor: "pointer" }}
+              data-bs-toggle="tooltip"
+              data-bs-placement="bottom"
+              title="Total Tasks In The Project"
+            >
+              <i className="fas fa-tasks me-2"></i>
+              {apiresponse?.tasks?.length}
+            </span>
+
+            <span
+              className="d-flex align-items-center fw-bold fs-5"
+              style={{ color: "#2ecc71", cursor: "pointer" }}
+              data-bs-toggle="tooltip"
+              data-bs-placement="bottom"
+              title="Total Notes In The Project"
+            >
+              <i className="fas fa-sticky-note me-2"></i>
+              {apiresponse?.totalNotesInTheProject}
+            </span>
+          </div>
         </div>
       </div>
 

@@ -217,6 +217,13 @@ class ApiClient {
     });
   }
 
+  async UpdateProjectNote(content, projectID, noteID) {
+    return this.customFetch(`/note/${projectID}/n/${noteID}`, {
+      method: "PUT",
+      body: JSON.stringify({ content }),
+    });
+  }
+
   async DeleteProjectNote(projectID, noteID) {
     return this.customFetch(`/note/${projectID}/n/${noteID}`, {
       method: "DELETE",
@@ -227,6 +234,32 @@ class ApiClient {
   async getAllSubTasksOfCurrentTask(taskID) {
     return this.customFetch(`/task/subtask/get/${taskID}`, {
       method: "GET",
+    });
+  }
+
+  async getAllSubTasksByID(subTaskID) {
+    return this.customFetch(`/task/subtask/getByID/${subTaskID}`, {
+      method: "GET",
+    });
+  }
+
+  async createSubTask(title, isCompleted, taskID) {
+    return this.customFetch(`/task/subtask/create/${taskID}`, {
+      method: "POST",
+      body: JSON.stringify({ title, isCompleted }),
+    });
+  }
+
+  async updateSubTask(title, isCompleted, SubTaskID) {
+    return this.customFetch(`/task/subtask/${SubTaskID}`, {
+      method: "PUT",
+      body: JSON.stringify({ title, isCompleted }),
+    });
+  }
+
+  async deleteSubTask(SubTaskID) {
+    return this.customFetch(`/task/subtask/${SubTaskID}`, {
+      method: "DELETE",
     });
   }
 }

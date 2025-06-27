@@ -22,6 +22,8 @@ function RouteComponent() {
   const [content, setcontent] = useState("");
   const [showAlert, setShowAlert] = useState(true);
   const [isNoteCreated, setisNoteCreated] = useState(false);
+  const [editNoteId, setEditNoteId] = useState(null);
+  const [editContent, setEditContent] = useState("");
 
   const isLoggedInZustand = authStore((state) => state.isLoggedIn);
   const loggedInUserIdZustand = authStore((state) => state.loggedInUserId);
@@ -98,7 +100,28 @@ function RouteComponent() {
     }
   };
 
-  function handleEdit() {}
+  async function handleEdit(noteID, editContent) {
+    try {
+      const NoteUpdation = await apiClient.UpdateProjectNote(
+        editContent,
+        pid,
+        noteID,
+      );
+      setData(NoteUpdation);
+      console.log("Note Created response:", NoteUpdation);
+
+      if (NoteUpdation.success) {
+        setTimeout(() => {
+          window.location.reload();
+        }, 3000);
+      }
+    } catch (error) {
+      setData({
+        success: false,
+        message: "Note Deletion failed in Frontend. Try again later.",
+      });
+    }
+  }
 
   const handleDelete = async (noteID) => {
     try {
@@ -234,13 +257,10 @@ function RouteComponent() {
               const isEdited = createdAt !== updatedAt;
               const badgeColor = roleBadgeColors[role] || "secondary";
 
-              // ✅ Custom date formatting
               const formatDate = (isoString) => {
                 const date = new Date(isoString);
                 const day = date.getDate();
-                const month = date.toLocaleString("default", {
-                  month: "long",
-                });
+                const month = date.toLocaleString("default", { month: "long" });
                 const year = date.getFullYear();
                 let hours = date.getHours();
                 const minutes = date.getMinutes().toString().padStart(2, "0");
@@ -255,7 +275,7 @@ function RouteComponent() {
                 <div key={_id} className="col-12 col-md-6">
                   <div className="card bg-dark border border-secondary border-3 text-light h-100 custom-white-shadow">
                     <div
-                      className="card-body d-flex flex-column justify-content-between "
+                      className="card-body d-flex flex-column justify-content-between"
                       style={{
                         boxShadow: "rgba(255, 255, 255, 0.35) 0px 5px 15px",
                       }}
@@ -271,11 +291,10 @@ function RouteComponent() {
                             height: "45px",
                             borderRadius: "50%",
                             objectFit: "cover",
-                            border: "2px solid #555", // Inner dark border
-                            boxShadow: "0 0 0 3px #ffc107", // Outer warning border
+                            border: "2px solid #555",
+                            boxShadow: "0 0 0 3px #ffc107",
                           }}
                         />
-
                         <div>
                           <div className="fw-semibold">
                             <span>
@@ -309,24 +328,51 @@ function RouteComponent() {
                         </div>
                       </div>
 
-                      {/* Row 2: Note Content */}
+                      {/* Row 2: Note Content OR Editable Textarea */}
                       <div
                         className="mb-3"
-                        style={{
-                          fontSize: "1.05rem",
-                          whiteSpace: "pre-wrap",
-                        }}
+                        style={{ fontSize: "1.05rem", whiteSpace: "pre-wrap" }}
                       >
-                        {content}
+                        {editNoteId === _id ? (
+                          <>
+                            <textarea
+                              className="form-control bg-dark text-light border-secondary mb-2"
+                              rows="3"
+                              value={editContent}
+                              onChange={(e) => setEditContent(e.target.value)}
+                            ></textarea>
+                            <div className="d-flex gap-2">
+                              <button
+                                className="btn btn-sm btn-success"
+                                onClick={() => {
+                                  handleEdit(_id, editContent);
+                                  setEditNoteId(null);
+                                }}
+                              >
+                                Save
+                              </button>
+                              <button
+                                className="btn btn-sm btn-secondary"
+                                onClick={() => setEditNoteId(null)}
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          </>
+                        ) : (
+                          content
+                        )}
                       </div>
 
-                      {/* Row 3: Time */}
+                      {/* Row 3: Time and Buttons */}
                       <div className="d-flex justify-content-between align-items-center text-white small mt-auto">
-                        {/* Left: Edit & Delete buttons */}
                         <div className="d-flex gap-2">
                           <button
                             className="btn btn-sm btn-outline-light"
-                            onClick={handleEdit}
+                            onClick={() => {
+                              setEditNoteId(_id);
+                              setEditContent(content);
+                            }}
                             disabled={currentUserRole === "member"}
                             data-bs-toggle="tooltip"
                             data-bs-placement="top"
@@ -354,7 +400,6 @@ function RouteComponent() {
                           </button>
                         </div>
 
-                        {/* Right: Time and edited status */}
                         <div className="text-end">
                           {formattedTime}
                           {isEdited && (

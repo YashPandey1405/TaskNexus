@@ -21,6 +21,7 @@ import { Route as HomeprojectEditPidRouteImport } from './routes/home/(project)/
 import { Route as HometasksprojectHomePageProjectPidRouteImport } from './routes/home/(tasks)/(project-HomePage)/project.$pid'
 import { Route as HometasksprojectHomePageTaskUpdateTidRouteImport } from './routes/home/(tasks)/(project-HomePage)/task/update.$tid'
 import { Route as HometasksprojectHomePageTaskCreatePidRouteImport } from './routes/home/(tasks)/(project-HomePage)/task/create.$pid'
+import { Route as HometasksprojectHomePageSubtasksEditStidRouteImport } from './routes/home/(tasks)/(project-HomePage)/subtasks/edit.$stid'
 import { Route as HometasksprojectHomePageSubtasksDetailsTidRouteImport } from './routes/home/(tasks)/(project-HomePage)/subtasks/details.$tid'
 import { Route as HometasksprojectHomePageSubtasksCreateTidRouteImport } from './routes/home/(tasks)/(project-HomePage)/subtasks/create.$tid'
 import { Route as HometasksprojectHomePageProjectMemberUpdatePmidRouteImport } from './routes/home/(tasks)/(project-HomePage)/project-member/update.$pmid'
@@ -92,6 +93,12 @@ const HometasksprojectHomePageTaskCreatePidRoute =
     path: '/home/task/create/$pid',
     getParentRoute: () => rootRouteImport,
   } as any)
+const HometasksprojectHomePageSubtasksEditStidRoute =
+  HometasksprojectHomePageSubtasksEditStidRouteImport.update({
+    id: '/home/(tasks)/(project-HomePage)/subtasks/edit/$stid',
+    path: '/home/subtasks/edit/$stid',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const HometasksprojectHomePageSubtasksDetailsTidRoute =
   HometasksprojectHomePageSubtasksDetailsTidRouteImport.update({
     id: '/home/(tasks)/(project-HomePage)/subtasks/details/$tid',
@@ -153,6 +160,7 @@ export interface FileRoutesByFullPath {
   '/home/project-member/update/$pmid': typeof HometasksprojectHomePageProjectMemberUpdatePmidRoute
   '/home/subtasks/create/$tid': typeof HometasksprojectHomePageSubtasksCreateTidRoute
   '/home/subtasks/details/$tid': typeof HometasksprojectHomePageSubtasksDetailsTidRoute
+  '/home/subtasks/edit/$stid': typeof HometasksprojectHomePageSubtasksEditStidRoute
   '/home/task/create/$pid': typeof HometasksprojectHomePageTaskCreatePidRoute
   '/home/task/update/$tid': typeof HometasksprojectHomePageTaskUpdateTidRoute
 }
@@ -174,6 +182,7 @@ export interface FileRoutesByTo {
   '/home/project-member/update/$pmid': typeof HometasksprojectHomePageProjectMemberUpdatePmidRoute
   '/home/subtasks/create/$tid': typeof HometasksprojectHomePageSubtasksCreateTidRoute
   '/home/subtasks/details/$tid': typeof HometasksprojectHomePageSubtasksDetailsTidRoute
+  '/home/subtasks/edit/$stid': typeof HometasksprojectHomePageSubtasksEditStidRoute
   '/home/task/create/$pid': typeof HometasksprojectHomePageTaskCreatePidRoute
   '/home/task/update/$tid': typeof HometasksprojectHomePageTaskUpdateTidRoute
 }
@@ -196,6 +205,7 @@ export interface FileRoutesById {
   '/home/(tasks)/(project-HomePage)/project-member/update/$pmid': typeof HometasksprojectHomePageProjectMemberUpdatePmidRoute
   '/home/(tasks)/(project-HomePage)/subtasks/create/$tid': typeof HometasksprojectHomePageSubtasksCreateTidRoute
   '/home/(tasks)/(project-HomePage)/subtasks/details/$tid': typeof HometasksprojectHomePageSubtasksDetailsTidRoute
+  '/home/(tasks)/(project-HomePage)/subtasks/edit/$stid': typeof HometasksprojectHomePageSubtasksEditStidRoute
   '/home/(tasks)/(project-HomePage)/task/create/$pid': typeof HometasksprojectHomePageTaskCreatePidRoute
   '/home/(tasks)/(project-HomePage)/task/update/$tid': typeof HometasksprojectHomePageTaskUpdateTidRoute
 }
@@ -219,6 +229,7 @@ export interface FileRouteTypes {
     | '/home/project-member/update/$pmid'
     | '/home/subtasks/create/$tid'
     | '/home/subtasks/details/$tid'
+    | '/home/subtasks/edit/$stid'
     | '/home/task/create/$pid'
     | '/home/task/update/$tid'
   fileRoutesByTo: FileRoutesByTo
@@ -240,6 +251,7 @@ export interface FileRouteTypes {
     | '/home/project-member/update/$pmid'
     | '/home/subtasks/create/$tid'
     | '/home/subtasks/details/$tid'
+    | '/home/subtasks/edit/$stid'
     | '/home/task/create/$pid'
     | '/home/task/update/$tid'
   id:
@@ -261,6 +273,7 @@ export interface FileRouteTypes {
     | '/home/(tasks)/(project-HomePage)/project-member/update/$pmid'
     | '/home/(tasks)/(project-HomePage)/subtasks/create/$tid'
     | '/home/(tasks)/(project-HomePage)/subtasks/details/$tid'
+    | '/home/(tasks)/(project-HomePage)/subtasks/edit/$stid'
     | '/home/(tasks)/(project-HomePage)/task/create/$pid'
     | '/home/(tasks)/(project-HomePage)/task/update/$tid'
   fileRoutesById: FileRoutesById
@@ -283,6 +296,7 @@ export interface RootRouteChildren {
   HometasksprojectHomePageProjectMemberUpdatePmidRoute: typeof HometasksprojectHomePageProjectMemberUpdatePmidRoute
   HometasksprojectHomePageSubtasksCreateTidRoute: typeof HometasksprojectHomePageSubtasksCreateTidRoute
   HometasksprojectHomePageSubtasksDetailsTidRoute: typeof HometasksprojectHomePageSubtasksDetailsTidRoute
+  HometasksprojectHomePageSubtasksEditStidRoute: typeof HometasksprojectHomePageSubtasksEditStidRoute
   HometasksprojectHomePageTaskCreatePidRoute: typeof HometasksprojectHomePageTaskCreatePidRoute
   HometasksprojectHomePageTaskUpdateTidRoute: typeof HometasksprojectHomePageTaskUpdateTidRoute
 }
@@ -373,6 +387,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HometasksprojectHomePageTaskCreatePidRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/home/(tasks)/(project-HomePage)/subtasks/edit/$stid': {
+      id: '/home/(tasks)/(project-HomePage)/subtasks/edit/$stid'
+      path: '/home/subtasks/edit/$stid'
+      fullPath: '/home/subtasks/edit/$stid'
+      preLoaderRoute: typeof HometasksprojectHomePageSubtasksEditStidRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/home/(tasks)/(project-HomePage)/subtasks/details/$tid': {
       id: '/home/(tasks)/(project-HomePage)/subtasks/details/$tid'
       path: '/home/subtasks/details/$tid'
@@ -451,6 +472,8 @@ const rootRouteChildren: RootRouteChildren = {
     HometasksprojectHomePageSubtasksCreateTidRoute,
   HometasksprojectHomePageSubtasksDetailsTidRoute:
     HometasksprojectHomePageSubtasksDetailsTidRoute,
+  HometasksprojectHomePageSubtasksEditStidRoute:
+    HometasksprojectHomePageSubtasksEditStidRoute,
   HometasksprojectHomePageTaskCreatePidRoute:
     HometasksprojectHomePageTaskCreatePidRoute,
   HometasksprojectHomePageTaskUpdateTidRoute:

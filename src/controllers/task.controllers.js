@@ -5,6 +5,7 @@ import { ApiResponse } from "../utils/api-response.js";
 import { User } from "../models/user.models.js";
 import { Project } from "../models/project.models.js";
 import { ProjectMember } from "../models/projectmember.models.js";
+import { ProjectNote } from "../models/note.models.js";
 import { Task } from "../models/task.models.js";
 import { SubTask } from "../models/subtask.models.js";
 
@@ -46,15 +47,16 @@ const getTasks = asyncHandler(async (req, res) => {
         const totalSubTasksInTask = await SubTask.countDocuments({
           task: task._id,
         });
-        task.subTask = {
-          totalSubTasksInTask,
-        };
+        task.subTask = totalSubTasksInTask;
       }),
     );
 
     console.log("4");
     // 3. Get total users in the project
     const totalUsersInTheProject = await ProjectMember.countDocuments({
+      project: projectID,
+    });
+    const totalNotesInTheProject = await ProjectNote.countDocuments({
       project: projectID,
     });
 
@@ -87,6 +89,7 @@ const getTasks = asyncHandler(async (req, res) => {
       {
         tasks: currentProject_TasksAssigned,
         projectTotalUsers: totalUsersInTheProject,
+        totalNotesInTheProject: totalNotesInTheProject,
         projectCreator: projectAdmins,
         projectAdmins: admins,
         currentUser: currentUserInProject,
@@ -557,6 +560,45 @@ const getSubTasks = asyncHandler(async (req, res) => {
   }
 });
 
+const getSubTaskByID = asyncHandler(async (req, res) => {
+  const subTaskID = req.params.subTaskID;
+  console.log("subTaskID: ", subTaskID);
+
+  // req.user is Available Due To The VerifyJWT Middleware Used before this Controller...
+  const userID = req.user._id;
+  console.log("userID: ", userID);
+  try {
+    // Search For The Task In The Database....
+    const requestedSubTask = await SubTask.findById(subTaskID);
+
+    // If No Task Found From The Database.....
+
+    console.log("1");
+    if (!requestedSubTask) {
+      throw new ApiError(404, "SubTask Not Found");
+    }
+
+    console.log("4");
+    // Set cookies and redirect
+    const response = new ApiResponse(
+      200,
+      requestedSubTask,
+      "Requested Sub-Task Send Sucsessfully From TaskNexus platform",
+    );
+
+    // Send All Projects To The Frontend....
+    return res.status(response.statusCode).json(response);
+  } catch (error) {
+    // Handle any errors that occur during user creation
+    throw new ApiError(500, "Internal server error", [
+      {
+        field: "server",
+        message: "Internal server error In The createSubTask Controller",
+      },
+    ]);
+  }
+});
+
 const createSubTask = asyncHandler(async (req, res) => {
   const { title, isCompleted } = req.body;
   console.log(req.body);
@@ -575,8 +617,7 @@ const createSubTask = asyncHandler(async (req, res) => {
   console.log("taskID: ", taskID);
 
   // req.user is Available Due To The VerifyJWT Middleware Used before this Controller...
-  // const userID = req.user._id;
-  const userID = "681b93f403609c3ca993fbda";
+  const userID = req.user._id;
   console.log("userID: ", userID);
   try {
     console.log("1");
@@ -590,11 +631,25 @@ const createSubTask = asyncHandler(async (req, res) => {
       throw new ApiError(404, "Task Not Found");
     }
 
+    // Check In The Database Is The Current User is The Project Admin.....
+    const currentUserRole = await ProjectMember.findOne({
+      user: userID,
+      project: requestedTask.project,
+    });
+
+    // If The Current User Isn't Part Of The Project....
+    if (!currentUserRole) {
+      throw new ApiError(
+        403,
+        "You Are Not Authorized To Create New Sub-Task For This Task",
+      );
+    }
+
     console.log("3");
-    // To Ensure The Current user is Either assignedTo Or assignedBy user In Task.....
+    // To Ensure The Current user is Either assignedBy user In Task Or Project_Admin.....
     if (
-      String(requestedTask.assignedTo) == String(userID) ||
-      String(requestedTask.assignedBy) == String(userID)
+      String(requestedTask.assignedTo) !== String(userID) &&
+      currentUserRole.role !== "project_admin"
     ) {
       throw new ApiError(
         403,
@@ -657,6 +712,39 @@ const updateSubTask = asyncHandler(async (req, res) => {
   const userID = req.user._id;
   console.log("userID: ", userID);
   try {
+    // Find the task and ensure it belongs to the user
+    const subtaskToUpdate = await SubTask.findById(subtaskID);
+    console.log("1");
+    console.log(subtaskToUpdate);
+
+    // If The Task Isn't Found In The Database.....
+    if (!subtaskToUpdate) {
+      throw new ApiError(404, "Sub-Task Not Found In The Database");
+    }
+    console.log("2");
+
+    // If The Current User Isn't Created The Sub-Task......
+    // Then Check , Is He Project Admin , Then Update Otherwise 403 Error Message....
+    if (String(subtaskToUpdate.createdBy) !== String(userID)) {
+      // Check Is The User Is The Project Admin Of The Project.....
+      const taskIDOfTheSubTask = subtaskToUpdate.task;
+      console.log(taskIDOfTheSubTask);
+
+      const currentParentTask = await Task.findById(taskIDOfTheSubTask);
+
+      console.log("3");
+      // Now Search For The User Role In The Project......
+      const currentUser = await ProjectMember.findOne({
+        user: userID,
+        project: currentParentTask.project,
+      });
+
+      console.log("4");
+      if (!currentUser || currentUser.role !== "project_admin") {
+        throw new ApiError(403, "unauthorized access To Delete Sub-Task");
+      }
+    }
+
     const updatedSubTask = await SubTask.findByIdAndUpdate(
       subtaskID,
       { title, isCompleted: isCompleted || false },
@@ -696,15 +784,39 @@ const deleteSubTask = asyncHandler(async (req, res) => {
   console.log("userID: ", userID);
   try {
     // Find the task and ensure it belongs to the user
-    const subtaskToDelete = await SubTask.findOne({
-      _id: subtaskID,
-      createdBy: userID,
-    });
+    const subtaskToDelete = await SubTask.findById(subtaskID);
+    console.log("1");
+    console.log(subtaskToDelete);
 
+    // If The Task Isn't Found In The Database.....
     if (!subtaskToDelete) {
-      throw new ApiError(404, "SubTask not found or unauthorized access");
+      throw new ApiError(404, "Sub-Task Not Found In The Database");
+    }
+    console.log("2");
+
+    // If The Current User Isn't Created The Sub-Task......
+    // Then Check , Is He Project Admin , Then Delete Otherwise 403 Error Message....
+    if (String(subtaskToDelete.createdBy) !== String(userID)) {
+      // Check Is The User Is The Project Admin Of The Project.....
+      const taskIDOfTheSubTask = subtaskToDelete.task;
+      console.log(taskIDOfTheSubTask);
+
+      const currentParentTask = await Task.findById(taskIDOfTheSubTask);
+
+      console.log("3");
+      // Now Search For The User Role In The Project......
+      const currentUser = await ProjectMember.findOne({
+        user: userID,
+        project: currentParentTask.project,
+      });
+
+      console.log("4");
+      if (!currentUser || currentUser.role !== "project_admin") {
+        throw new ApiError(403, "unauthorized access To Delete Sub-Task");
+      }
     }
 
+    console.log("5");
     // Now delete the task itself
     const deletedSubTask = await SubTask.findByIdAndDelete(subtaskID);
 
@@ -712,6 +824,7 @@ const deleteSubTask = asyncHandler(async (req, res) => {
       throw new ApiError(500, "Sub-Task Not Deleted");
     }
 
+    console.log("6");
     // Set cookies and redirect
     const response = new ApiResponse(
       200,
@@ -741,6 +854,7 @@ export {
   updateTask,
   deleteTask,
   getSubTasks,
+  getSubTaskByID,
   createSubTask,
   updateSubTask,
   deleteSubTask,

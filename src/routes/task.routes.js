@@ -7,6 +7,7 @@ import {
   updateTask,
   deleteTask,
   getSubTasks,
+  getSubTaskByID,
   createSubTask,
   updateSubTask,
   deleteSubTask,
@@ -49,6 +50,9 @@ router
 
 // Routes For Sub-Task Controllers
 router.route("/subtask/get/:taskID").get(verifyJWT, getSubTasks);
+router.route("/subtask/getByID/:subTaskID").get(verifyJWT, getSubTaskByID);
+
+// Only Task Creator & Project Admin Can Create An SubTask.....
 router.route("/subtask/create/:taskID").post(verifyJWT, createSubTask);
 
 router
