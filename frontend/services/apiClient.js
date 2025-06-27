@@ -209,6 +209,19 @@ class ApiClient {
       method: "GET",
     });
   }
+
+  async createProjectNote(content, projectID) {
+    return this.customFetch(`/note/${projectID}`, {
+      method: "POST",
+      body: JSON.stringify({ content }),
+    });
+  }
+
+  async DeleteProjectNote(projectID, noteID) {
+    return this.customFetch(`/note/${projectID}/n/${noteID}`, {
+      method: "DELETE",
+    });
+  }
 }
 
 const apiClient = new ApiClient();

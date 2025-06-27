@@ -119,6 +119,7 @@ const getNoteById = asyncHandler(async (req, res) => {
 });
 
 const createNote = asyncHandler(async (req, res) => {
+  console.log("The Control Reached To The Controller.....");
   // Get The Project Id From The Params.....
   const projectID = req.params.projectID;
   console.log("projectID: ", projectID);
@@ -167,7 +168,7 @@ const createNote = asyncHandler(async (req, res) => {
     const response = new ApiResponse(
       201,
       returnProjectNote,
-      "New Notes Created Sucsessfully On TaskNexus platform",
+      "New Note Created Sucsessfully On TaskNexus platform",
     );
 
     // Send All Projects To The Frontend....

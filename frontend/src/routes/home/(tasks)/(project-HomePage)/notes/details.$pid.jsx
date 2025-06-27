@@ -16,10 +16,11 @@ function RouteComponent() {
   const { pid } = Route.useParams();
   console.log("Project ID from params:", pid);
 
+  const [data, setData] = useState(null);
   const [apiresponse, setapiresponse] = useState(null);
-  const [formdatavalues, setformdatavalues] = useState(null);
+  const [content, setcontent] = useState("");
   const [showAlert, setShowAlert] = useState(true);
-  const [isProjectUpdated, setisProjectUpdated] = useState(false);
+  const [isNoteCreated, setisNoteCreated] = useState(false);
 
   const isLoggedInZustand = authStore((state) => state.isLoggedIn);
   const loggedInUserIdZustand = authStore((state) => state.loggedInUserId);
@@ -57,10 +58,6 @@ function RouteComponent() {
     getTheNotesData();
   }, [router, isLoggedInZustand]);
 
-  currentUserRole = apiresponse?.currentUserRole;
-  console.log("currentUserRole: ", currentUserRole);
-  console.log(apiresponse);
-
   // Color Pallete Based On The Note Creator Role......
   const roleBadgeColors = {
     project_admin: "danger",
@@ -68,19 +65,86 @@ function RouteComponent() {
     viewer: "secondary",
   };
 
-  function handleCreateNote() {
-    router.navigate({ to: `/home/notes/create/$pid` });
+  currentUserRole = apiresponse?.currentUserRole;
+  console.log("currentUserRole: ", currentUserRole);
+  console.log(apiresponse);
+
+  function handleGetBackPage() {
+    router.navigate({ to: `/home/project/${pid}` });
   }
 
+  const handleCreateNote = async (e) => {
+    e.preventDefault();
+    setisNoteCreated(true);
+
+    try {
+      console.log("Form Data before API call:", content);
+      const NoteCreation = await apiClient.createProjectNote(content, pid);
+      setData(NoteCreation);
+      console.log("Note Created response:", NoteCreation);
+
+      if (NoteCreation.success) {
+        setisNoteCreated(false);
+        setTimeout(() => {
+          window.location.reload();
+        }, 3000);
+      }
+    } catch (error) {
+      setData({
+        success: false,
+        message: "Note Creation failed in Frontend. Try again later.",
+      });
+    }
+  };
+
   function handleEdit() {}
-  function handleDelete() {}
+
+  const handleDelete = async (noteID) => {
+    try {
+      const NoteDeletion = await apiClient.DeleteProjectNote(pid, noteID);
+      setData(NoteDeletion);
+      console.log("Note Created response:", NoteDeletion);
+
+      if (NoteDeletion.success) {
+        setTimeout(() => {
+          window.location.reload();
+        }, 3000);
+      }
+    } catch (error) {
+      setData({
+        success: false,
+        message: "Note Deletion failed in Frontend. Try again later.",
+      });
+    }
+  };
+
   return (
     <div className="container-fluid bg-dark text-light min-vh-100">
       <Navbar />
       <div className="pb-4 px-3">
+        {/* Alert */}
+        {data && showAlert && (
+          <div
+            className={`alert ${data.success ? "alert-success" : "alert-danger"} alert-dismissible fade show`}
+            role="alert"
+          >
+            {data.message}
+            <button
+              type="button"
+              className="btn-close btn-close-dark"
+              aria-label="Close"
+              onClick={() => setShowAlert(false)}
+            ></button>
+          </div>
+        )}
         {/* Centered Welcome Text */}
-        <div className="d-flex justify-content-between align-items-center flex-wrap gap-2 pb-3 border-bottom border-secondary mb-4">
-          <div className="fw-semibold fs-5 text-center">
+        <div className="row align-items-center mb-4 pb-3">
+          <div className="col-auto">
+            <button className="btn btn-primary" onClick={handleGetBackPage}>
+              Go Back
+            </button>
+          </div>
+          <div className="col text-center fw-semibold fs-5">
             Project&nbsp;
             <span className="text-info">
               ‘{apiresponse?.currentProject?.name}’
@@ -100,16 +164,64 @@ function RouteComponent() {
               })}
             </span>
           </div>
-
-          {/* Members Are Not Allowed To Create An Project Note */}
-          <button
-            className="btn btn-primary me-2"
-            onClick={handleCreateNote}
-            disabled={currentUserRole === "member"}
-          >
-            Create Note
-          </button>
         </div>
+
+        <>
+          {/* Members Are Not Allowed To Create An Project Note */}
+          {/* 
+              React doesn't support styling pseudo-elements like ::placeholder through inline styles.
+              Although we can set text color via `style={{ color: "#fff" }}`, it affects only the input value, 
+              NOT the placeholder text.
+
+              By default, browsers render ::placeholder with `opacity: 0.5`, and since we are using a dark theme
+              (bg-dark + text-white), the white placeholder becomes nearly invisible due to reduced opacity.
+
+              Therefore, we insert a scoped <style> block inside the component to directly target the 
+              placeholder using the input's ID and set:
+              - color: a visible light gray (`#ccc`)
+                - opacity: 1 (fully visible)
+                
+                This approach avoids needing a separate CSS file while still fixing the visibility issue.
+        */}
+        </>
+        <>
+          <style>
+            {`#create::placeholder { color: #ccc !important; opacity: 1; }`}
+          </style>
+          <form
+            onSubmit={handleCreateNote}
+            className="border-bottom border-secondary mb-4"
+          >
+            <div className="row">
+              <div className="col-10 mb-3">
+                <input
+                  type="text"
+                  id="create"
+                  name="create"
+                  className="form-control bg-dark text-white border-secondary"
+                  placeholder={
+                    currentUserRole === "member"
+                      ? "Only Admin & Project-Admin Can Create An Note"
+                      : "Create a descriptive note for this project"
+                  }
+                  value={content}
+                  onChange={(e) => setcontent(e.target.value)}
+                  disabled={currentUserRole === "member"}
+                  required
+                />
+              </div>
+              <div className="col">
+                <button
+                  className="btn btn-primary me-2"
+                  disabled={currentUserRole === "member" || isNoteCreated}
+                  type="submit"
+                >
+                  {isNoteCreated ? "Creating Note..." : "Create Note"}
+                </button>
+              </div>
+            </div>
+          </form>
+        </>
 
         {apiresponse?.allProjectNotes?.length === 0 ? (
           <p className="text-muted text-center">No notes found.</p>
@@ -214,7 +326,7 @@ function RouteComponent() {
                           <button
                             className="btn btn-sm btn-outline-light"
                             onClick={handleEdit}
-                             disabled={currentUserRole === "member"}
+                            disabled={currentUserRole === "member"}
                             data-bs-toggle="tooltip"
                             data-bs-placement="top"
                             title="Edit"
@@ -223,8 +335,16 @@ function RouteComponent() {
                           </button>
                           <button
                             className="btn btn-sm btn-outline-danger"
-                            onClick={handleDelete}
-                             disabled={currentUserRole !== "project_admin"}
+                            onClick={() => {
+                              if (
+                                window.confirm(
+                                  "Are you sure you want to delete this note?",
+                                )
+                              ) {
+                                handleDelete(_id);
+                              }
+                            }}
+                            disabled={currentUserRole !== "project_admin"}
                             data-bs-toggle="tooltip"
                             data-bs-placement="top"
                             title="Delete"
