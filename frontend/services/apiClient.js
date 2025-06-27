@@ -222,6 +222,13 @@ class ApiClient {
       method: "DELETE",
     });
   }
+
+  // All Sub-Tasks Controller....
+  async getAllSubTasksOfCurrentTask(taskID) {
+    return this.customFetch(`/task/subtask/get/${taskID}`, {
+      method: "GET",
+    });
+  }
 }
 
 const apiClient = new ApiClient();

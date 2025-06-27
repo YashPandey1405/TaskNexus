@@ -49,7 +49,7 @@ function RouteComponent() {
           console.log("Notes data fetched successfully:", response);
         }
       } catch (error) {
-        setapiData({
+        setapiresponse({
           success: false,
           message: "User Not Logged In failed. Try again later.",
         });
@@ -142,7 +142,7 @@ function RouteComponent() {
         <div className="row align-items-center mb-4 pb-3">
           <div className="col-auto">
             <button className="btn btn-primary" onClick={handleGetBackPage}>
-              Go Back
+              &lt;Back
             </button>
           </div>
           <div className="col text-center fw-semibold fs-5">

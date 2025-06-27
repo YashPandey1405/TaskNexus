@@ -459,6 +459,104 @@ const deleteTask = asyncHandler(async (req, res) => {
   }
 });
 
+const getSubTasks = asyncHandler(async (req, res) => {
+  const taskID = req.params.taskID;
+  console.log("taskID: ", taskID);
+
+  // req.user is Available Due To The VerifyJWT Middleware Used before this Controller...
+  const userID = req.user._id;
+  console.log("userID: ", userID);
+  try {
+    // Search For The Task In The Database....
+    const requestedTask = await Task.findById(taskID)
+      .populate("project", "name")
+      .populate("assignedTo", "username")
+      .populate("assignedBy", "username");
+    // If No Task Found From The Database.....
+
+    console.log("1");
+    if (!requestedTask) {
+      throw new ApiError(404, "Task Not Found");
+    }
+
+    console.log("2");
+    const currentUserRole = await ProjectMember.findOne({
+      user: userID,
+      project: requestedTask.project._id,
+    }).select("role");
+
+    console.log("3");
+    // Create An SubTask In The Database......
+    const allAssociatedSubTasks = await SubTask.find({
+      task: requestedTask._id,
+    }).lean();
+
+    // Method to Show The SubTask Creator UserName & Role In Each SubTask.......
+    await Promise.all(
+      allAssociatedSubTasks.map(async (subTask) => {
+        console.log(subTask);
+        const ProjectOfCurrentSubTask = await Task.findById(
+          subTask.task,
+        ).select("project");
+        console.log(ProjectOfCurrentSubTask);
+
+        console.log("subTask.createdBy: ", subTask.createdBy);
+        console.log(
+          "ProjectOfCurrentSubTask.project : ",
+          ProjectOfCurrentSubTask.project,
+        );
+        const currentSubTaskCreatorRole = await ProjectMember.findOne({
+          user: subTask.createdBy,
+          project: ProjectOfCurrentSubTask.project,
+        }).populate("user", "username avatar");
+
+        console.log(currentSubTaskCreatorRole);
+
+        subTask.currentSubTaskCreatorRole = currentSubTaskCreatorRole;
+      }),
+    );
+
+    if (!allAssociatedSubTasks) {
+      throw new ApiError(500, "Sub-Task Not Created");
+    }
+
+    const assignedByUserRole = await ProjectMember.findOne({
+      user: requestedTask.assignedBy._id,
+      project: requestedTask.project,
+    }).select("role");
+
+    const assignedToUserRole = await ProjectMember.findOne({
+      user: requestedTask.assignedTo._id,
+      project: requestedTask.project,
+    }).select("role");
+
+    console.log("4");
+    // Set cookies and redirect
+    const response = new ApiResponse(
+      200,
+      {
+        requestedTask,
+        allAssociatedSubTasks,
+        currentUserRole,
+        assignedByUserRole,
+        assignedToUserRole,
+      },
+      "Requested Sub-Task Send Sucsessfully From TaskNexus platform",
+    );
+
+    // Send All Projects To The Frontend....
+    return res.status(response.statusCode).json(response);
+  } catch (error) {
+    // Handle any errors that occur during user creation
+    throw new ApiError(500, "Internal server error", [
+      {
+        field: "server",
+        message: "Internal server error In The createSubTask Controller",
+      },
+    ]);
+  }
+});
+
 const createSubTask = asyncHandler(async (req, res) => {
   const { title, isCompleted } = req.body;
   console.log(req.body);
@@ -477,21 +575,26 @@ const createSubTask = asyncHandler(async (req, res) => {
   console.log("taskID: ", taskID);
 
   // req.user is Available Due To The VerifyJWT Middleware Used before this Controller...
-  const userID = req.user._id;
+  // const userID = req.user._id;
+  const userID = "681b93f403609c3ca993fbda";
   console.log("userID: ", userID);
   try {
+    console.log("1");
     // Search For The Task In The Database....
     const requestedTask = await Task.findById(taskID);
+    console.log(requestedTask);
 
+    console.log("2");
     // If No Task Found From The Database.....
     if (!requestedTask) {
       throw new ApiError(404, "Task Not Found");
     }
 
+    console.log("3");
     // To Ensure The Current user is Either assignedTo Or assignedBy user In Task.....
     if (
-      String(requestedTask.assignedTo) !== String(userID) &&
-      String(requestedTask.assignedBy) !== String(userID)
+      String(requestedTask.assignedTo) == String(userID) ||
+      String(requestedTask.assignedBy) == String(userID)
     ) {
       throw new ApiError(
         403,
@@ -499,6 +602,7 @@ const createSubTask = asyncHandler(async (req, res) => {
       );
     }
 
+    console.log("4");
     // Create An SubTask In The Database......
     const newSubTask = await SubTask.create({
       title: title,
@@ -507,6 +611,7 @@ const createSubTask = asyncHandler(async (req, res) => {
       createdBy: new mongoose.Types.ObjectId(userID),
     });
 
+    console.log("5");
     if (!newSubTask) {
       throw new ApiError(500, "Sub-Task Not Created");
     }
@@ -628,14 +733,15 @@ const deleteSubTask = asyncHandler(async (req, res) => {
 });
 
 export {
-  createSubTask,
+  getTasks,
+  getTaskById,
   getDataForcreateTask,
   createTask,
   quickUpdateTask,
-  deleteSubTask,
-  deleteTask,
-  getTaskById,
-  getTasks,
-  updateSubTask,
   updateTask,
+  deleteTask,
+  getSubTasks,
+  createSubTask,
+  updateSubTask,
+  deleteSubTask,
 };

@@ -62,6 +62,10 @@ const TaskCard = ({ id, data, isDragDisabled }) => {
     }
   }
 
+  function handleSubTasksGET(taskID) {
+    router.navigate({ to: `/home/subtasks/details/${taskID}` });
+  }
+
   return (
     <div
       ref={setNodeRef}
@@ -79,7 +83,8 @@ const TaskCard = ({ id, data, isDragDisabled }) => {
           <span
             className="text-info small d-flex align-items-center mt-1 mt-sm-0"
             data-bs-toggle="tooltip"
-            title="Total Subtasks"
+            title="Click to View Subtasks"
+            onClick={() => handleSubTasksGET(id)}
           >
             <i className="fas fa-layer-group me-1"></i>
             {data?.subTask?.totalSubTasksInTask ?? 0}

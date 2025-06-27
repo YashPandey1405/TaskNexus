@@ -6,6 +6,7 @@ import {
   quickUpdateTask,
   updateTask,
   deleteTask,
+  getSubTasks,
   createSubTask,
   updateSubTask,
   deleteSubTask,
@@ -47,12 +48,13 @@ router
   );
 
 // Routes For Sub-Task Controllers
+router.route("/subtask/get/:taskID").get(verifyJWT, getSubTasks);
+router.route("/subtask/create/:taskID").post(verifyJWT, createSubTask);
+
 router
   .route("/subtask/:subtaskID")
   .put(verifyJWT, validateSubTaskPermission, updateSubTask)
   .delete(verifyJWT, validateSubTaskPermission, deleteSubTask);
-
-router.route("/subtask/create/:taskID").post(verifyJWT, createSubTask);
 
 // Update & Delete Route To Task.....
 router
