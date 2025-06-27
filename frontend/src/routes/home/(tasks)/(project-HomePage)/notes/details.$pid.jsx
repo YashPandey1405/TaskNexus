@@ -4,6 +4,7 @@ import { createFileRoute, useRouter } from "@tanstack/react-router";
 import Navbar from "../../../../../../Components/Navbar";
 import apiClient from "../../../../../../services/apiClient";
 import { authStore } from "../../../../../store/authStore";
+import ModalForm from "../../../../../../Components/ModalForm";
 
 export const Route = createFileRoute(
   "/home/(tasks)/(project-HomePage)/notes/details/$pid",
