@@ -386,7 +386,6 @@ const verifyEmail = asyncHandler(async (req, res) => {
       .update(token) // 2️⃣ Pass the unhashed token to be hashed
       .digest("hex"); // 3️⃣ Convert the hash output to a hexadecimal string
 
-
     // Find The User Based On The Hashed Verification Token.....
     const existingUser = await User.findOne({
       emailVerificationToken: hashedToken,
@@ -530,7 +529,6 @@ const resetForgottenPassword = asyncHandler(async (req, res) => {
       .createHash("sha256") // 1️⃣ Create a SHA-256 hash function
       .update(token) // 2️⃣ Pass the unhashed token to be hashed
       .digest("hex"); // 3️⃣ Convert the hash output to a hexadecimal string
-
 
     // Find The User Based On The Hashed Verification Token.....
     const existingUser = await User.findOne({
@@ -787,16 +785,32 @@ const getCurrentUser = asyncHandler(async (req, res) => {
         const projectID = projectMember.project._id;
 
         // Total Associated Tasks Of That Project With The Requested User
-        const totalAssociatedTasks = await Task.countDocuments({
+        const totalAssociatedTasks = await Task.find({
           project: projectID,
           $or: [{ assignedBy: userID }, { assignedTo: userID }],
         });
 
         // Total Associated Sub-Tasks Of That Project With The Requested User
-        const totalAssociatedSubTasks = await SubTask.countDocuments({
+        const allTasksOfCurrentProject = await Task.find({
           project: projectID,
+        }).select("_id");
+
+        const allSubTasksCreatedByUser = await SubTask.find({
           createdBy: userID,
         });
+
+        // Step 1: Extract task IDs of the current project into a Set for fast lookup
+        const projectTaskIds = new Set(
+          allTasksOfCurrentProject.map((task) => task._id.toString()),
+        );
+
+        // Step 2: Filter SubTasks where .task is in that set
+        const matchedSubTasks = allSubTasksCreatedByUser.filter((subtask) =>
+          projectTaskIds.has(subtask.task.toString()),
+        );
+
+        // Step 3: Get the total count
+        const totalMatchingSubTasksCount = matchedSubTasks.length;
 
         // Total Associated Notes Of That Project With The Requested User
         const totalAssociatedNotes = await ProjectNote.countDocuments({
@@ -804,8 +818,8 @@ const getCurrentUser = asyncHandler(async (req, res) => {
           createdBy: userID,
         });
 
-        projectMember.totalAssociatedTasks = totalAssociatedTasks;
-        projectMember.totalAssociatedSubTasks = totalAssociatedSubTasks;
+        projectMember.totalAssociatedTasks = totalAssociatedTasks.length;
+        projectMember.totalAssociatedSubTasks = totalMatchingSubTasksCount;
         projectMember.totalAssociatedNotes = totalAssociatedNotes;
       }),
     );

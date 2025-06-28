@@ -231,7 +231,7 @@ function RouteComponent() {
                 onClick={createSubTask}
                 disabled={
                   apiresponse?.requestedTask?.assignedBy._id !=
-                    loggedInUserIdZustand || currentUserRole !== "project_admin"
+                    loggedInUserIdZustand && currentUserRole !== "project_admin"
                 }
               >
                 ➕ create SubTask
