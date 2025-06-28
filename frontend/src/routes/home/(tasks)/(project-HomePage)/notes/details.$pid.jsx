@@ -67,8 +67,6 @@ function RouteComponent() {
   };
 
   currentUserRole = apiresponse?.currentUserRole;
-  console.log("currentUserRole: ", currentUserRole);
-  console.log(apiresponse);
 
   function handleGetBackPage() {
     router.navigate({ to: `/home/project/${pid}` });
@@ -367,7 +365,10 @@ function RouteComponent() {
                               setEditNoteId(_id);
                               setEditContent(content);
                             }}
-                            disabled={currentUserRole === "member"}
+                            disabled={
+                              createdBy._id != loggedInUserIdZustand &&
+                              currentUserRole !== "project_admin"
+                            }
                             data-bs-toggle="tooltip"
                             data-bs-placement="top"
                             title="Edit"

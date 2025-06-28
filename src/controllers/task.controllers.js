@@ -584,10 +584,10 @@ const createSubTask = asyncHandler(async (req, res) => {
       );
     }
 
-    // To Ensure The Current user is Either assignedBy user In Task Or Project_Admin.....
+    // To Ensure The Current user is Either assignedBy user In Task Or He Is Not An Member.....
     if (
-      String(requestedTask.assignedTo) !== String(userID) &&
-      currentUserRole.role !== "project_admin"
+      String(requestedTask.assignedBy) !== String(userID) ||
+      currentUserRole.role === "member"
     ) {
       throw new ApiError(
         403,
