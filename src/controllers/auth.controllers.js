@@ -41,33 +41,21 @@ const generateAccessAndRefereshTokens = async (userId) => {
 // Just To Learn How To Integrate Cloudinary And Multer In TaskNexus Project......
 const tempCheckRoute = asyncHandler(async (req, res) => {
   try {
-    console.log("1");
     // get data from request body
-    console.log("2");
     const { email, username, fullname, password } = req.body;
-    console.log(req.body);
-    console.log("+++++++++++++++++++++++++++++++++++++++++++++++");
-    console.log(req.file);
 
     const localFilePath = req.file?.path;
-    console.log("The Local Path Is ::: ", localFilePath);
 
     let imageUrl = null;
 
     if (localFilePath) {
-      console.log("The Control Reached Here");
       const cloudinaryResult = await uploadOnCloudinary(localFilePath);
-      console.log("The Image Cloudinary Response Is ::: ", cloudinaryResult);
 
-      console.log(1);
       if (!cloudinaryResult) {
         return res.status(500).json({ message: "Failed to upload image" });
       }
-
-      console.log(12);
       imageUrl = cloudinaryResult.secure_url;
     }
-    console.log("The Image Cloudinary URL Is ::: ", imageUrl);
 
     const newUser = {
       email,
@@ -76,7 +64,6 @@ const tempCheckRoute = asyncHandler(async (req, res) => {
       imageUrl,
     };
 
-    console.log("3");
     // Set cookies and redirect
     const response = new ApiResponse(
       200,
@@ -99,7 +86,6 @@ const tempCheckRoute = asyncHandler(async (req, res) => {
 const registerUser = asyncHandler(async (req, res) => {
   // get data from request body
   const { email, username, fullname, password } = req.body;
-  console.log(req.body);
 
   //validation Of The Input Fields....
   const errors = [];
@@ -118,7 +104,6 @@ const registerUser = asyncHandler(async (req, res) => {
 
   // Get The Local Path Of The Image Uploaded By The Multer.....
   const localFilePath = req.file?.path;
-  console.log("The Local Path Is ::: ", localFilePath);
 
   // If The LocalPath Isn't Got Created , Throw Error....
   if (!localFilePath) {
@@ -132,26 +117,21 @@ const registerUser = asyncHandler(async (req, res) => {
 
   // Now , We Will Upload On The Cloudinary Cloud Service.....
   if (localFilePath) {
-    console.log("The Control Reached Here");
     const cloudinaryResult = await uploadOnCloudinary(localFilePath);
 
     if (!cloudinaryResult) {
       return res.status(500).json({ message: "Failed to upload image" });
     }
 
-    console.log("The URL Is Been Generated");
     imageUrl = cloudinaryResult.secure_url;
   }
-  console.log("The Image Cloudinary URL Is ::: ", imageUrl);
 
   try {
-    console.log("1");
     // Check if user already exists
     const existingUser = await User.findOne({
       $or: [{ email }, { username }],
     });
 
-    console.log("2");
     // If user already exists, throw an error.....
     if (existingUser) {
       if (existingUser.email === email) {
@@ -165,8 +145,6 @@ const registerUser = asyncHandler(async (req, res) => {
       }
     }
 
-    console.log("3");
-    console.log("Creating new user...");
     // Creates a new User document & Saves it to your MongoDB database.
     // await newUser.save(); --> No need as it's already saved in the create method
     const newUser = await User.create({
@@ -179,9 +157,6 @@ const registerUser = asyncHandler(async (req, res) => {
       },
     });
 
-    console.log("4");
-    console.log(newUser);
-
     // If the user is not created, throw an error.....
     if (!newUser) {
       throw new ApiError(400, "User not created", [
@@ -189,19 +164,16 @@ const registerUser = asyncHandler(async (req, res) => {
       ]);
     }
 
-    console.log("5");
     // Generate tokens
     const { accessToken, refreshToken } = await generateAccessAndRefereshTokens(
       newUser._id,
     );
 
-    console.log("6");
     // Get Above Created user info without password & refreshToken
     const loggedInUser = await User.findById(newUser._id).select(
       "-password -refreshToken",
     );
 
-    console.log("7");
     // Send verification email to the user.....
     const { hashedToken, unHashedToken, tokenExpiry } =
       loggedInUser.generateTemporaryToken();
@@ -212,13 +184,11 @@ const registerUser = asyncHandler(async (req, res) => {
 
     // Create a verification URL with the Email-Verification token...
     const verificationUrl = `${process.env.BASE_URL}/api/v1/auth/verify-email/${unHashedToken}`;
-    console.log("Verification URL: ", verificationUrl);
 
     const EmailVerification_MailgenContent = emailVerificationMailgenContent(
       loggedInUser.username,
       verificationUrl,
     );
-    console.log("Mailgen Content Created : ", EmailVerification_MailgenContent);
 
     // Send the email To The User.....
     // await sendEmail({
@@ -261,7 +231,6 @@ const registerUser = asyncHandler(async (req, res) => {
 const loginUser = asyncHandler(async (req, res) => {
   // get data from request body
   const { email, username, password } = req.body;
-  console.log(req.body);
 
   //validation
   const errors = [];
@@ -322,15 +291,10 @@ const loginUser = asyncHandler(async (req, res) => {
 
       // Create a verification URL with the Email-Verification token...
       const verificationUrl = `${process.env.BASE_URL}/api/v1/auth/verify-email/${unHashedToken}`;
-      console.log("Verification URL: ", verificationUrl);
 
       const EmailVerification_MailgenContent = emailVerificationMailgenContent(
         loggedInUser.username,
         verificationUrl,
-      );
-      console.log(
-        "Mailgen Content Created : ",
-        EmailVerification_MailgenContent,
       );
 
       // Send the email To The User.....
@@ -414,7 +378,6 @@ const logoutUser = asyncHandler(async (req, res) => {
 
 const verifyEmail = asyncHandler(async (req, res) => {
   const token = req.params.token;
-  console.log("Token: ", token);
 
   try {
     // Hash The Token received To Make The DB-Comparisn....
@@ -423,13 +386,11 @@ const verifyEmail = asyncHandler(async (req, res) => {
       .update(token) // 2️⃣ Pass the unhashed token to be hashed
       .digest("hex"); // 3️⃣ Convert the hash output to a hexadecimal string
 
-    console.log("hashedToken: ", hashedToken);
 
     // Find The User Based On The Hashed Verification Token.....
     const existingUser = await User.findOne({
       emailVerificationToken: hashedToken,
     });
-    console.log("existingUser:", existingUser);
 
     // Special case >>> When The User Is Been Already Verified & After This , If It requests That
     // Verify-email , Then , The emailVerificationToken=null and emailVerificationExpiry=""......
@@ -516,13 +477,11 @@ const resendEmailVerification = asyncHandler(async (req, res) => {
 
     // Create a verification URL with the Email-Verification token...
     const verificationUrl = `${process.env.BASE_URL}/api/v1/auth/verify-email/${unHashedToken}`;
-    console.log("Verification URL: ", verificationUrl);
 
     const EmailVerification_MailgenContent = emailVerificationMailgenContent(
       currentUser.username,
       verificationUrl,
     );
-    console.log("Mailgen Content Created : ", EmailVerification_MailgenContent);
 
     // Send the email To The User.....
     // await sendEmail({btt
@@ -564,7 +523,6 @@ const resetForgottenPassword = asyncHandler(async (req, res) => {
 
   // Get Token From The URL....
   const token = req.params.token;
-  console.log("Token: ", token);
 
   try {
     // Hash The Token received To Make The DB-Comparisn....
@@ -573,13 +531,11 @@ const resetForgottenPassword = asyncHandler(async (req, res) => {
       .update(token) // 2️⃣ Pass the unhashed token to be hashed
       .digest("hex"); // 3️⃣ Convert the hash output to a hexadecimal string
 
-    console.log("hashedToken: ", hashedToken);
 
     // Find The User Based On The Hashed Verification Token.....
     const existingUser = await User.findOne({
       forgotPasswordToken: hashedToken,
     }).select("-password -refreshToken");
-    console.log("existingUser:", existingUser);
 
     // If The User is Not Found In The Database....
     if (!existingUser) {
@@ -693,7 +649,6 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 
 const forgotPasswordRequest = asyncHandler(async (req, res) => {
   const { email } = req.body;
-  console.log("Email: ", email);
 
   // When the email is not provided or not in valid format
   if (!email || !email.includes("@")) {
@@ -705,7 +660,6 @@ const forgotPasswordRequest = asyncHandler(async (req, res) => {
     const existingUser = await User.findOne({
       email: email,
     }).select("-password -refreshToken");
-    console.log("existingUser:", existingUser);
 
     // When The User Is Not Found In The Database.....
     if (!existingUser) {
@@ -722,14 +676,12 @@ const forgotPasswordRequest = asyncHandler(async (req, res) => {
 
     // Create a verification URL with the Forgot-Password token...
     const verificationUrl = `${process.env.BASE_URL}/api/v1/auth/forgot-password-change/${unHashedToken}`;
-    console.log("Verification URL: ", verificationUrl);
 
     // Mail Template Creation Through Mailgen npm.....
     const ForgotPassword_MailgenContent = forgotPasswordMailgenContent(
       existingUser.username,
       verificationUrl,
     );
-    console.log("Mailgen Content Created : ", ForgotPassword_MailgenContent);
 
     // Send the email To The User.....
     // await sendEmail({
@@ -764,7 +716,6 @@ const forgotPasswordRequest = asyncHandler(async (req, res) => {
 
 const changeCurrentPassword = asyncHandler(async (req, res) => {
   const { password, confirmPassword } = req.body;
-  console.log(password, confirmPassword);
 
   if (password !== confirmPassword) {
     throw new ApiError(400, "Passwords do not match.");
@@ -812,7 +763,6 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
 
 const getCurrentUser = asyncHandler(async (req, res) => {
   const userID = req.params.userID;
-  console.log("userID: ", userID);
 
   try {
     // Find The User Based On The userID Of User.....
