@@ -12,7 +12,6 @@ import { ProjectNote } from "../models/note.models.js";
 const getProjects = asyncHandler(async (req, res) => {
   // req.user is Available Due To The VerifyJWT Middleware Used before this Controller...
   const userID = req.user._id;
-  console.log("userID: ", userID);
 
   try {
     const allProjectsAssociatedWithUser = await ProjectMember.find({
@@ -69,7 +68,6 @@ const getProjects = asyncHandler(async (req, res) => {
 
 const getProjectById = asyncHandler(async (req, res) => {
   const projectID = req.params.projectID;
-  console.log("projectID: ", projectID);
 
   try {
     const currentProject = await Project.findById(projectID).populate(
@@ -99,7 +97,6 @@ const getProjectById = asyncHandler(async (req, res) => {
 
 const createProject = asyncHandler(async (req, res) => {
   const { name, description } = req.body;
-  console.log(req.body);
 
   // Extra validation When The Required Fields Are Missing....
   if (!name || !description) {
@@ -113,7 +110,6 @@ const createProject = asyncHandler(async (req, res) => {
 
   // req.user is Available Due To The VerifyJWT Middleware Used before this Controller...
   const userID = req.user._id;
-  console.log("userID: ", userID);
 
   try {
     // To ensure it's a proper ObjectId type, not just a string.....
@@ -134,8 +130,6 @@ const createProject = asyncHandler(async (req, res) => {
       user: new mongoose.Types.ObjectId(userID),
       role: "project_admin",
     });
-    console.log("Project: ", newProject);
-    console.log("newProjectMember: ", newProjectMember);
 
     const currentProject = await Project.findById(newProject._id).populate(
       "createdBy",
@@ -164,7 +158,6 @@ const createProject = asyncHandler(async (req, res) => {
 
 const updateProject = asyncHandler(async (req, res) => {
   const projectID = req.params.projectID;
-  console.log("projectID: ", projectID);
 
   const { name, description } = req.body;
   console.log(req.body);
@@ -216,7 +209,6 @@ const updateProject = asyncHandler(async (req, res) => {
 
 const deleteProject = asyncHandler(async (req, res) => {
   const projectID = req.params.projectID;
-  console.log("projectID: ", projectID);
 
   try {
     const currentProject = await Project.findByIdAndDelete(projectID);
@@ -276,39 +268,32 @@ const deleteProject = asyncHandler(async (req, res) => {
 
 const getProjectMembers = asyncHandler(async (req, res) => {
   const projectID = req.params.projectID;
-  console.log("projectID: ", projectID);
 
   try {
-    console.log("1");
     const currentProject = await Project.findById(projectID).populate(
       "createdBy",
       "username email",
     );
 
-    console.log("2");
     // When No Project Is Been Found.....
     if (!currentProject) {
       throw new ApiError(404, "No project  found");
     }
 
-    console.log("3");
     const currentProjectMembers = await ProjectMember.find({
       project: projectID,
     }).populate("user", "username fullname avatar");
 
-    console.log("4");
     // When No Enteries Found From The Database....
     if (currentProjectMembers.length === 0) {
       throw new ApiError(404, "No project members found");
     }
 
-    console.log("5");
     const [totalTasks, totalNotes] = await Promise.all([
       Task.countDocuments({ project: projectID }),
       ProjectNote.countDocuments({ project: projectID }),
     ]);
 
-    console.log("6");
     // Set cookies and redirect
     const response = new ApiResponse(
       200,
@@ -336,14 +321,11 @@ const getProjectMembers = asyncHandler(async (req, res) => {
 
 const getAvailableMembers = asyncHandler(async (req, res) => {
   const projectID = req.params.projectID;
-  console.log("projectID: ", projectID);
 
   // req.user is Available Due To The VerifyJWT Middleware Used before this Controller...
   const userID = req.user._id;
-  console.log("userID: ", userID);
 
   try {
-    console.log("1");
     const allCurrentProjectMembers = await ProjectMember.find({
       project: projectID,
     }).populate("user", "username");
@@ -352,14 +334,12 @@ const getAvailableMembers = asyncHandler(async (req, res) => {
       throw new ApiError(404, "No project members found");
     }
 
-    console.log("2");
     const allUsersInDatabase = await User.find().select("_id username email");
 
     if (allUsersInDatabase.length === 0) {
       throw new ApiError(404, "No users found");
     }
 
-    console.log("3");
     // Set cookies and redirect
     const response = new ApiResponse(
       200,
@@ -385,38 +365,30 @@ const getAvailableMembers = asyncHandler(async (req, res) => {
 
 const getProjectMemberByID = asyncHandler(async (req, res) => {
   const projectMemberID = req.params.projectMemberID;
-  console.log("projectMemberID: ", projectMemberID);
 
   // req.user is Available Due To The VerifyJWT Middleware Used before this Controller...
   const userID = req.user._id;
-  console.log("userID: ", userID);
 
   try {
-    console.log("1");
     const requestedProjectMember = await ProjectMember.findById(
       projectMemberID,
     ).populate("user", "username email");
 
-    console.log("2");
-    console.log("requestedProjectMember: ", requestedProjectMember);
     // When No Project Member Is Been Found.....
     if (!requestedProjectMember) {
       throw new ApiError(404, "No project  found");
     }
 
-    console.log("3");
     const currentLoggedInUserRole = await ProjectMember.findOne({
       user: userID,
       project: requestedProjectMember.project,
     }).populate("user", "username fullname avatar");
 
-    console.log("4");
     // When No Enteries Found From The Database....
     if (!currentLoggedInUserRole) {
       throw new ApiError(404, "No project members found");
     }
 
-    console.log("6");
     // Set cookies and redirect
     const response = new ApiResponse(
       200,
@@ -442,10 +414,8 @@ const getProjectMemberByID = asyncHandler(async (req, res) => {
 
 const addMemberToProject = asyncHandler(async (req, res) => {
   const projectID = req.params.projectID;
-  console.log("projectID: ", projectID);
 
   const { userID, role } = req.body;
-  console.log("userID: ", userID);
 
   if (!userID) {
     throw new ApiError(400, "The userID Field Is Required");
@@ -454,8 +424,6 @@ const addMemberToProject = asyncHandler(async (req, res) => {
   // req.user is Available Due To The VerifyJWT Middleware Used before this Controller...
   const LoggedInuserID = req.user._id;
   const LoggedInuserRole = req.user.role;
-  console.log("LoggedInuserID: ", LoggedInuserID);
-  console.log("LoggedInuserRole: ", LoggedInuserRole);
 
   // Any Member Can't Add Any Project Member.....
   // There Can Be Only 1 Project Admin And More Than 2 Isn't Allowed
@@ -526,10 +494,8 @@ const addMemberToProject = asyncHandler(async (req, res) => {
 
 const updateMemberRole = asyncHandler(async (req, res) => {
   const projectMemberID = req.params.projectMemberID;
-  console.log("projectMemberID: ", projectMemberID);
 
   const { role } = req.body;
-  console.log("role: ", role);
 
   if (!role) {
     throw new ApiError(400, "The role Field Is Required");
@@ -538,8 +504,6 @@ const updateMemberRole = asyncHandler(async (req, res) => {
   // req.user is Available Due To The VerifyJWT Middleware Used before this Controller...
   const LoggedInuserID = req.user._id;
   const LoggedInuserRole = req.projectMemberRole;
-  console.log("LoggedInuserID: ", LoggedInuserID);
-  console.log("LoggedInuserRole: ", LoggedInuserRole);
   try {
     const requestedProjectMember =
       await ProjectMember.findById(projectMemberID);
@@ -592,7 +556,6 @@ const updateMemberRole = asyncHandler(async (req, res) => {
 
 const deleteMember = asyncHandler(async (req, res) => {
   const projectMemberID = req.params.projectMemberID;
-  console.log("projectMemberID: ", projectMemberID);
 
   try {
     // findByIdAndUpdate The Role Of Project Member In The Database...
