@@ -43,13 +43,11 @@ function RouteComponent() {
         formData.password,
       );
       setData(loginUser);
-      console.log("Login response:", loginUser);
 
       if (loginUser.success) {
         let userId = loginUser.data._id;
         let userAvatorURl = loginUser.data.avatar?.url;
         loginUserZustand(userId, userAvatorURl);
-        console.log("User logged in:", authStore.getState());
 
         setTimeout(() => {
           router.navigate({ to: "/home" });

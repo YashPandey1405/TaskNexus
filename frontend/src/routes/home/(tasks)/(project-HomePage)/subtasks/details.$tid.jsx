@@ -14,7 +14,6 @@ export const Route = createFileRoute(
 function RouteComponent() {
   const router = useRouter();
   const { tid } = Route.useParams();
-  console.log("Task ID from params:", tid);
 
   const [data, setData] = useState(null);
   const [showSubTasks, setshowSubTasks] = useState(false);
@@ -32,21 +31,18 @@ function RouteComponent() {
     const getAllSubTasks = async () => {
       try {
         if (!isLoggedInZustand) {
-          console.log("User is not logged in, redirecting to login page...");
           router.navigate({ to: "/login" });
           return;
         }
 
         const response = await apiClient.getAllSubTasksOfCurrentTask(tid);
 
-        setapiresponse(response?.data);
-
         const tooltipTriggerList = document.querySelectorAll(
           '[data-bs-toggle="tooltip"]',
         );
         tooltipTriggerList.forEach((el) => new Tooltip(el));
         if (response.success) {
-          console.log("Sub-Tasks data fetched successfully:", response?.data);
+          setapiresponse(response?.data);
         }
       } catch (error) {
         setapiresponse({
@@ -97,7 +93,6 @@ function RouteComponent() {
   }
 
   currentUserRole = apiresponse?.currentUserRole?.role;
-  console.log("currentUserRole: ", currentUserRole);
 
   return (
     <div className="bg-dark min-vh-100">

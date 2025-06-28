@@ -47,7 +47,6 @@ const TaskCard = ({ id, data, isDragDisabled }) => {
   async function handleDeleteTask(taskID) {
     try {
       const teskDeleted = await apiClient.deleteTask(taskID);
-      console.log("Task Updated response:", teskDeleted);
 
       if (teskDeleted.success) {
         setTimeout(() => {
@@ -244,8 +243,6 @@ const KanbanBoard = ({ KanbanBoardTaskData, currentUser }) => {
   const [updationresponse, setupdationresponse] = useState(null);
   const [updating, setupdating] = useState(false);
 
-  console.log("In Kanban Block , Current User:", currentUser);
-
   // 🎯 Local state to manage columns and currently active (dragging) task
   const [columns, setColumns] = useState({
     todo: [],
@@ -317,12 +314,8 @@ const KanbanBoard = ({ KanbanBoardTaskData, currentUser }) => {
     const fromCol = findTaskColumn(taskId);
     const task = columns[fromCol]?.find((t) => t.id === taskId);
 
-    console.log("Dragging task:", task);
     const assignedByUserID = task?.data?.assignedBy?._id;
     const currentUserID = currentUser?.user?._id;
-
-    console.log("Assigned By User ID:", assignedByUserID);
-    console.log("Current User ID:", currentUserID);
 
     // 🛑 Your custom condition here (example: prevent dragging if task is done)
     if (
@@ -402,7 +395,6 @@ const KanbanBoard = ({ KanbanBoardTaskData, currentUser }) => {
   async function updateTaskStatus(taskId, newStatus) {
     try {
       setupdating(true);
-      console.log("Updating task status:", taskId, newStatus);
       const response = await apiClient.quickUpdateState(taskId, newStatus);
 
       setupdationresponse(response.data);

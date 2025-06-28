@@ -27,7 +27,6 @@ function RouteComponent() {
 
         const response = await apiClient.getCurrentUser(loggedInUserIdZudtand);
         setData(response?.data);
-        console.log(response);
       } catch (error) {
         setData({
           success: false,

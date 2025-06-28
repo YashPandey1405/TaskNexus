@@ -14,7 +14,6 @@ export const Route = createFileRoute(
 function RouteComponent() {
   const router = useRouter();
   const { pmid } = Route.useParams();
-  console.log("Project Member ID from params:", pmid);
 
   const [formData, setFormData] = useState({
     member: "",
@@ -44,7 +43,6 @@ function RouteComponent() {
         const response = await apiClient.getProjectMemberByID(pmid);
 
         if (response.success) {
-          console.log(response.data);
           setMemberList(response.data);
         }
       } catch (error) {
@@ -71,13 +69,11 @@ function RouteComponent() {
     setShowAlert(true);
 
     try {
-      console.log("Form Data before API call:", formData);
       const projectUpdation = await apiClient.UpdateProjectMember(
         formData.role,
         pmid,
       );
       setData(projectUpdation);
-      console.log("Project Member Created response:", projectUpdation);
 
       if (projectUpdation.success) {
         const pid = projectUpdation?.data?.project;
@@ -99,13 +95,11 @@ function RouteComponent() {
   //   Use Effect To Ensure That Only Project_Admin Can Edit The Project Admin
   useEffect(() => {
     const currentLoggedInUserRole = MemberList?.currentLoggedInUserRole?.role;
-    console.log(currentLoggedInUserRole);
 
     if (
       currentLoggedInUserRole &&
       currentLoggedInUserRole !== "project_admin"
     ) {
-      console.log("OUCHhhhhhhhh-------------------");
       router.navigate({ to: "/home" });
     }
     const AddedByMember = `${MemberList?.requestedProjectMember?.user?.username} (${MemberList?.requestedProjectMember?.role})`;

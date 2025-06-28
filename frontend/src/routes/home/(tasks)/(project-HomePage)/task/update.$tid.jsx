@@ -38,7 +38,6 @@ function RouteComponent() {
       try {
         // Redirect early if not logged in
         if (!isLoggedInZustand) {
-          console.log("User is not logged in, redirecting to login page...");
           router.navigate({ to: "/login" });
           return; // stop further execution
         }
@@ -51,7 +50,6 @@ function RouteComponent() {
             loggedInUserIdZudtand ||
           response?.currentLoggedInUserDetails?.role === "project_admin"
         ) {
-          console.log("You Are Not Allowed To Change The Task");
           router.navigate({ to: `/home` });
           return; // stop further execution
         }
@@ -79,7 +77,6 @@ function RouteComponent() {
           formData.assignedBy = `${assignedByUserName} (${responseData?.assignedByUserRole?.role})`;
           formData.assignedTo = `${assignedToUserName} (${responseData?.assignedToUserRole?.role})`;
           formData.status = responseData?.currentUserTask?.status;
-          console.log("Member details fetched successfully:", response);
         }
       } catch (error) {
         setData({
@@ -91,8 +88,6 @@ function RouteComponent() {
 
     getTheTaskDetails();
   }, [router, isLoggedInZustand]);
-
-  console.log("The Current User Id : ", loggedInUserIdZudtand);
 
   const handleChange = (e) => {
     setFormData((prev) => ({
@@ -107,19 +102,15 @@ function RouteComponent() {
     setShowAlert(true);
 
     try {
-      console.log("Form Data before API call:", formData);
       const taskUpdated = await apiClient.updateTask(
         formData.title,
         formData.description,
         formData.status,
         tid,
       );
-      console.log("1");
       setData(taskUpdated);
-      console.log("Task Updated response:", taskUpdated);
 
       if (taskUpdated.success) {
-        console.log("1");
         setTimeout(() => {
           router.navigate({ to: `/home/project/${projectID}` });
         }, 3000);

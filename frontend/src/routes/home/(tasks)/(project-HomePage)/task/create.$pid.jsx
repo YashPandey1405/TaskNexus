@@ -14,7 +14,6 @@ export const Route = createFileRoute(
 
 function RouteComponent() {
   const { pid } = Route.useParams();
-  console.log("Project ID from params:", pid);
   const router = useRouter();
 
   const [formData, setFormData] = useState({
@@ -36,22 +35,19 @@ function RouteComponent() {
       try {
         // Redirect early if not logged in
         if (!isLoggedInZustand) {
-          console.log("User is not logged in, redirecting to login page...");
           router.navigate({ to: "/login" });
           return; // stop further execution
         }
         const response = await apiClient.getAllProjectMembersDetails(pid);
-        setprojectMemberDetails(response);
 
         // Only ["admin", "project_admin"] Are Allowed To Create An Task Of An Project.....
         if (response?.data?.currentUserDetails?.role === "member") {
-          console.log("User is a member, redirecting to project home page...");
           router.navigate({ to: `/home/project/${pid}` });
           return; // stop further execution
         }
 
         if (response.success) {
-          console.log("Member details fetched successfully:", response);
+          setprojectMemberDetails(response);
         }
       } catch (error) {
         setData({
@@ -77,7 +73,6 @@ function RouteComponent() {
     setShowAlert(true);
 
     try {
-      console.log("Form Data before API call:", formData);
       const projectUpdation = await apiClient.createTask(
         formData.title,
         formData.description,
@@ -86,7 +81,6 @@ function RouteComponent() {
         pid,
       );
       setData(projectUpdation);
-      console.log("Project Updated response:", projectUpdation);
 
       if (projectUpdation.success) {
         setTimeout(() => {

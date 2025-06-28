@@ -51,16 +51,13 @@ function RouteComponent() {
   async function handleSubmitFormForEmail(e) {
     e.preventDefault();
     try {
-      console.log(email);
       const ForgotPasswordresponse =
         await apiClient.forgotPasswordRequest(email);
       setData(ForgotPasswordresponse);
-      console.log("Project creation response:", ForgotPasswordresponse);
 
       if (ForgotPasswordresponse.success) {
         setshowPasswordResetForm(true);
         setunHashedToken(ForgotPasswordresponse?.data);
-        console.log(unHashedToken);
       }
     } catch (error) {
       setData({
@@ -83,8 +80,6 @@ function RouteComponent() {
     setShowAlert(true);
 
     try {
-      console.log(formData);
-      console.log("unHashedToken: ", unHashedToken);
       if (formData.password !== formData.repassword) {
         setData({
           success: false,
@@ -92,14 +87,12 @@ function RouteComponent() {
         });
         return;
       }
-      console.log("Same Hai Bhai");
       const ForgotPasswordDone = await apiClient.forgotPasswordChange(
         formData.password,
         formData.repassword,
         unHashedToken,
       );
       setData(ForgotPasswordDone);
-      console.log("Forgot Password response:", ForgotPasswordDone);
 
       if (ForgotPasswordDone.success) {
         setTimeout(() => {

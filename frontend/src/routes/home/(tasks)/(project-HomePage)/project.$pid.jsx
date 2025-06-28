@@ -39,14 +39,12 @@ function RouteComponent() {
 
         const response = await apiClient.getAllTasksOfProject(pid);
 
-        setapiresponse(response.data);
-
         const tooltipTriggerList = document.querySelectorAll(
           '[data-bs-toggle="tooltip"]',
         );
         tooltipTriggerList.forEach((el) => new Tooltip(el));
         if (response.success) {
-          console.log("Project data fetched successfully:", response);
+          setapiresponse(response.data);
         }
       } catch (error) {
         setapiData({

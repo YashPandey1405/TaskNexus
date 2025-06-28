@@ -37,7 +37,6 @@ function RouteComponent() {
     setShowAlert(true);
 
     try {
-      console.log(formData);
       if (formData.password !== formData.repassword) {
         setData({
           success: false,
@@ -45,13 +44,11 @@ function RouteComponent() {
         });
         return;
       }
-      console.log("Same Hai Bhai");
       const projectCreated = await apiClient.changePassword(
         formData.password,
         formData.repassword,
       );
       setData(projectCreated);
-      console.log("Project creation response:", projectCreated);
 
       if (projectCreated.success) {
         setTimeout(() => {

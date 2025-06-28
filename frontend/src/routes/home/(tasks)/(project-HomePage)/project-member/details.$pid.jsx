@@ -36,14 +36,12 @@ function RouteComponent() {
 
         const response = await apiClient.getProjectMembers(pid);
 
-        setapiresponse(response.data);
-
         const tooltipTriggerList = document.querySelectorAll(
           '[data-bs-toggle="tooltip"]',
         );
         tooltipTriggerList.forEach((el) => new Tooltip(el));
         if (response.success) {
-          console.log("Project Members data fetched successfully:", response);
+          setapiresponse(response.data);
         }
       } catch (error) {
         setapiData({
@@ -59,7 +57,6 @@ function RouteComponent() {
   const currentLoggedInUser = apiresponse?.currentProjectMembers?.find(
     (member) => member?.user?._id === loggedInUserIdZustand,
   );
-  console.log("currentLoggedInUser: ", currentLoggedInUser);
 
   function handleAddProjectMember() {
     router.navigate({ to: `/home/project-member/create/${pid}` });

@@ -41,14 +41,12 @@ function RouteComponent() {
 
         const response = await apiClient.getAllNotesOfProject(pid);
 
-        setapiresponse(response?.data);
-
         const tooltipTriggerList = document.querySelectorAll(
           '[data-bs-toggle="tooltip"]',
         );
         tooltipTriggerList.forEach((el) => new Tooltip(el));
         if (response.success) {
-          console.log("Notes data fetched successfully:", response);
+          setapiresponse(response?.data);
         }
       } catch (error) {
         setapiresponse({
@@ -81,10 +79,8 @@ function RouteComponent() {
     setisNoteCreated(true);
 
     try {
-      console.log("Form Data before API call:", content);
       const NoteCreation = await apiClient.createProjectNote(content, pid);
       setData(NoteCreation);
-      console.log("Note Created response:", NoteCreation);
 
       if (NoteCreation.success) {
         setisNoteCreated(false);
@@ -108,7 +104,6 @@ function RouteComponent() {
         noteID,
       );
       setData(NoteUpdation);
-      console.log("Note Created response:", NoteUpdation);
 
       if (NoteUpdation.success) {
         setTimeout(() => {
@@ -127,7 +122,6 @@ function RouteComponent() {
     try {
       const NoteDeletion = await apiClient.DeleteProjectNote(pid, noteID);
       setData(NoteDeletion);
-      console.log("Note Created response:", NoteDeletion);
 
       if (NoteDeletion.success) {
         setTimeout(() => {

@@ -22,6 +22,7 @@ function RouteComponent() {
   });
 
   const [data, setData] = useState(null);
+  const [apiData, setapiData] = useState(null);
   const [MemberList, setMemberList] = useState(null);
   const [formdatavalues, setformdatavalues] = useState(null);
   const [showAlert, setShowAlert] = useState(true);
@@ -69,14 +70,12 @@ function RouteComponent() {
     setShowAlert(true);
 
     try {
-      console.log("Form Data before API call:", formData);
       const projectUpdation = await apiClient.createProjectMember(
         formData.userID,
         formData.role,
         pid,
       );
       setData(projectUpdation);
-      console.log("Project Member Created response:", projectUpdation);
 
       if (projectUpdation.success) {
         setTimeout(() => {

@@ -12,7 +12,6 @@ export const Route = createFileRoute("/home/(project)/edit/$pid")({
 
 function RouteComponent() {
   const { pid } = Route.useParams();
-  console.log("Project ID from params:", pid);
   const router = useRouter();
 
   const isLoggedInZustand = authStore((state) => state.isLoggedIn);
@@ -46,7 +45,6 @@ function RouteComponent() {
         pid,
       );
       setData(projectUpdation);
-      console.log("Project Updated response:", projectUpdation);
 
       if (projectUpdation.success) {
         setTimeout(() => {

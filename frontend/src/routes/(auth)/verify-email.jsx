@@ -29,7 +29,6 @@ function RouteComponent() {
         const response = await apiClient.resendEmailVerificationToken();
 
         if (response.success) {
-          console.log(response.data);
           setVerifyURL(response?.data);
         }
       } catch (error) {
@@ -46,10 +45,8 @@ function RouteComponent() {
   // Function To verify Email....
   async function verifyUserEmail() {
     try {
-      console.log("VerifyURL: ", VerifyURL);
       const verificationStatus = await apiClient.verifyEmail(VerifyURL);
       setData(verificationStatus);
-      console.log("verificationStatus response:", verificationStatus);
 
       if (verificationStatus.success) {
         setTimeout(() => {

@@ -14,7 +14,6 @@ export const Route = createFileRoute(
 function RouteComponent() {
   const router = useRouter();
   const { tid } = Route.useParams();
-  console.log("Task ID from params:", tid);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -35,7 +34,6 @@ function RouteComponent() {
     const getTheSubTasksList = async () => {
       try {
         if (!isLoggedInZustand) {
-          console.log("User is not logged in, redirecting to login page...");
           router.navigate({ to: "/login" });
           return;
         }
@@ -63,14 +61,12 @@ function RouteComponent() {
     setShowAlert(true);
 
     try {
-      console.log("Form Data before API call:", formData);
       const projectUpdation = await apiClient.createSubTask(
         formData.title,
         formData.isCompleted,
         tid,
       );
       setData(projectUpdation);
-      console.log("Project Member Created response:", projectUpdation);
 
       if (projectUpdation.success) {
         setTimeout(() => {

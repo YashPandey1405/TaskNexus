@@ -41,7 +41,6 @@ function RouteComponent() {
         formData.description,
       );
       setData(projectCreated);
-      console.log("Project creation response:", projectCreated);
 
       if (projectCreated.success) {
         setTimeout(() => {
