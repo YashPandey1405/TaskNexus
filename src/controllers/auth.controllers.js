@@ -525,16 +525,17 @@ const resendEmailVerification = asyncHandler(async (req, res) => {
     console.log("Mailgen Content Created : ", EmailVerification_MailgenContent);
 
     // Send the email To The User.....
-    await sendEmail({
-      email: currentUser.email, // receiver's email
-      subject: "Please Verify your email address", // subject line
-      mailgenContent: EmailVerification_MailgenContent, // Mailgen formatted content
-    });
+    // await sendEmail({btt
+    //   email: currentUser.email, // receiver's email
+    //   subject: "Please Verify your email address", // subject line
+    //   mailgenContent: EmailVerification_MailgenContent, // Mailgen formatted content
+    // });
     console.log("Email sent successfully");
 
     // Set the success mail message to frontend.....
     const response = new ApiResponse(
       200,
+      unHashedToken,
       "Mail Send successful To user's Email",
     );
 
@@ -764,7 +765,7 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
   const { password, confirmPassword } = req.body;
   console.log(password, confirmPassword);
 
-  if (password != confirmPassword) {
+  if (password !== confirmPassword) {
     throw new ApiError(400, "Passwords do not match.");
   }
 

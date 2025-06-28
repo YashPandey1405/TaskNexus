@@ -74,10 +74,29 @@ class ApiClient {
       method: "POST",
     });
   }
- 
+
   async getCurrentUser(userID) {
     return this.customFetch(`/auth/get-user/${userID}`, {
       method: "GET",
+    });
+  }
+
+  async resendEmailVerificationToken() {
+    return this.customFetch(`/auth/resend-email`, {
+      method: "GET",
+    });
+  }
+
+  async verifyEmail(token) {
+    return this.customFetch(`/auth/verify-email/${token}`, {
+      method: "GET",
+    });
+  }
+
+  async changePassword(password, confirmPassword) {
+    return this.customFetch(`/auth/change-password`, {
+      method: "POST",
+      body: JSON.stringify({ password, confirmPassword }),
     });
   }
 

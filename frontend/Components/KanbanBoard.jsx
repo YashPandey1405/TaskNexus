@@ -140,7 +140,7 @@ const TaskCard = ({ id, data, isDragDisabled }) => {
           <div className="d-flex flex-wrap gap-2">
             <button
               type="button"
-              className="btn btn-sm btn-outline-info rounded-pill d-flex align-items-center gap-1"
+              className="btn btn-sm btn-info rounded-pill d-flex align-items-center gap-1"
               disabled={
                 !(
                   data?.createdBy?._id === data?.currentUser ||

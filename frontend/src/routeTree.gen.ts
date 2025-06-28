@@ -10,11 +10,13 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AboutRouteImport } from './routes/about'
+import { Route as authVerifyEmailRouteImport } from './routes/(auth)/verify-email'
 import { Route as authSignupRouteImport } from './routes/(auth)/signup'
 import { Route as authShowProfileRouteImport } from './routes/(auth)/showProfile'
 import { Route as authLogoutRouteImport } from './routes/(auth)/logout'
 import { Route as authLoginRouteImport } from './routes/(auth)/login'
 import { Route as authForgotPasswordRouteImport } from './routes/(auth)/forgot-password'
+import { Route as authChangePasswordRouteImport } from './routes/(auth)/change-password'
 import { Route as HomeprojectIndexRouteImport } from './routes/home/(project)/index'
 import { Route as HomeprojectCreateRouteImport } from './routes/home/(project)/create'
 import { Route as HomeprojectEditPidRouteImport } from './routes/home/(project)/edit.$pid'
@@ -33,6 +35,11 @@ import { Route as HometasksprojectHomePageNotesCreatePidRouteImport } from './ro
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
   path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const authVerifyEmailRoute = authVerifyEmailRouteImport.update({
+  id: '/(auth)/verify-email',
+  path: '/verify-email',
   getParentRoute: () => rootRouteImport,
 } as any)
 const authSignupRoute = authSignupRouteImport.update({
@@ -58,6 +65,11 @@ const authLoginRoute = authLoginRouteImport.update({
 const authForgotPasswordRoute = authForgotPasswordRouteImport.update({
   id: '/(auth)/forgot-password',
   path: '/forgot-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const authChangePasswordRoute = authChangePasswordRouteImport.update({
+  id: '/(auth)/change-password',
+  path: '/change-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HomeprojectIndexRoute = HomeprojectIndexRouteImport.update({
@@ -144,11 +156,13 @@ const HometasksprojectHomePageNotesCreatePidRoute =
 
 export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
+  '/change-password': typeof authChangePasswordRoute
   '/forgot-password': typeof authForgotPasswordRoute
   '/login': typeof authLoginRoute
   '/logout': typeof authLogoutRoute
   '/showProfile': typeof authShowProfileRoute
   '/signup': typeof authSignupRoute
+  '/verify-email': typeof authVerifyEmailRoute
   '/home/create': typeof HomeprojectCreateRoute
   '/home': typeof HomeprojectIndexRoute
   '/home/edit/$pid': typeof HomeprojectEditPidRoute
@@ -166,11 +180,13 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/about': typeof AboutRoute
+  '/change-password': typeof authChangePasswordRoute
   '/forgot-password': typeof authForgotPasswordRoute
   '/login': typeof authLoginRoute
   '/logout': typeof authLogoutRoute
   '/showProfile': typeof authShowProfileRoute
   '/signup': typeof authSignupRoute
+  '/verify-email': typeof authVerifyEmailRoute
   '/home/create': typeof HomeprojectCreateRoute
   '/home': typeof HomeprojectIndexRoute
   '/home/edit/$pid': typeof HomeprojectEditPidRoute
@@ -189,11 +205,13 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/about': typeof AboutRoute
+  '/(auth)/change-password': typeof authChangePasswordRoute
   '/(auth)/forgot-password': typeof authForgotPasswordRoute
   '/(auth)/login': typeof authLoginRoute
   '/(auth)/logout': typeof authLogoutRoute
   '/(auth)/showProfile': typeof authShowProfileRoute
   '/(auth)/signup': typeof authSignupRoute
+  '/(auth)/verify-email': typeof authVerifyEmailRoute
   '/home/(project)/create': typeof HomeprojectCreateRoute
   '/home/(project)/': typeof HomeprojectIndexRoute
   '/home/(project)/edit/$pid': typeof HomeprojectEditPidRoute
@@ -213,11 +231,13 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/about'
+    | '/change-password'
     | '/forgot-password'
     | '/login'
     | '/logout'
     | '/showProfile'
     | '/signup'
+    | '/verify-email'
     | '/home/create'
     | '/home'
     | '/home/edit/$pid'
@@ -235,11 +255,13 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/about'
+    | '/change-password'
     | '/forgot-password'
     | '/login'
     | '/logout'
     | '/showProfile'
     | '/signup'
+    | '/verify-email'
     | '/home/create'
     | '/home'
     | '/home/edit/$pid'
@@ -257,11 +279,13 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/about'
+    | '/(auth)/change-password'
     | '/(auth)/forgot-password'
     | '/(auth)/login'
     | '/(auth)/logout'
     | '/(auth)/showProfile'
     | '/(auth)/signup'
+    | '/(auth)/verify-email'
     | '/home/(project)/create'
     | '/home/(project)/'
     | '/home/(project)/edit/$pid'
@@ -280,11 +304,13 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
+  authChangePasswordRoute: typeof authChangePasswordRoute
   authForgotPasswordRoute: typeof authForgotPasswordRoute
   authLoginRoute: typeof authLoginRoute
   authLogoutRoute: typeof authLogoutRoute
   authShowProfileRoute: typeof authShowProfileRoute
   authSignupRoute: typeof authSignupRoute
+  authVerifyEmailRoute: typeof authVerifyEmailRoute
   HomeprojectCreateRoute: typeof HomeprojectCreateRoute
   HomeprojectIndexRoute: typeof HomeprojectIndexRoute
   HomeprojectEditPidRoute: typeof HomeprojectEditPidRoute
@@ -308,6 +334,13 @@ declare module '@tanstack/react-router' {
       path: '/about'
       fullPath: '/about'
       preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(auth)/verify-email': {
+      id: '/(auth)/verify-email'
+      path: '/verify-email'
+      fullPath: '/verify-email'
+      preLoaderRoute: typeof authVerifyEmailRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/(auth)/signup': {
@@ -343,6 +376,13 @@ declare module '@tanstack/react-router' {
       path: '/forgot-password'
       fullPath: '/forgot-password'
       preLoaderRoute: typeof authForgotPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(auth)/change-password': {
+      id: '/(auth)/change-password'
+      path: '/change-password'
+      fullPath: '/change-password'
+      preLoaderRoute: typeof authChangePasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/home/(project)/': {
@@ -448,11 +488,13 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
+  authChangePasswordRoute: authChangePasswordRoute,
   authForgotPasswordRoute: authForgotPasswordRoute,
   authLoginRoute: authLoginRoute,
   authLogoutRoute: authLogoutRoute,
   authShowProfileRoute: authShowProfileRoute,
   authSignupRoute: authSignupRoute,
+  authVerifyEmailRoute: authVerifyEmailRoute,
   HomeprojectCreateRoute: HomeprojectCreateRoute,
   HomeprojectIndexRoute: HomeprojectIndexRoute,
   HomeprojectEditPidRoute: HomeprojectEditPidRoute,
