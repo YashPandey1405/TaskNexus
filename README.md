@@ -1,7 +1,7 @@
 # Tasknexus 🧠📌
 
 ![Backend](https://img.shields.io/badge/backend-complete-success)
-![Frontend](https://img.shields.io/badge/frontend-in%20progress-yellow)
+![Frontend](https://img.shields.io/badge/frontend-complete-success)
 ![Routing](https://img.shields.io/badge/routing-TanStack_Router-blue)
 ![State](https://img.shields.io/badge/state-Zustand-purple)
 ![Deployment](https://img.shields.io/badge/deployment-AWS_EC2-orange)
@@ -13,9 +13,24 @@
 ## 🚀 Project Status
 
 - ✅ **Backend API development is completed**
-- 🧪 **Frontend React integration is in progress**
-- 🌍 **Frontend and Backend will be deployed separately on AWS (EC2 & S3)**
-- 🔄 **Real-time features (WebSocket) and CI/CD pipeline integration are upcoming**
+- ✅ **Frontend React UI is fully integrated and complete**
+- 🚀 **Next up: Deployment to production (AWS EC2 + S3)**
+- 🔄 **Real-time WebSocket support and CI/CD automation coming soon**
+
+---
+
+## 📖 Project Journey
+
+This project was built from scratch after a progressive journey of hands-on learning through structured mini-projects:
+
+| Project                                                                      | Date     | Description                                                                                         |
+| ---------------------------------------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------- |
+| [TaskFlow Kanban](https://github.com/YashPandey1405/TaskFlow-Kanban)         | Mar 2025 | Understood core JavaScript principles including drag-and-drop and local storage persistence.        |
+| [Loginify-JWT](https://github.com/YashPandey1405/Loginify-JWT)               | Apr 2025 | Learned backend fundamentals: route/controller separation, JWT auth, and MongoDB Atlas integration. |
+| [Loginify-MERN](https://github.com/YashPandey1405/Loginify-MERN)             | Apr 2025 | Connected React frontend with backend using APIs, tackled CORS issues and frontend token handling.  |
+| TaskNexus Backend                                                            | May 2025 | Designed a robust modular backend with authentication middleware and role-based routes.             |
+| [NxtLink (Next.js URL Shortener)](https://github.com/YashPandey1405/NxtLink) | Jun 2025 | Practiced production-level deployment logic, frontend-backend linking and env setup.                |
+| TaskNexus Frontend                                                           | Jun 2025 | Built the frontend using Zustand & TanStack Router with drag-and-drop task UI in Bootstrap.         |
 
 ---
 
