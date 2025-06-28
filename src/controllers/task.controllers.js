@@ -12,7 +12,6 @@ import { SubTask } from "../models/subtask.models.js";
 const getTasks = asyncHandler(async (req, res) => {
   // Extracting projectID from the request parameters....
   const projectID = req.params.projectID;
-  console.log("projectID: ", projectID);
 
   // Validate the projectID format.....
   if (!mongoose.isValidObjectId(projectID)) {
@@ -21,9 +20,7 @@ const getTasks = asyncHandler(async (req, res) => {
 
   // req.user is Available Due To The VerifyJWT Middleware Used before this Controller...
   const userID = req.user._id;
-  console.log("userID: ", userID);
   try {
-    console.log("1");
     // 1. Get tasks assigned in the current project
     const currentProject_TasksAssigned = await Task.find({
       project: projectID,
@@ -32,15 +29,11 @@ const getTasks = asyncHandler(async (req, res) => {
       .populate("assignedBy", "username email")
       .lean();
 
-    console.log("currentProject_TasksAssigned: ", currentProject_TasksAssigned);
-
-    console.log("2");
     // When No Task Are Found From The Database....
     if (!currentProject_TasksAssigned) {
       throw new ApiError(404, "Tasks Not Found");
     }
 
-    console.log("3");
     // 2. Add subtask count to each task
     await Promise.all(
       currentProject_TasksAssigned.map(async (task) => {
@@ -51,7 +44,6 @@ const getTasks = asyncHandler(async (req, res) => {
       }),
     );
 
-    console.log("4");
     // 3. Get total users in the project
     const totalUsersInTheProject = await ProjectMember.countDocuments({
       project: projectID,
@@ -60,7 +52,6 @@ const getTasks = asyncHandler(async (req, res) => {
       project: projectID,
     });
 
-    console.log("5");
     // 4. Get project admins
     const projectAdmins = await ProjectMember.findOne({
       project: projectID,
@@ -69,20 +60,17 @@ const getTasks = asyncHandler(async (req, res) => {
       .populate("user", "username email")
       .populate("project", "name description");
 
-    console.log("6");
     // 5. Get global admins
     const admins = await ProjectMember.find({
       project: projectID,
       role: "admin",
     }).populate("user", "username email");
 
-    console.log("7");
     const currentUserInProject = await ProjectMember.findOne({
       user: userID,
       project: projectID,
     }).populate("user", "username email");
 
-    console.log("8");
     // Set cookies and redirect
     const response = new ApiResponse(
       200,
@@ -112,11 +100,9 @@ const getTasks = asyncHandler(async (req, res) => {
 
 const getTaskById = asyncHandler(async (req, res) => {
   const taskID = req.params.taskID;
-  console.log("taskID: ", taskID);
 
   // req.user is Available Due To The VerifyJWT Middleware Used before this Controller...
   const userID = req.user._id;
-  console.log("userID: ", userID);
   try {
     const currentUserTask = await Task.findById(taskID)
       .populate("project", "name description")
@@ -171,39 +157,32 @@ const getTaskById = asyncHandler(async (req, res) => {
 
 const getDataForcreateTask = asyncHandler(async (req, res) => {
   const projectID = req.params.projectID;
-  console.log("projectID: ", projectID);
 
   // req.user is Available Due To The VerifyJWT Middleware Used before this Controller...
   const userID = req.user._id;
-  console.log("userID: ", userID);
 
   try {
-    console.log("1");
     // Check Whether Assigned To User & Project Exists Or Not....
     const currentLoggedInUserRole = await ProjectMember.findOne({
       user: userID,
       project: projectID,
     });
 
-    console.log("2");
     // If The Assigned To User Doesn't Exists.....
     if (!currentLoggedInUserRole) {
       throw new ApiError(404, "Assigned user or project not found");
     }
 
-    console.log("3");
     // Get All The Project Members Of The Project......
     const allProjectMembers = await ProjectMember.find({
       project: projectID,
     }).populate("user", "username email");
 
-    console.log("4");
     // If The Current Project Doesn't Exists.....
     if (!allProjectMembers) {
       throw new ApiError(404, "No Project Not Found");
     }
 
-    console.log("5");
     // Set cookies and redirect
     const response = new ApiResponse(
       200,
@@ -230,7 +209,6 @@ const getDataForcreateTask = asyncHandler(async (req, res) => {
 
 const createTask = asyncHandler(async (req, res) => {
   const { title, description, assignedTo, status, attachments } = req.body;
-  console.log(req.body);
 
   // Extra validation when required fields are missing
   if (!title || !description) {
@@ -243,13 +221,10 @@ const createTask = asyncHandler(async (req, res) => {
   }
 
   const projectID = req.params.projectID;
-  console.log("projectID: ", projectID);
 
   // req.user is Available Due To The VerifyJWT Middleware Used before this Controller...
   const userID = req.user._id;
   const LoggedInuserRole = req.user.role;
-  console.log("userID: ", userID);
-  console.log("LoggedInuserRole: ", LoggedInuserRole);
 
   try {
     // Check Whether Assigned To User & Project Exixts Or Not....
@@ -325,15 +300,11 @@ const createTask = asyncHandler(async (req, res) => {
 });
 
 const quickUpdateTask = asyncHandler(async (req, res) => {
-  console.log("quickUpdateTask Controller Called");
   const { status } = req.body;
-  console.log(req.body);
 
   const taskID = req.params.taskID;
-  console.log("taskID: ", taskID);
 
   try {
-    console.log("1");
     // Find the task by ID and update it
     const updatedTask = await Task.findByIdAndUpdate(
       taskID,
@@ -343,13 +314,11 @@ const quickUpdateTask = asyncHandler(async (req, res) => {
       { new: true }, // To return the updated document
     );
 
-    console.log("2");
     // When No Task Are Found From The Database....
     if (!updatedTask) {
       throw new ApiError(404, "Task Not Found");
     }
 
-    console.log("3");
     // Set cookies and redirect
     const response = new ApiResponse(
       200,
@@ -372,10 +341,8 @@ const quickUpdateTask = asyncHandler(async (req, res) => {
 
 const updateTask = asyncHandler(async (req, res) => {
   const { title, description, status, attachments } = req.body;
-  console.log(req.body);
 
   const taskID = req.params.taskID;
-  console.log("taskID: ", taskID);
 
   // Validate required fields
   if (!title || !description) {
@@ -385,7 +352,6 @@ const updateTask = asyncHandler(async (req, res) => {
     );
   }
   try {
-    console.log(1);
     // Find the task by ID and update it
     const updatedTask = await Task.findByIdAndUpdate(
       taskID,
@@ -398,13 +364,11 @@ const updateTask = asyncHandler(async (req, res) => {
       { new: true }, // To return the updated document
     ).populate("project", "name description");
 
-    console.log(2);
     // When No Task Are Found From The Database....
     if (!updatedTask) {
       throw new ApiError(404, "Task Not Found");
     }
 
-    console.log(3);
     // Set cookies and redirect
     const response = new ApiResponse(
       200,
@@ -427,7 +391,6 @@ const updateTask = asyncHandler(async (req, res) => {
 
 const deleteTask = asyncHandler(async (req, res) => {
   const taskID = req.params.taskID;
-  console.log("taskID: ", taskID);
   try {
     // Find the task by ID and update it
     const deletedTask = await Task.findByIdAndDelete(taskID);
@@ -464,11 +427,9 @@ const deleteTask = asyncHandler(async (req, res) => {
 
 const getSubTasks = asyncHandler(async (req, res) => {
   const taskID = req.params.taskID;
-  console.log("taskID: ", taskID);
 
   // req.user is Available Due To The VerifyJWT Middleware Used before this Controller...
   const userID = req.user._id;
-  console.log("userID: ", userID);
   try {
     // Search For The Task In The Database....
     const requestedTask = await Task.findById(taskID)
@@ -477,18 +438,15 @@ const getSubTasks = asyncHandler(async (req, res) => {
       .populate("assignedBy", "username");
     // If No Task Found From The Database.....
 
-    console.log("1");
     if (!requestedTask) {
       throw new ApiError(404, "Task Not Found");
     }
 
-    console.log("2");
     const currentUserRole = await ProjectMember.findOne({
       user: userID,
       project: requestedTask.project._id,
     }).select("role");
 
-    console.log("3");
     // Create An SubTask In The Database......
     const allAssociatedSubTasks = await SubTask.find({
       task: requestedTask._id,
@@ -501,19 +459,11 @@ const getSubTasks = asyncHandler(async (req, res) => {
         const ProjectOfCurrentSubTask = await Task.findById(
           subTask.task,
         ).select("project");
-        console.log(ProjectOfCurrentSubTask);
 
-        console.log("subTask.createdBy: ", subTask.createdBy);
-        console.log(
-          "ProjectOfCurrentSubTask.project : ",
-          ProjectOfCurrentSubTask.project,
-        );
         const currentSubTaskCreatorRole = await ProjectMember.findOne({
           user: subTask.createdBy,
           project: ProjectOfCurrentSubTask.project,
         }).populate("user", "username avatar");
-
-        console.log(currentSubTaskCreatorRole);
 
         subTask.currentSubTaskCreatorRole = currentSubTaskCreatorRole;
       }),
@@ -533,7 +483,6 @@ const getSubTasks = asyncHandler(async (req, res) => {
       project: requestedTask.project,
     }).select("role");
 
-    console.log("4");
     // Set cookies and redirect
     const response = new ApiResponse(
       200,
@@ -562,23 +511,18 @@ const getSubTasks = asyncHandler(async (req, res) => {
 
 const getSubTaskByID = asyncHandler(async (req, res) => {
   const subTaskID = req.params.subTaskID;
-  console.log("subTaskID: ", subTaskID);
 
   // req.user is Available Due To The VerifyJWT Middleware Used before this Controller...
   const userID = req.user._id;
-  console.log("userID: ", userID);
   try {
     // Search For The Task In The Database....
     const requestedSubTask = await SubTask.findById(subTaskID);
 
     // If No Task Found From The Database.....
-
-    console.log("1");
     if (!requestedSubTask) {
       throw new ApiError(404, "SubTask Not Found");
     }
 
-    console.log("4");
     // Set cookies and redirect
     const response = new ApiResponse(
       200,
@@ -601,7 +545,6 @@ const getSubTaskByID = asyncHandler(async (req, res) => {
 
 const createSubTask = asyncHandler(async (req, res) => {
   const { title, isCompleted } = req.body;
-  console.log(req.body);
 
   // Extra validation when required fields are missing
   if (!title) {
@@ -614,18 +557,14 @@ const createSubTask = asyncHandler(async (req, res) => {
   }
 
   const taskID = req.params.taskID;
-  console.log("taskID: ", taskID);
 
   // req.user is Available Due To The VerifyJWT Middleware Used before this Controller...
   const userID = req.user._id;
-  console.log("userID: ", userID);
   try {
-    console.log("1");
     // Search For The Task In The Database....
     const requestedTask = await Task.findById(taskID);
     console.log(requestedTask);
 
-    console.log("2");
     // If No Task Found From The Database.....
     if (!requestedTask) {
       throw new ApiError(404, "Task Not Found");
@@ -645,7 +584,6 @@ const createSubTask = asyncHandler(async (req, res) => {
       );
     }
 
-    console.log("3");
     // To Ensure The Current user is Either assignedBy user In Task Or Project_Admin.....
     if (
       String(requestedTask.assignedTo) !== String(userID) &&
@@ -657,7 +595,6 @@ const createSubTask = asyncHandler(async (req, res) => {
       );
     }
 
-    console.log("4");
     // Create An SubTask In The Database......
     const newSubTask = await SubTask.create({
       title: title,
@@ -666,7 +603,6 @@ const createSubTask = asyncHandler(async (req, res) => {
       createdBy: new mongoose.Types.ObjectId(userID),
     });
 
-    console.log("5");
     if (!newSubTask) {
       throw new ApiError(500, "Sub-Task Not Created");
     }
@@ -693,7 +629,6 @@ const createSubTask = asyncHandler(async (req, res) => {
 
 const updateSubTask = asyncHandler(async (req, res) => {
   const { title, isCompleted } = req.body;
-  console.log(req.body);
 
   // Extra validation when required fields are missing
   if (!title) {
@@ -706,22 +641,17 @@ const updateSubTask = asyncHandler(async (req, res) => {
   }
 
   const subtaskID = req.params.subtaskID;
-  console.log("subtaskID: ", subtaskID);
 
   // req.user is Available Due To The VerifyJWT Middleware Used before this Controller...
   const userID = req.user._id;
-  console.log("userID: ", userID);
   try {
     // Find the task and ensure it belongs to the user
     const subtaskToUpdate = await SubTask.findById(subtaskID);
-    console.log("1");
-    console.log(subtaskToUpdate);
 
     // If The Task Isn't Found In The Database.....
     if (!subtaskToUpdate) {
       throw new ApiError(404, "Sub-Task Not Found In The Database");
     }
-    console.log("2");
 
     // If The Current User Isn't Created The Sub-Task......
     // Then Check , Is He Project Admin , Then Update Otherwise 403 Error Message....
@@ -732,14 +662,12 @@ const updateSubTask = asyncHandler(async (req, res) => {
 
       const currentParentTask = await Task.findById(taskIDOfTheSubTask);
 
-      console.log("3");
       // Now Search For The User Role In The Project......
       const currentUser = await ProjectMember.findOne({
         user: userID,
         project: currentParentTask.project,
       });
 
-      console.log("4");
       if (!currentUser || currentUser.role !== "project_admin") {
         throw new ApiError(403, "unauthorized access To Delete Sub-Task");
       }
@@ -777,46 +705,37 @@ const updateSubTask = asyncHandler(async (req, res) => {
 
 const deleteSubTask = asyncHandler(async (req, res) => {
   const subtaskID = req.params.subtaskID;
-  console.log("subtaskID: ", subtaskID);
 
   // req.user is Available Due To The VerifyJWT Middleware Used before this Controller...
   const userID = req.user._id;
-  console.log("userID: ", userID);
   try {
     // Find the task and ensure it belongs to the user
     const subtaskToDelete = await SubTask.findById(subtaskID);
-    console.log("1");
-    console.log(subtaskToDelete);
 
     // If The Task Isn't Found In The Database.....
     if (!subtaskToDelete) {
       throw new ApiError(404, "Sub-Task Not Found In The Database");
     }
-    console.log("2");
 
     // If The Current User Isn't Created The Sub-Task......
     // Then Check , Is He Project Admin , Then Delete Otherwise 403 Error Message....
     if (String(subtaskToDelete.createdBy) !== String(userID)) {
       // Check Is The User Is The Project Admin Of The Project.....
       const taskIDOfTheSubTask = subtaskToDelete.task;
-      console.log(taskIDOfTheSubTask);
 
       const currentParentTask = await Task.findById(taskIDOfTheSubTask);
 
-      console.log("3");
       // Now Search For The User Role In The Project......
       const currentUser = await ProjectMember.findOne({
         user: userID,
         project: currentParentTask.project,
       });
 
-      console.log("4");
       if (!currentUser || currentUser.role !== "project_admin") {
         throw new ApiError(403, "unauthorized access To Delete Sub-Task");
       }
     }
 
-    console.log("5");
     // Now delete the task itself
     const deletedSubTask = await SubTask.findByIdAndDelete(subtaskID);
 
@@ -824,7 +743,6 @@ const deleteSubTask = asyncHandler(async (req, res) => {
       throw new ApiError(500, "Sub-Task Not Deleted");
     }
 
-    console.log("6");
     // Set cookies and redirect
     const response = new ApiResponse(
       200,
