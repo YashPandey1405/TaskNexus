@@ -732,17 +732,18 @@ const forgotPasswordRequest = asyncHandler(async (req, res) => {
     console.log("Mailgen Content Created : ", ForgotPassword_MailgenContent);
 
     // Send the email To The User.....
-    await sendEmail({
-      email: existingUser.email, // receiver's email
-      subject: "Reset Your Password", // subject line
-      mailgenContent: ForgotPassword_MailgenContent, // Mailgen formatted content
-    });
+    // await sendEmail({
+    //   email: existingUser.email, // receiver's email
+    //   subject: "Reset Your Password", // subject line
+    //   mailgenContent: ForgotPassword_MailgenContent, // Mailgen formatted content
+    // });
     console.log("Email sent successfully");
 
     // Set the success mail message to frontend.....
     const response = new ApiResponse(
       200,
-      "Mail Send successful To user's Email",
+      unHashedToken,
+      "Mail Send successfully To user's Email",
     );
 
     // send response.....

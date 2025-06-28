@@ -100,6 +100,20 @@ class ApiClient {
     });
   }
 
+  async forgotPasswordRequest(email) {
+    return this.customFetch(`/auth/forgot-password-request`, {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    });
+  }
+
+  async forgotPasswordChange(password, confirmPassword, token) {
+    return this.customFetch(`/auth/forgot-password-change/${token}`, {
+      method: "POST",
+      body: JSON.stringify({ password, confirmPassword }),
+    });
+  }
+
   // Project endpoints
 
   async getProjects() {

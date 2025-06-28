@@ -55,7 +55,7 @@ function RouteComponent() {
       if (signupUser.success) {
         let userId = signupUser.data._id;
         let userAvatorURl = signupUser.data.avatar?.url;
-        loginUserZustand(userId,userAvatorURl);
+        loginUserZustand(userId, userAvatorURl);
         setTimeout(() => {
           router.navigate({ to: "/home" });
         }, 3000);
@@ -192,12 +192,6 @@ function RouteComponent() {
               className="btn btn-outline-warning w-75 mx-auto d-block mt-3 text-center"
             >
               Already have an account? <strong>Log In</strong>
-            </Link>
-            <Link
-              to="/forgot-password"
-              className="btn btn-outline-info w-75 mx-auto d-block mt-3 text-center"
-            >
-              Forgot your password? <strong>Reset it here</strong>
             </Link>
           </form>
         </div>
