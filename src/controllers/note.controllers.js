@@ -11,13 +11,10 @@ import { ProjectMember } from "../models/projectmember.models.js";
 const getNotes = asyncHandler(async (req, res) => {
   // Get The Project Id From The Params.....
   const projectID = req.params.projectID;
-  console.log("projectID: ", projectID);
 
   // req.user is Available Due To The VerifyJWT Middleware Used before this Controller...
   const userID = req.user._id;
   const currentUserRole = req.user.role;
-  console.log("userID: ", userID);
-  console.log("currentUserRole: ", currentUserRole);
 
   try {
     const currentProject = await Project.findById(projectID).populate(
@@ -81,7 +78,6 @@ const getNotes = asyncHandler(async (req, res) => {
 const getNoteById = asyncHandler(async (req, res) => {
   // Get The Note Id From The Params.....
   const noteID = req.params.noteID;
-  console.log("noteID: ", noteID);
 
   if (!noteID) {
     throw new ApiError(400, "noteID Is required");
@@ -119,17 +115,13 @@ const getNoteById = asyncHandler(async (req, res) => {
 });
 
 const createNote = asyncHandler(async (req, res) => {
-  console.log("The Control Reached To The Controller.....");
   // Get The Project Id From The Params.....
   const projectID = req.params.projectID;
-  console.log("projectID: ", projectID);
 
   // req.user is Available Due To The VerifyJWT Middleware Used before this Controller...
   const userID = req.user._id;
-  console.log("userID: ", userID);
 
   const { content } = req.body;
-  console.log("content: ", content);
 
   if (!content) {
     throw new ApiError(400, "content Field Is Required");
@@ -187,14 +179,12 @@ const createNote = asyncHandler(async (req, res) => {
 const updateNote = asyncHandler(async (req, res) => {
   // Get The Note Id From The Params.....
   const noteID = req.params.noteID;
-  console.log("noteID: ", noteID);
 
   if (!noteID) {
     throw new ApiError(400, "noteID Is required");
   }
 
   const { content } = req.body;
-  console.log("content: ", content);
 
   if (!content) {
     throw new ApiError(400, "content Field Is Required");
@@ -233,7 +223,6 @@ const updateNote = asyncHandler(async (req, res) => {
 const deleteNote = asyncHandler(async (req, res) => {
   // Get The Note Id From The Params.....
   const noteID = req.params.noteID;
-  console.log("noteID: ", noteID);
 
   if (!noteID) {
     throw new ApiError(400, "noteID Is required");
