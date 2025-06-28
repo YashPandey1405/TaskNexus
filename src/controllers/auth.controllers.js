@@ -11,6 +11,10 @@ import {
   forgotPasswordMailgenContent,
   sendEmail,
 } from "../utils/mail.js";
+import { ProjectMember } from "../models/projectmember.models.js";
+import { Task } from "../models/task.models.js";
+import { SubTask } from "../models/subtask.models.js";
+import { ProjectNote } from "../models/note.models.js";
 
 // Common Method To Generate Access And Refresh Tokens....
 const generateAccessAndRefereshTokens = async (userId) => {
@@ -819,10 +823,45 @@ const getCurrentUser = asyncHandler(async (req, res) => {
       throw new ApiError(401, "User Not Found");
     }
 
+    const allAssociatedProject = await ProjectMember.find({
+      user: userID,
+    })
+      .populate("project", "name description")
+      .lean();
+
+    // Method to count Total Associated Notes , Tasks & SubTasks Of The Current Requested User.......
+    await Promise.all(
+      allAssociatedProject.map(async (projectMember) => {
+        const projectID = projectMember.project._id;
+
+        // Total Associated Tasks Of That Project With The Requested User
+        const totalAssociatedTasks = await Task.countDocuments({
+          project: projectID,
+          $or: [{ assignedBy: userID }, { assignedTo: userID }],
+        });
+
+        // Total Associated Sub-Tasks Of That Project With The Requested User
+        const totalAssociatedSubTasks = await SubTask.countDocuments({
+          project: projectID,
+          createdBy: userID,
+        });
+
+        // Total Associated Notes Of That Project With The Requested User
+        const totalAssociatedNotes = await ProjectNote.countDocuments({
+          project: projectID,
+          createdBy: userID,
+        });
+
+        projectMember.totalAssociatedTasks = totalAssociatedTasks;
+        projectMember.totalAssociatedSubTasks = totalAssociatedSubTasks;
+        projectMember.totalAssociatedNotes = totalAssociatedNotes;
+      }),
+    );
+
     // Set the requested user API response.....
     const response = new ApiResponse(
       200,
-      existingUser,
+      { existingUser, allAssociatedProject },
       "Successfully fetched user details on TaskNexus.",
     );
 

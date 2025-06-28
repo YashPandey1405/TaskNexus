@@ -74,6 +74,12 @@ class ApiClient {
       method: "POST",
     });
   }
+ 
+  async getCurrentUser(userID) {
+    return this.customFetch(`/auth/get-user/${userID}`, {
+      method: "GET",
+    });
+  }
 
   // Project endpoints
 
