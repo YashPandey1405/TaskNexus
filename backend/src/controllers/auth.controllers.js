@@ -202,6 +202,8 @@ const registerUser = asyncHandler(async (req, res) => {
     const options = {
       httpOnly: true,
       secure: true,
+      sameSite: "None", // 🧠 REQUIRED for cross-origin cookies
+      path: "/", // ✅ ensures cookie is accessible on all routes
     };
 
     // Set cookies and redirect
@@ -320,6 +322,7 @@ const loginUser = asyncHandler(async (req, res) => {
       httpOnly: true,
       secure: true,
       sameSite: "None", // 🧠 REQUIRED for cross-origin cookies
+      path: "/", // ✅ ensures cookie is accessible on all routes
     };
 
     // Set cookies and redirect
@@ -370,6 +373,8 @@ const logoutUser = asyncHandler(async (req, res) => {
   const options = {
     httpOnly: true,
     secure: true,
+    sameSite: "None",
+    path: "/", // ❗ very important for cookie clearing
   };
 
   // Set cookies and redirect
