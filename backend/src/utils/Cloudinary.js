@@ -4,7 +4,7 @@ import fs from "fs";
 // Uploads a local file to Cloudinary and deletes the local copy.
 // @param {string} localFilePath - Full path of the file stored temporarily on disk.
 // @returns {Promise<object|null>} - Cloudinary upload response object, or null if upload fails.
-const uploadOnCloudinary = async (localFilePath) => {
+const uploadOnCloudinary = async (fileBuffer, originalname) => {
   try {
     // Configure Cloudinary using environment variables
     cloudinary.config({
@@ -14,19 +14,22 @@ const uploadOnCloudinary = async (localFilePath) => {
     });
 
     // Exit early if file path is not provided or file doesn't exist
-    if (!localFilePath || !fs.existsSync(localFilePath)) {
-      return null;
-    }
+    // if (!localFilePath || !fs.existsSync(localFilePath)) {
+    //   return null;
+    // }
+
+    const base64String = fileBuffer.toString("base64");
+    const dataUri = `data:image/${originalname.split(".").pop()};base64,${base64String}`;
 
     // Upload to Cloudinary In The TaskNexus_MERN-Project Project......
-    const response = await cloudinary.uploader.upload(localFilePath, {
+    const response = await cloudinary.uploader.upload(dataUri, {
       folder: "TaskNexus_MERN-Project",
       resource_type: "auto",
     });
 
     // Industry Standard -> Only Delete File From Server When Uploaded On The Cloud...
     // Delete the local file after upload From The Server......
-    fs.unlinkSync(localFilePath);
+    // fs.unlinkSync(localFilePath);
 
     return response;
   } catch (error) {
