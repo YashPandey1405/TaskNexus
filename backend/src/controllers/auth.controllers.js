@@ -229,8 +229,10 @@ const registerUser = asyncHandler(async (req, res) => {
 });
 
 const loginUser = asyncHandler(async (req, res) => {
+  console.log("Reached The Controller");
   // get data from request body
   const { email, username, password } = req.body;
+  console.log("The email : ",email);
 
   //validation
   const errors = [];
