@@ -102,17 +102,23 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new ApiError(400, "All fields are required", errors);
   }
 
+  const file = req.file;
+
+  if (!file) {
+    throw new Error("No file uploaded");
+  }
+
   console.log("1");
   // Get The Local Path Of The Image Uploaded By The Multer.....
-  const localFilePath = req.file?.path;
-  console.log("localFilePath: ", localFilePath);
+  // const localFilePath = req.file?.path;
+  // console.log("localFilePath: ", localFilePath);
 
   // If The LocalPath Isn't Got Created , Throw Error....
-  if (!localFilePath) {
-    throw new ApiError(500, "File Not Got Uploaded On The Server", [
-      { field: "Image", message: "File Not Got Uploaded On The Server" },
-    ]);
-  }
+  // if (!localFilePath) {
+  //   throw new ApiError(500, "File Not Got Uploaded On The Server", [
+  //     { field: "Image", message: "File Not Got Uploaded On The Server" },
+  //   ]);
+  // }
 
   console.log("2");
   // Variale Which Will Actually Hold An Cloudinary Public URL.....
@@ -120,8 +126,10 @@ const registerUser = asyncHandler(async (req, res) => {
 
   console.log("3");
   // Now , We Will Upload On The Cloudinary Cloud Service.....
-  if (localFilePath) {
-    const cloudinaryResult = await uploadOnCloudinary(localFilePath);
+  if (req.file) {
+    // Upload from buffer instead of localFilePath
+    const cloudinaryResult = await uploadOnCloudinary(req.file.buffer, req.file.originalname);
+    // const cloudinaryResult = await uploadOnCloudinary(localFilePath);
 
     if (!cloudinaryResult) {
       return res.status(500).json({ message: "Failed to upload image" });
