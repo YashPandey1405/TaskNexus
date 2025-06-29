@@ -232,7 +232,7 @@ const loginUser = asyncHandler(async (req, res) => {
   console.log("Reached The Controller");
   // get data from request body
   const { email, username, password } = req.body;
-  console.log("The email : ",email);
+  console.log("The email : ", email);
 
   //validation
   const errors = [];
@@ -248,6 +248,7 @@ const loginUser = asyncHandler(async (req, res) => {
   }
 
   try {
+    console.log("1");
     // Check For The User Existence.....
     const existingUser = await User.findOne({
       $or: [{ email }, { username }],
@@ -260,11 +261,13 @@ const loginUser = asyncHandler(async (req, res) => {
       ]);
     }
 
+    console.log("2");
     // We Have To Use The Object Instance Of The User Model.....
     // 'isPasswordCorrect' is a method defined in the User model that checks
     // if the provided password matches the hashed password stored in the database.
     const isPasswordCorrect = await existingUser.isPasswordCorrect(password);
 
+    console.log("3");
     // When the password is incorrect....
     if (!isPasswordCorrect) {
       throw new ApiError(400, "Invalid credential", [
@@ -272,11 +275,13 @@ const loginUser = asyncHandler(async (req, res) => {
       ]);
     }
 
+    console.log("4");
     // Generate tokens
     const { accessToken, refreshToken } = await generateAccessAndRefereshTokens(
       existingUser._id,
     );
 
+    console.log("5");
     const loggedInUser = await User.findById(existingUser._id).select(
       "-password -refreshToken ",
     );
@@ -291,6 +296,7 @@ const loginUser = asyncHandler(async (req, res) => {
       loggedInUser.emailVerificationExpiry = tokenExpiry; // Save the token expiry to the user document
       await loggedInUser.save({ validateBeforeSave: false }); // Save the user document without validation
 
+      console.log("6");
       // Create a verification URL with the Email-Verification token...
       const verificationUrl = `${process.env.BASE_URL}/api/v1/auth/verify-email/${unHashedToken}`;
 
@@ -308,10 +314,12 @@ const loginUser = asyncHandler(async (req, res) => {
       console.log("Email sent successfully");
     }
 
+    console.log("7");
     // Cookie options
     const options = {
       httpOnly: true,
       secure: true,
+      sameSite: "None", // 🧠 REQUIRED for cross-origin cookies
     };
 
     // Set cookies and redirect
