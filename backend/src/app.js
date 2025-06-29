@@ -25,7 +25,18 @@ app.use(
     // 📦 Headers allowed in requests from frontend to backend
     // 📤 Headers allowed to be exposed to the frontend (useful for tokens/cookies)
 
-    origin: "http://localhost:5173",
+    origin: function (origin, callback) {
+      const allowedOrigins = [
+        "http://localhost:5173",
+        "https://task-nexus-seven.vercel.app",
+      ];
+      // Allow requests with no origin (like mobile apps or curl)
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", "Accept"],
