@@ -260,7 +260,7 @@ function RouteComponent() {
                 </div>
               </div>
             ) : (
-              apiresponse.allAssociatedSubTasks.map((subtask) => (
+              apiresponse?.allAssociatedSubTasks?.map((subtask) => (
                 <div key={subtask._id} className="col-12 col-lg-6">
                   <div
                     className="card bg-dark text-light shadow-lg border border-secondary rounded-4 h-100"
