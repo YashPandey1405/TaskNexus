@@ -4,7 +4,7 @@
 ![Frontend](https://img.shields.io/badge/frontend-complete-success)
 ![Routing](https://img.shields.io/badge/routing-TanStack_Router-blue)
 ![State](https://img.shields.io/badge/state-Zustand-purple)
-![Deployment](https://img.shields.io/badge/deployment-Vercel_&_Render-green)
+![Deployment](https://img.shields.io/badge/deployment-Vercel_&_Render-blue)
 
 **TaskNexus** is a full-featured **Kanban Task Management System** designed for modern team collaboration. Built using a production-ready **MERN Stack**, it offers scalable architecture, role-based access, and clean drag-and-drop workflows. Whether you're a developer, project manager, or team lead — this system streamlines task organization and productivity like a pro.
 
