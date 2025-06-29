@@ -1,36 +1,37 @@
-# Tasknexus 🧠📌
+# TaskNexus 🧠📌
 
 ![Backend](https://img.shields.io/badge/backend-complete-success)
 ![Frontend](https://img.shields.io/badge/frontend-complete-success)
 ![Routing](https://img.shields.io/badge/routing-TanStack_Router-blue)
 ![State](https://img.shields.io/badge/state-Zustand-purple)
-![Deployment](https://img.shields.io/badge/deployment-AWS_EC2-orange)
+![Deployment](https://img.shields.io/badge/deployment-Vercel_&_Render-green)
 
-**Tasknexus** is a full-featured **Kanban Task Management System** designed for modern team collaboration. Built with the **MERN Stack**, it offers a scalable and extensible architecture backed by a real-time, drag-and-drop interface. Ideal for developers, teams, and product managers who value productivity and clean UI.
+**TaskNexus** is a full-featured **Kanban Task Management System** designed for modern team collaboration. Built using a production-ready **MERN Stack**, it offers scalable architecture, role-based access, and clean drag-and-drop workflows. Whether you're a developer, project manager, or team lead — this system streamlines task organization and productivity like a pro.
 
 ---
 
 ## 🚀 Project Status
 
 - ✅ **Backend API development is completed**
-- ✅ **Frontend React UI is fully integrated and complete**
-- 🚀 **Next up: Deployment to production (AWS EC2 + S3)**
-- 🔄 **Real-time WebSocket support and CI/CD automation coming soon**
+- ✅ **Frontend React UI is complete and deployed**
+- ✅ **Deployed on Vercel (Frontend) & Render (Backend)**
+- 🔄 **Version 2 in progress — WebSocket + Redis + Kafka integration**
+- 🧠 **Version 3 (planned) — AI features + GraphQL API layer**
 
 ---
 
 ## 📖 Project Journey
 
-This project was built from scratch after a progressive journey of hands-on learning through structured mini-projects:
+This project is a culmination of structured, layered development through milestone-based mini-projects:
 
-| Project                                                                      | Date     | Description                                                                                         |
-| ---------------------------------------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------- |
-| [TaskFlow Kanban](https://github.com/YashPandey1405/TaskFlow-Kanban)         | Mar 2025 | Understood core JavaScript principles including drag-and-drop and local storage persistence.        |
-| [Loginify-JWT](https://github.com/YashPandey1405/Loginify-JWT)               | Apr 2025 | Learned backend fundamentals: route/controller separation, JWT auth, and MongoDB Atlas integration. |
-| [Loginify-MERN](https://github.com/YashPandey1405/Loginify-MERN)             | Apr 2025 | Connected React frontend with backend using APIs, tackled CORS issues and frontend token handling.  |
-| TaskNexus Backend                                                            | May 2025 | Designed a robust modular backend with authentication middleware and role-based routes.             |
-| [NxtLink (Next.js URL Shortener)](https://github.com/YashPandey1405/NxtLink) | Jun 2025 | Practiced production-level deployment logic, frontend-backend linking and env setup.                |
-| TaskNexus Frontend                                                           | Jun 2025 | Built the frontend using Zustand & TanStack Router with drag-and-drop task UI in Bootstrap.         |
+| Project                                                              | Date     | Description                                                                             |
+| -------------------------------------------------------------------- | -------- | --------------------------------------------------------------------------------------- |
+| [TaskFlow Kanban](https://github.com/YashPandey1405/TaskFlow-Kanban) | Mar 2025 | JavaScript fundamentals, drag-and-drop, and local storage.                              |
+| [Loginify-JWT](https://github.com/YashPandey1405/Loginify-JWT)       | Apr 2025 | Secure backend with JWT, MongoDB, route/controller structure.                           |
+| [Loginify-MERN](https://github.com/YashPandey1405/Loginify-MERN)     | Apr 2025 | Connected frontend/backend, managed CORS, cookies, token flow.                          |
+| TaskNexus Backend                                                    | May 2025 | Modular backend with validation, mailing, file uploads, and role-based access.          |
+| [NxtLink](https://github.com/YashPandey1405/NxtLink)                 | Jun 2025 | Deployment-focused shortener app using Next.js and cloud infrastructure.                |
+| TaskNexus Frontend                                                   | Jun 2025 | Zustand + TanStack Router based frontend with real-time-ready UI and responsive design. |
 
 ---
 
@@ -38,53 +39,70 @@ This project was built from scratch after a progressive journey of hands-on lear
 
 ### 📌 Core Stack – MERN
 
-- **MongoDB**: Document-based NoSQL database for fast and scalable storage.
-- **Express.js**: RESTful backend framework to handle robust routing and middleware logic.
-- **React.js**: Component-based frontend library, used for fast and dynamic UI rendering.
-- **Node.js**: Event-driven runtime for writing scalable backend services.
+- **MongoDB Atlas**: Cloud-hosted NoSQL database with six relational models using ObjectId-based mappings.
+- **Express.js**: Backend logic with middleware layers, validation, and mail/file handling.
+- **React.js**: UI components built for a seamless Kanban experience.
+- **Node.js**: Backend server logic with modular folder structure and clean error handling.
 
 ### ⚙️ Frontend Ecosystem
 
-- **TanStack Router**: A modern, type-safe, fileless routing solution offering nested layouts and full route control.
-- **Zustand**: Minimalist and powerful state management library for global/shared state without boilerplate.
-- **DnD Kit**: Lightweight, accessible drag-and-drop framework to implement Kanban card reordering.
-- **Bootstrap 5**: Clean UI and responsive components using Bootstrap’s utility-first styling.
-- **Axios**: For consistent and customizable API calls with interceptors for token handling.
+- **TanStack Router**: Lightweight, advanced routing system for nested layouts and route guards.
+- **Zustand**: Minimalist and fast global state management without boilerplate.
+- **DnD Kit**: Drag-and-drop library used to reorder tasks and columns.
+- **Bootstrap 5**: Responsive UI with a clean, mobile-friendly layout.
+- **Axios**: For structured HTTP requests with token interceptors.
 
-### ☁️ Backend & Infrastructure
+### ☁️ Backend Features
 
-- **Node.js + Express.js** REST API (fully functional)
-- **JWT Authentication** with role-based access control
-- **Mongoose ODM** for MongoDB schema design
-- **AWS EC2** (planned) for backend deployment
-- **AWS S3 / CloudFront** (planned) for React frontend hosting
+- **Zod**: End-to-end input validation for schema-safe request handling.
+- **Mailgen + Mailtrap + NodeMailer**: Email sending setup for task invites and notifications.
+- **Multer + Cloudinary**: File uploads (attachments, images) and secure cloud storage.
+- **JWT Auth**: Secure login with middleware for protected routes and session management.
+- **Role-Based Access**: `project_admin`, `admin`, `member` — enforced via middleware and model-level filters.
+- **Deployment**:
+
+  - **Frontend**: Hosted on **Vercel**
+  - **Backend**: Deployed via **Render**
 
 ---
 
 ## ✨ Features
 
-### ✅ Implemented
+### ✅ Implemented (v1.0)
 
-- 🧠 Create, Read, Update, Delete (CRUD) for tasks
-- 📌 Drag-and-drop Kanban UI with smooth reordering
-- 🔐 JWT-based user authentication (Login, Signup)
-- 🧾 Project-wise task organization
-- 📊 Role-based access (admin/user)
-- 🧮 Subtask tracking and task metadata (priority, deadline, etc.)
+- 🧠 Complete task CRUD operations
+- 📌 Drag-and-drop Kanban with reorder persistence
+- 🔐 Secure JWT-based authentication
+- 🧾 Project-wise task segregation
+- 🧑‍🤝‍🧑 Role-based access control with 3 roles
+- 📎 File Upload & Cloud Storage
+- 📬 Mailing via transactional services
+- 📅 Subtasks, priority tags, deadlines, and activity metadata
 
-### 🔄 In Progress
+### 🛠️ In Progress (v2.0)
 
-- 🧭 Advanced routing with TanStack Router
-- 🔂 Global state management via Zustand
-- 🛡️ Auth middleware for protected routes
-- ☁️ AWS deployment configuration
+- 🔁 Real-time sync using **WebSockets + Socket.io**
+- ⚙️ **Redis** integration for horizontal scaling
+- 🧪 **Kafka** for future analytics and activity tracking
+- 🖥️ Moving backend to **bare-metal Linode servers**
+- 🧩 **PM2** process manager + **Caddy** reverse proxy setup
 
-### 🛠️ Coming Soon
+### 🚀 Planned (v3.0)
 
-- 🔄 Real-time sync using WebSocket/Socket.IO
-- 📈 Activity logs and audit trail
-- 🌐 Multi-user collaboration
-- 🧪 Unit + Integration tests (Jest/Supertest)
+- 🤖 AI-enhanced features: suggestions, task prioritization, smart alerts
+- 🌐 Partial GraphQL API exposure for flexible queries
+- ✅ Final polish of UX & wrap-up of core development phase
+
+> Development is a continuous process — and I plan to evolve TaskNexus into a benchmark open-source project.
+
+---
+
+## 💡 The Bigger Picture
+
+TaskNexus lays the foundation for my dream project:
+👉 **[CodeVantage](https://github.com/YashPandey1405/CodeVantage)** — a **LeetCode-inspired coding platform** built using **Prisma** + **PostgreSQL**, designed to offer real-time problem-solving, smart evaluation, and rich analytics.
+
+What I’ve built and learned in TaskNexus will directly support collaborative problem boards, task syncing, role management, and real-time challenge updates in CodeVantage.
 
 ---
 
@@ -93,74 +111,44 @@ This project was built from scratch after a progressive journey of hands-on lear
 ### Backend
 
 ```bash
-git clone https://github.com/your-username/tasknexus.git
-cd tasknexus/backend
-
-# Install dependencies
+git clone https://github.com/YashPandey1405/TaskNexus.git
+cd TaskNexus/backend
 npm install
-
-# Start backend server
-npm run dev
+npm start
 ```
 
-### Frontend (React + Zustand + TanStack Router)
+### Frontend
 
 ```bash
-cd tasknexus/frontend
-
-# Install dependencies
+cd TaskNexus/frontend
 npm install
-
-# Start React dev server
 npm run dev
 ```
 
-> Ensure MongoDB is running locally or set your Atlas URI in `.env`.
+> ⚠️ Make sure to provide your `.env` variables for MongoDB, Cloudinary, Mailtrap, etc.
 
 ---
 
-## 📸 UI Preview
+## 🌐 Deployment Summary
 
-> Below are some live previews of the current UI components built with React and Bootstrap:
+- **Frontend**: Hosted on **Vercel**
+- **Backend**: Hosted on **Render**
+- **Planned Migration (v2)**:
 
-### 🏠 Home Page
-
-![Home](./002_UI-Screenshots/Home.png)
-
----
-
-### 🔐 Login Form
-
-![Login Form](./002_UI-Screenshots/Login-Form.png)
-
----
-
-### 🧾 Sign Up Form
-
-![SignUp Form](./002_UI-Screenshots/SignUp-Form.png)
-
----
-
-### 📁 Project Section
-
-![Project Section](./002_UI-Screenshots/Project-Section.png)
-
----
-
-## 🌐 Deployment Strategy
-
-- **Frontend**: Will be hosted on AWS S3 + CloudFront or Vite static output
-- **Backend**: Will run on AWS EC2 Ubuntu instance with reverse proxy (Nginx)
-- **Environment Variables**: Managed using `.env` files and AWS Secrets Manager
+  - Move backend to **Linode (bare metal)**
+  - Setup **PM2** and **Caddy** for reverse proxy and service reliability
+  - Introduce **Redis + Kafka** for scalability and message queuing
 
 ---
 
 ## 🤝 Contributing
 
-Contribution guidelines will be published post v1.0 release. For now, feel free to fork and experiment with the code.
+Contribution guidelines will be published post v2.0.
+Feel free to fork the repo, suggest improvements, or raise issues!
 
 ---
 
 ## 👨‍💻 Author
 
-Developed and maintained by **Yash Pandey**, a MERN developer passionate about building performant web apps with real-time UX and clean architecture.
+Crafted with dedication by **Yash Pandey** — MERN Stack Developer, Backend Architect, and ML Enthusiast.
+Exploring scalable, collaborative web systems with a passion for performance, real-time UX, and clean DevOps workflows.
