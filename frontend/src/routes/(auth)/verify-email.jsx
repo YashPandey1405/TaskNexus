@@ -30,6 +30,7 @@ function RouteComponent() {
 
         if (response.success) {
           setVerifyURL(response?.data);
+          console.log(response?.data);
         }
       } catch (error) {
         setData({
