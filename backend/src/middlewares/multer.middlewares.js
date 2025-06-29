@@ -4,7 +4,7 @@ const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     // This storage needs public/images folder in the root directory
     // Else it will throw an error saying cannot find path public/images
-    cb(null, `./public/images`);
+    cb(null, `./backend/public/images`);
   },
   filename: function (req, file, cb) {
     cb(null, `${Date.now()}-${file.originalname}`);
