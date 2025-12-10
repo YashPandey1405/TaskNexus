@@ -29,6 +29,7 @@ app.use(
       const allowedOrigins = [
         "http://localhost:5173",
         "https://task-nexus-seven.vercel.app",
+        "https://tasknexus.yashpandey.xyz"
       ];
       // Allow requests with no origin (like mobile apps or curl)
       if (!origin || allowedOrigins.includes(origin)) {
