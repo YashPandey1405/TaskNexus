@@ -13,22 +13,22 @@ function RootComponent() {
 
   const isLoggedInZustand = authStore((state) => state.isLoggedIn);
 
-  useEffect(() => {
-    const redirectToAboutPage = async () => {
-      try {
-        if (!isLoggedInZustand) {
-          router.navigate({ to: "/about" });
-        }
-      } catch (error) {
-        setData({
-          success: false,
-          message: "User Not Logged In failed. Try again later.",
-        });
-      }
-    };
+  // useEffect(() => {
+  //   const redirectToAboutPage = async () => {
+  //     try {
+  //       if (!isLoggedInZustand) {
+  //         router.navigate({ to: "/login" });
+  //       }
+  //     } catch (error) {
+  //       setData({
+  //         success: false,
+  //         message: "User Not Logged In failed. Try again later.",
+  //       });
+  //     }
+  //   };
 
-    redirectToAboutPage();
-  }, [router]);
+  //   redirectToAboutPage();
+  // }, [router]);
   return (
     <React.Fragment>
       <Outlet />

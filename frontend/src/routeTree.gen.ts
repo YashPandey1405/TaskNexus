@@ -9,7 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as AboutRouteImport } from './routes/about'
+import { Route as IndexRouteImport } from './routes/index'
 import { Route as authVerifyEmailRouteImport } from './routes/(auth)/verify-email'
 import { Route as authSignupRouteImport } from './routes/(auth)/signup'
 import { Route as authShowProfileRouteImport } from './routes/(auth)/showProfile'
@@ -32,9 +32,9 @@ import { Route as HometasksprojectHomePageProjectMemberCreatePidRouteImport } fr
 import { Route as HometasksprojectHomePageNotesDetailsPidRouteImport } from './routes/home/(tasks)/(project-HomePage)/notes/details.$pid'
 import { Route as HometasksprojectHomePageNotesCreatePidRouteImport } from './routes/home/(tasks)/(project-HomePage)/notes/create.$pid'
 
-const AboutRoute = AboutRouteImport.update({
-  id: '/about',
-  path: '/about',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const authVerifyEmailRoute = authVerifyEmailRouteImport.update({
@@ -155,7 +155,7 @@ const HometasksprojectHomePageNotesCreatePidRoute =
   } as any)
 
 export interface FileRoutesByFullPath {
-  '/about': typeof AboutRoute
+  '/': typeof IndexRoute
   '/change-password': typeof authChangePasswordRoute
   '/forgot-password': typeof authForgotPasswordRoute
   '/login': typeof authLoginRoute
@@ -179,7 +179,7 @@ export interface FileRoutesByFullPath {
   '/home/task/update/$tid': typeof HometasksprojectHomePageTaskUpdateTidRoute
 }
 export interface FileRoutesByTo {
-  '/about': typeof AboutRoute
+  '/': typeof IndexRoute
   '/change-password': typeof authChangePasswordRoute
   '/forgot-password': typeof authForgotPasswordRoute
   '/login': typeof authLoginRoute
@@ -204,7 +204,7 @@ export interface FileRoutesByTo {
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/about': typeof AboutRoute
+  '/': typeof IndexRoute
   '/(auth)/change-password': typeof authChangePasswordRoute
   '/(auth)/forgot-password': typeof authForgotPasswordRoute
   '/(auth)/login': typeof authLoginRoute
@@ -230,7 +230,7 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | '/about'
+    | '/'
     | '/change-password'
     | '/forgot-password'
     | '/login'
@@ -254,7 +254,7 @@ export interface FileRouteTypes {
     | '/home/task/update/$tid'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/about'
+    | '/'
     | '/change-password'
     | '/forgot-password'
     | '/login'
@@ -278,7 +278,7 @@ export interface FileRouteTypes {
     | '/home/task/update/$tid'
   id:
     | '__root__'
-    | '/about'
+    | '/'
     | '/(auth)/change-password'
     | '/(auth)/forgot-password'
     | '/(auth)/login'
@@ -303,7 +303,7 @@ export interface FileRouteTypes {
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  AboutRoute: typeof AboutRoute
+  IndexRoute: typeof IndexRoute
   authChangePasswordRoute: typeof authChangePasswordRoute
   authForgotPasswordRoute: typeof authForgotPasswordRoute
   authLoginRoute: typeof authLoginRoute
@@ -329,11 +329,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/about': {
-      id: '/about'
-      path: '/about'
-      fullPath: '/about'
-      preLoaderRoute: typeof AboutRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/(auth)/verify-email': {
@@ -487,7 +487,7 @@ declare module '@tanstack/react-router' {
 }
 
 const rootRouteChildren: RootRouteChildren = {
-  AboutRoute: AboutRoute,
+  IndexRoute: IndexRoute,
   authChangePasswordRoute: authChangePasswordRoute,
   authForgotPasswordRoute: authForgotPasswordRoute,
   authLoginRoute: authLoginRoute,
