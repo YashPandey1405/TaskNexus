@@ -5,6 +5,7 @@ import cors from "cors";
 //router imports
 import healthCheckRouter from "./routes/healthcheck.routes.js";
 import authorizationRoute from "./routes/auth.routes.js";
+import OAuthRoute from "./routes/oauth.routes.js";
 import projectRoutes from "./routes/project.routes.js";
 import taskRoutes from "./routes/task.routes.js";
 import noteRoutes from "./routes/note.routes.js";
@@ -29,7 +30,7 @@ app.use(
       const allowedOrigins = [
         "http://localhost:5173",
         "https://task-nexus-seven.vercel.app",
-        "https://tasknexus.yashpandey.xyz"
+        "https://tasknexus.yashpandey.xyz",
       ];
       // Allow requests with no origin (like mobile apps or curl)
       if (!origin || allowedOrigins.includes(origin)) {
@@ -60,6 +61,7 @@ const errorMiddleware = (err, req, res, next) => {
 
 app.use("/api/v1/healthcheck", healthCheckRouter);
 app.use("/api/v1/auth", authorizationRoute);
+app.use("/api/v1/oauth", OAuthRoute);
 app.use("/api/v1/project", projectRoutes);
 app.use("/api/v1/task", taskRoutes);
 app.use("/api/v1/note", noteRoutes);

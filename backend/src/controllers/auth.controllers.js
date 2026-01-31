@@ -38,51 +38,6 @@ const generateAccessAndRefereshTokens = async (userId) => {
   }
 };
 
-// Just To Learn How To Integrate Cloudinary And Multer In TaskNexus Project......
-const tempCheckRoute = asyncHandler(async (req, res) => {
-  try {
-    // get data from request body
-    const { email, username, fullname, password } = req.body;
-
-    const localFilePath = req.file?.path;
-
-    let imageUrl = null;
-
-    if (localFilePath) {
-      const cloudinaryResult = await uploadOnCloudinary(localFilePath);
-
-      if (!cloudinaryResult) {
-        return res.status(500).json({ message: "Failed to upload image" });
-      }
-      imageUrl = cloudinaryResult.secure_url;
-    }
-
-    const newUser = {
-      email,
-      username,
-      fullname,
-      imageUrl,
-    };
-
-    // Set cookies and redirect
-    const response = new ApiResponse(
-      200,
-      newUser,
-      "Control Reached successful On TaskNexus Platform",
-    );
-
-    return res.json(response);
-  } catch (error) {
-    // Handle any errors that occur during user creation
-    throw new ApiError(500, "Internal server error", [
-      {
-        field: "server",
-        message: "Internal server error In The registerUser Controller",
-      },
-    ]);
-  }
-});
-
 const registerUser = asyncHandler(async (req, res) => {
   // get data from request body
   const { email, username, fullname, password } = req.body;

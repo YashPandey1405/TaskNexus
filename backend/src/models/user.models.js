@@ -33,9 +33,31 @@ const userSchema = new Schema(
       type: String,
       required: true,
     },
+    authProvider: {
+      type: String,
+      enum: ["local", "google", "github", "linkedin"],
+      default: "local",
+    },
+    googleId: {
+      type: String,
+      unique: true,
+      sparse: true, // allows multiple null values
+    },
+    githubId: {
+      type: String,
+      unique: true,
+      sparse: true, // allows multiple null values
+    },
+    linkedinId: {
+      type: String,
+      unique: true,
+      sparse: true, // allows multiple null values
+    },
     password: {
       type: String,
-      required: [true, "password is required"],
+      required: function () {
+        return this.authProvider === "local";
+      },
     },
     isEmailVerified: {
       type: Boolean,
