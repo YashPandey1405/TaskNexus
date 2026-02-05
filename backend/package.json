@@ -10,6 +10,7 @@
   "author": "Yash Pandey",
   "license": "ISC",
   "dependencies": {
+    "axios": "^1.13.4",
     "bcryptjs": "^3.0.2",
     "cloudinary": "^2.7.0",
     "cookie-parser": "^1.4.7",
